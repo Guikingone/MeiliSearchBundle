@@ -1,6 +1,6 @@
 <?php
 
-namespace MeiliBundle\Event;
+namespace MeiliSearchBundle\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -9,6 +9,9 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class IndexRemovedEvent extends Event
 {
+    /**
+     * @var string
+     */
     private $uid;
 
     public function __construct(string $uid)

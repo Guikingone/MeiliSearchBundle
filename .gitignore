@@ -9,3 +9,6 @@ docker/meili/data.ms
 
 # Infection
 infection.log
+
+# PHPUnit
+.phpunit.result.cache

@@ -1,6 +1,6 @@
 <?php
 
-namespace MeiliBundle\Tests\Event;
+namespace MeiliSearchBundle\Tests\Event;
 
 use PHPUnit\Framework\TestCase;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace MeiliBundle\Tests\Client;
+namespace MeiliSearchBundle\Tests\Client;
 
 use PHPUnit\Framework\TestCase;
 

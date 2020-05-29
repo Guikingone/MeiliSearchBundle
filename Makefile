@@ -31,6 +31,26 @@ vendor:
 ## Tools
 ##---------------------------------------------------------------------------
 
+php-cs-fixer: ## Run PHP-CS-FIXER and fix the errors
+php-cs-fixer:
+	$(PHP) vendor/bin/php-cs-fixer fix .
+
+php-cs-fixer-dry: ## Run PHP-CS-FIXER in --dry-run mode
+php-cs-fixer-dry:
+	$(PHP) vendor/bin/php-cs-fixer fix . --dry-run
+
+phpstan: ## Run PHPStan (a specific LEVEL can be defined)
+phpstan:
+	$(PHP) vendor/bin/phpstan analyse -c phpstan.neon --level $(or $(LEVEL), 8)
+
+rector-dry: ## Run Rector in --dry-run mode
+rector-dry:
+	$(DOCKER) run -v $(PWD):/project rector/rector process /project --config /project/rector.yaml --dry-run
+
+rector: ## Run Rector
+rector:
+	$(DOCKER) run -v $(PWD):/project rector/rector process /project --config /project/rector.yaml --dry-run
+
 ##
 ## Tests
 ##---------------------------------------------------------------------------

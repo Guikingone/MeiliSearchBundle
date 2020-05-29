@@ -1,6 +1,6 @@
 <?php
 
-namespace MeiliBundle\DependencyInjection;
+namespace MeiliSearchBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -21,6 +21,7 @@ final class Configuration implements ConfigurationInterface
             ->getRootNode()
                 ->children()
                     ->scalarNode('host')->end()
+                    ->scalarNode('api_key')->cannotBeEmpty()->end()
                 ->end()
             ->end()
         ;

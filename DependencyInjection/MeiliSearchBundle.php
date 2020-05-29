@@ -1,12 +1,12 @@
 <?php
 
-namespace MeiliBundle\DependencyInjection;
+namespace MeiliSearchBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class MeiliBundle extends Bundle
+final class MeiliSearchBundle extends Bundle
 {
 }

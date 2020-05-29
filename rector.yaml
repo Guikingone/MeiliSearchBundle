@@ -1,0 +1,20 @@
+parameters:
+  php_version_features: '7.2'
+  auto_import_names: true
+  autoload_paths:
+    - 'vendor/autoload.php'
+  paths:
+    - 'Client'
+    - 'Command'
+    - 'DataCollector'
+    - 'DependencyInjection'
+    - 'Event'
+    - 'Tests'
+  exclude_paths:
+    - 'vendor'
+  sets:
+    - 'Php71'
+    - 'DeadCode'
+    - 'Performance'
+    - 'Privatization'
+    - 'SOLID'

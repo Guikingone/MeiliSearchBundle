@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+    paths:
+        - Client
+        - Command
+        - DataCollector
+        - DependencyInjection
+        - Event
+        - Exception
+        - Tests

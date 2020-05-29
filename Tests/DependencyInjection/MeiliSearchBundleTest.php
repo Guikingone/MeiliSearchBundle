@@ -9,6 +9,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class ConfigurationTest extends TestCase
+final class MeiliSearchBundleTest extends TestCase
 {
 }

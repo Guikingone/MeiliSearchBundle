@@ -1,6 +1,8 @@
 <?php
 
-namespace MeiliBundle\Tests\DependencyInjection;
+declare(strict_types=1);
+
+namespace MeiliSearchBundle\Tests\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
 

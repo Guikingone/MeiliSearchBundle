@@ -1,18 +1,24 @@
 <?php
 
-namespace MeiliBundle\Command;
+namespace MeiliSearchBundle\Command;
 
-use MeiliBundle\Client\ClientInterface;
+use MeiliSearchBundle\Client\ClientInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class CreateIndexesCommand extends Command
 {
+    /**
+     * @var ClientInterface
+     */
     private $client;
 
     protected static $defaultName = 'meili:create-indexes';
@@ -27,11 +33,12 @@ final class CreateIndexesCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDefinition([
-                new InputArgument('index', InputArgument::REQUIRED)
+                new InputArgument('index', InputArgument::REQUIRED),
+                new InputOption('uid', 'u', InputOption::VALUE_OPTIONAL, 'The uid of the index'),
             ])
         ;
     }
@@ -39,7 +46,23 @@ final class CreateIndexesCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $io = new SymfonyStyle($input, $output);
+
+        $index = $input->getArgument('index');
+        $uid = $input->getOption('uid');
+
+        try {
+            $this->client->createIndex($index, $uid);
+        } catch (Throwable $exception) {
+            $io->error(sprintf('The index cannot be created, error: "%s"', $exception->getMessage()));
+
+            return 1;
+        }
+
+        $io->success(sprintf('The "%s" index has been created', $index));
+
+        return 0;
     }
 }
