@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DependencyInjection;
 
-use MeiliSearchBundle\Client\ClientInterface;
-use MeiliSearchBundle\Client\MeiliClient;
+use MeiliSearch\Client;
+use MeiliSearchBundle\Client\DocumentOrchestrator;
+use MeiliSearchBundle\Client\IndexOrchestrator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -26,17 +27,31 @@ final class MeiliSearchExtension extends Extension
 
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->registerForAutoconfiguration(ClientInterface::class)->addTag('meili_search.client');
-
-        $clientDefinition = (new Definition(MeiliClient::class))
+        $clientDefinition = (new Definition(Client::class))
             ->setArguments([
                 $config['host'],
                 $config['api_key'] ?? null,
                 new Reference('http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE),
-                new Reference('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE),
-                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE)
             ])
         ;
         $container->setDefinition('meili_search.client', $clientDefinition);
+
+        $documentOrchestratorDefinition = (new Definition(DocumentOrchestrator::class))
+            ->setArguments([
+                new Reference('meili_search.client'),
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->addTag('meili_search.document_orchestrator')
+        ;
+        $container->setDefinition('meili_search.document_orchestrator', $documentOrchestratorDefinition);
+
+        $indexOrchestratorDefinition = (new Definition(IndexOrchestrator::class))
+            ->setArguments([
+                new Reference('meili_search.client'),
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->addTag('meili_search.index_orchestrator')
+        ;
+        $container->setDefinition('meili_search.index_orchestrator', $indexOrchestratorDefinition);
     }
 }

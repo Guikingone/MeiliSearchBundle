@@ -2,6 +2,8 @@
 
 MeiliSearchBundle is a Symfony bundle which configure and enable [MeiliSearch]('https://github.com/meilisearch/MeiliSearch').
 
+The core logic act as a wrapper around the official [MeiliSearch PHP SDK]('https://github.com/meilisearch/meilisearch-php').
+
 ## Installation
 
 ```bash

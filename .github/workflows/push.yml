@@ -4,7 +4,7 @@ on:
     branches:
       - master
 jobs:
-  panther_extension:
+  meili_search:
     name: PHP ${{ matrix.php-versions }} - ${{ matrix.composer-dependencies }}
     # https://hub.docker.com/_/ubuntu/
     runs-on: ubuntu-18.04
