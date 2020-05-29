@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Command;
+namespace MeiliBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class CreateIndexesCommandTest extends TestCase
+final class ListIndexesCommandTest extends TestCase
 {
 }

@@ -1,1 +1,1 @@
-# MeiliBundle
+# MeiliSearchBundle

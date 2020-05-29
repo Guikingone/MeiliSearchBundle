@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.8/phpunit.xsd"
+         backupGlobals="false"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         bootstrap="vendor/autoload.php"
+         verbose="true">
+
+    <filter>
+        <whitelist>
+            <directory>Client</directory>
+            <directory>Command</directory>
+            <directory>DependencyInjection</directory>
+        </whitelist>
+    </filter>
+
+    <testsuites>
+        <testsuite name="MeiliSearchBundle Test Suite">
+            <directory>Tests/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

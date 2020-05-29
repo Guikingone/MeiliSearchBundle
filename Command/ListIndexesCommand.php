@@ -4,18 +4,17 @@ namespace MeiliBundle\Command;
 
 use MeiliBundle\Client\ClientInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class CreateIndexesCommand extends Command
+final class ListIndexesCommand extends Command
 {
     private $client;
 
-    protected static $defaultName = 'meili:create-indexes';
+    protected static $defaultName = 'meili:list-indexes';
 
     public function __construct(ClientInterface $client)
     {
@@ -29,11 +28,6 @@ final class CreateIndexesCommand extends Command
      */
     protected function configure()
     {
-        $this
-            ->setDefinition([
-                new InputArgument('index', InputArgument::REQUIRED)
-            ])
-        ;
     }
 
     /**

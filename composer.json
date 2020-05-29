@@ -1,5 +1,5 @@
 {
-  "name": "guikingone/meiliSearchBundle",
+  "name": "guikingone/meili-search-bundle",
   "description": "A Symfony bundle that enable MeiliSearch",
   "minimum-stability": "stable",
   "license": "MIT",
@@ -15,19 +15,37 @@
       "MeiliBundle\\": "",
       "MeiliBundle\\Client\\": "Client/",
       "MeiliBundle\\Command\\": "Command/",
-      "MeiliBundle\\DependencyInjection\\": "DependencyInjection/"
+      "MeiliBundle\\DataCollector\\": "DataCollector/",
+      "MeiliBundle\\DependencyInjection\\": "DependencyInjection/",
+      "MeiliBundle\\Event\\": "Event/",
+      "MeiliBundle\\EventListener\\": "EventListener/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "Tests/"
+      "Tests\\": "Tests/",
+      "Tests\\Client\\": "Tests/Client/",
+      "Tests\\Command\\": "Tests/Command/",
+      "Tests\\DataCollector\\": "Tests/DataCollector/",
+      "Tests\\DependencyInjection\\": "Tests/DependencyInjection/",
+      "Tests\\Event\\": "Tests/Event/",
+      "Tests\\EventListener\\": "Tests/EventListener/"
     }
   },
   "require": {
     "php": ">=7.2",
-    "infection/infection": "0.16.3",
     "meilisearch/meilisearch-php": "^0.10.2",
+    "symfony/config": "4.4.8",
     "symfony/console": "4.4.8",
-    "symfony/http-client": "4.4.8"
+    "symfony/dependency-injection": "4.4.8",
+    "symfony/event-dispatcher": "4.4.8",
+    "symfony/http-client": "4.4.8",
+    "symfony/http-kernel": "4.4.8"
+  },
+  "require-dev": {
+    "infection/infection": "0.15.3",
+    "friendsofphp/php-cs-fixer": "^2.16",
+    "phpunit/phpunit": "8.5.5",
+    "phpstan/phpstan": "^0.12.23"
   }
 }

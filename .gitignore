@@ -1,1 +1,11 @@
+# Docker
+docker-compose.override.yml
+
+# Composer
 vendor
+
+# Meili
+docker/meili/data.ms
+
+# Infection
+infection.log
