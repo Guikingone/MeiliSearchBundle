@@ -1,0 +1,33 @@
+{
+  "name": "guikingone/meiliSearchBundle",
+  "description": "A Symfony bundle that enable MeiliSearch",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "keywords": ["bundle", "symfony", "meili"],
+  "authors": [
+    {
+      "name": "Guillaume Loulier",
+      "email": "contact@guillaumeloulier.fr"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MeiliBundle\\": "",
+      "MeiliBundle\\Client\\": "Client/",
+      "MeiliBundle\\Command\\": "Command/",
+      "MeiliBundle\\DependencyInjection\\": "DependencyInjection/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "Tests/"
+    }
+  },
+  "require": {
+    "php": ">=7.2",
+    "infection/infection": "0.16.3",
+    "meilisearch/meilisearch-php": "^0.10.2",
+    "symfony/console": "4.4.8",
+    "symfony/http-client": "4.4.8"
+  }
+}
