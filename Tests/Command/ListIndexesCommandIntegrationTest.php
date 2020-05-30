@@ -2,7 +2,8 @@
 
 namespace MeiliSearchBundle\Tests\Command;
 
-use MeiliSearchBundle\Client\MeiliClient;
+use MeiliSearch\Client;
+use MeiliSearchBundle\Client\IndexOrchestrator;
 use MeiliSearchBundle\Command\ListIndexesCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
@@ -14,7 +15,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 final class ListIndexesCommandIntegrationTest extends TestCase
 {
     /**
-     * @var MeiliClient|null
+     * @var Client
      */
     private $client;
 
@@ -23,8 +24,7 @@ final class ListIndexesCommandIntegrationTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->client = new MeiliClient('http://meili:7700');
-        $this->client->deleteIndexes();
+        $this->client = new Client('http://meili:7700');
     }
 
     /**
@@ -32,13 +32,14 @@ final class ListIndexesCommandIntegrationTest extends TestCase
      */
     protected function tearDown(): void
     {
-        $this->client->deleteIndexes();
-        $this->client = null;
+        $this->client->deleteAllIndexes();
     }
 
     public function testCommandCannotListEmptyIndexes(): void
     {
-        $command = new ListIndexesCommand($this->client);
+        $orchestrator = new IndexOrchestrator($this->client);
+
+        $command = new ListIndexesCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:list-indexes'));
@@ -50,9 +51,11 @@ final class ListIndexesCommandIntegrationTest extends TestCase
 
     public function testCommandCanListIndexes(): void
     {
-        $this->client->createIndex('test', 'test_test');
+        $this->client->createIndex(['uid' => 'test', 'primaryKey' => 'test_test']);
 
-        $command = new ListIndexesCommand($this->client);
+        $orchestrator = new IndexOrchestrator($this->client);
+
+        $command = new ListIndexesCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:list-indexes'));

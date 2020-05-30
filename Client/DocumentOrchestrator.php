@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Client;
 
 use MeiliSearch\Client;
+use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentUpdateEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentUpdateEvent;
 use MeiliSearchBundle\Exception\InvalidArgumentException;
@@ -81,7 +82,7 @@ final class DocumentOrchestrator
 
             $this->dispatch(new PreDocumentUpdateEvent($documentUpdate));
             $documentUpdateId = $index->updateDocuments($documentUpdate, $documentKey);
-            $this->dispatch(new PostDocumentUpdateEvent($documentUpdateId));
+            $this->dispatch(new PostDocumentUpdateEvent($documentUpdateId['updateId']));
         } catch (Throwable $exception) {
             $this->logError(sprintf('The document cannot be updated, error: "%s"', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
@@ -93,7 +94,8 @@ final class DocumentOrchestrator
         try {
             $index = $this->client->getIndex($uid);
 
-            $index->deleteDocument($id);
+            $update = $index->deleteDocument($id);
+            $this->dispatch(new PostDocumentDeletionEvent($update['updateId']));
         } catch (Throwable $exception) {
             $this->logError(sprintf('The document cannot be removed, error: "%s"', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
@@ -135,7 +137,7 @@ final class DocumentOrchestrator
         $this->eventDispatcher->dispatch($event);
     }
 
-    public function logError(string $message, array $context = []): void
+    private function logError(string $message, array $context = []): void
     {
         if (null === $this->logger) {
             return;
@@ -144,7 +146,7 @@ final class DocumentOrchestrator
         $this->logger->error($message, $context);
     }
 
-    public function logInfo(string $message, array $context = []): void
+    private function logInfo(string $message, array $context = []): void
     {
         if (null === $this->logger) {
             return;

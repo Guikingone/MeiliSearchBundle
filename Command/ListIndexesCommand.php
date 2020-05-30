@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Client\ClientInterface;
+use MeiliSearchBundle\Client\IndexOrchestrator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,15 +18,15 @@ use Throwable;
 final class ListIndexesCommand extends Command
 {
     /**
-     * @var ClientInterface
+     * @var IndexOrchestrator
      */
-    private $client;
+    private $indexOrchestrator;
 
     protected static $defaultName = 'meili:list-indexes';
 
-    public function __construct(ClientInterface $client)
+    public function __construct(IndexOrchestrator $indexOrchestrator)
     {
-        $this->client = $client;
+        $this->indexOrchestrator = $indexOrchestrator;
 
         parent::__construct();
     }
@@ -39,7 +39,7 @@ final class ListIndexesCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $indexes = $this->client->getIndexes();
+            $indexes = $this->indexOrchestrator->getIndexes();
             if (0 === \count($indexes)) {
                 $io->warning('No indexes found, please ensure that indexes have been created');
 

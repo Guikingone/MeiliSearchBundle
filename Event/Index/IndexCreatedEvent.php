@@ -1,6 +1,8 @@
 <?php
 
-namespace MeiliSearchBundle\Event;
+declare(strict_types=1);
+
+namespace MeiliSearchBundle\Event\Index;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -10,7 +12,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class IndexCreatedEvent extends Event
 {
     /**
-     * @var <string, string>
+     * @var <string, mixed>
      */
     private $config;
 

@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Client\ClientInterface;
+use MeiliSearchBundle\Client\IndexOrchestrator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,15 +19,15 @@ use Throwable;
 final class CreateIndexesCommand extends Command
 {
     /**
-     * @var ClientInterface
+     * @var IndexOrchestrator
      */
-    private $client;
+    private $indexOrchestrator;
 
     protected static $defaultName = 'meili:create-indexes';
 
-    public function __construct(ClientInterface $client)
+    public function __construct(IndexOrchestrator $indexOrchestrator)
     {
-        $this->client = $client;
+        $this->indexOrchestrator = $indexOrchestrator;
 
         parent::__construct();
     }
@@ -37,8 +39,8 @@ final class CreateIndexesCommand extends Command
     {
         $this
             ->setDefinition([
-                new InputArgument('index', InputArgument::REQUIRED),
-                new InputOption('uid', 'u', InputOption::VALUE_OPTIONAL, 'The uid of the index'),
+                new InputArgument('uid', InputArgument::REQUIRED),
+                new InputOption('primary_key', 'p', InputOption::VALUE_OPTIONAL, 'The primary_key of the index'),
             ])
         ;
     }
@@ -50,18 +52,18 @@ final class CreateIndexesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $index = $input->getArgument('index');
-        $uid = $input->getOption('uid');
+        $uid = $input->getArgument('uid');
+        $primaryKey = $input->getOption('primary_key');
 
         try {
-            $this->client->createIndex($index, $uid);
+            $this->indexOrchestrator->addIndex($uid, $primaryKey);
         } catch (Throwable $exception) {
             $io->error(sprintf('The index cannot be created, error: "%s"', $exception->getMessage()));
 
             return 1;
         }
 
-        $io->success(sprintf('The "%s" index has been created', $index));
+        $io->success(sprintf('The "%s" index has been created', $uid));
 
         return 0;
     }
