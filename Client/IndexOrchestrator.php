@@ -99,7 +99,7 @@ final class IndexOrchestrator
             throw new RuntimeException($exception->getMessage());
         }
 
-        $this->logInfo('An index has been deleted', ['index' => $uid]);
+        $this->logInfo('An index has been deleted', ['uid' => $uid]);
     }
 
     private function dispatch(Event $event): void
@@ -111,7 +111,7 @@ final class IndexOrchestrator
         $this->eventDispatcher->dispatch($event);
     }
 
-    public function logError(string $message, array $context = []): void
+    private function logError(string $message, array $context = []): void
     {
         if (null === $this->logger) {
             return;

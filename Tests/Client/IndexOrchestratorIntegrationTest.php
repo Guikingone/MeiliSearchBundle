@@ -36,13 +36,38 @@ final class IndexOrchestratorIntegrationTest extends TestCase
         $this->client->deleteAllIndexes();
     }
 
-    public function testAllIndexCanBeRetrieved(): void
+    public function testAllIndexesCanBeRetrieved(): void
+    {
+        $this->client->createIndex('foo');
+
+        $orchestrator = new IndexOrchestrator($this->client);
+        $indexes = $orchestrator->getIndexes();
+
+        static::assertNotEmpty($indexes);
+        static::assertArrayHasKey(0, $indexes);
+        static::assertSame('foo', $indexes[0]['name']);
+        static::assertSame('foo', $indexes[0]['uid']);
+    }
+
+    public function testSingleIndexCanBeRetrieved(): void
     {
         $this->client->createIndex('foo');
 
         $orchestrator = new IndexOrchestrator($this->client);
 
         static::assertInstanceOf(Index::class, $orchestrator->getIndex('foo'));
+    }
+
+    public function testAllIndexesCanBeRemoved(): void
+    {
+        $this->client->createIndex('foo');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+        $logger->expects(self::once())->method('info');
+
+        $orchestrator = new IndexOrchestrator($this->client, null, $logger);
+        $orchestrator->removeIndexes();
     }
 
     public function testIndexCanBeDeleted(): void

@@ -6,15 +6,55 @@ namespace MeiliSearchBundle\Tests\Client;
 
 use MeiliSearch\Client;
 use MeiliSearchBundle\Client\IndexOrchestrator;
+use MeiliSearchBundle\Exception\RuntimeException as MeiliSeachBundleRuntimeException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpClient\Exception\ClientException;
+use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class IndexOrchestratorTest extends TestCase
 {
+    public function testIndexCannotBeAddedWithException(): void
+    {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::never())->method('dispatch');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('error');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('createIndex')->willThrowException(new ClientException(new MockResponse([], ['http_code' => 400])));
+
+        $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
+
+        static::expectException(MeiliSeachBundleRuntimeException::class);
+        $orchestrator->addIndex('test', 'test');
+    }
+
+    public function testIndexCanBeAdded(): void
+    {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::once())->method('dispatch');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+        $logger->expects(self::once())->method('info');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('createIndex')->willReturn([
+            'uid' => 'test',
+            'primaryKey' => 'test',
+        ]);
+
+        $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
+        $orchestrator->addIndex('test', 'test');
+    }
+
     public function testIndexesCannotBeRetrievedWithException(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
@@ -27,6 +67,20 @@ final class IndexOrchestratorTest extends TestCase
 
         static::expectException(RuntimeException::class);
         $orchestrator->getIndexes();
+    }
+
+    public function testIndexCannotBeRetrievedWithException(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('error');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->with(self::equalTo('foo'))->willThrowException(new RuntimeException('An error occurred'));
+
+        $orchestrator = new IndexOrchestrator($client, null, $logger);
+
+        static::expectException(RuntimeException::class);
+        $orchestrator->getIndex('foo');
     }
 
     public function testAllIndexesCanBeRetrieved(): void
@@ -50,20 +104,6 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator = new IndexOrchestrator($client);
 
         static::assertNotEmpty($orchestrator->getIndexes());
-    }
-
-    public function testIndexCannotBeRetrievedWithException(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error');
-
-        $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->with(self::equalTo('foo'))->willThrowException(new RuntimeException('An error occurred'));
-
-        $orchestrator = new IndexOrchestrator($client, null, $logger);
-
-        static::expectException(RuntimeException::class);
-        $orchestrator->getIndex('foo');
     }
 
     public function testIndexCannotBeDeletedWithException(): void

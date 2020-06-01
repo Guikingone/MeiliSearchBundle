@@ -5,6 +5,11 @@ jobs:
     name: PHP ${{ matrix.php-versions }} - ${{ matrix.composer-dependencies }}
     # https://hub.docker.com/_/ubuntu/
     runs-on: ubuntu-18.04
+    services:
+      meili:
+        image: getmeili/meilisearch
+        ports:
+          - 7700:7700
     strategy:
       fail-fast: true
       matrix:

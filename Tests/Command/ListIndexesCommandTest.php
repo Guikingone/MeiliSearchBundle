@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Tests\Command;
 
-use MeiliSearchBundle\Client\ClientInterface;
+use MeiliSearch\Client;
+use MeiliSearchBundle\Client\IndexOrchestrator;
 use MeiliSearchBundle\Command\ListIndexesCommand;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -18,19 +19,22 @@ final class ListIndexesCommandTest extends TestCase
 {
     public function testCommandIsConfigured(): void
     {
-        $client = $this->createMock(ClientInterface::class);
+        $client = $this->createMock(Client::class);
+        $orchestrator = new IndexOrchestrator($client);
 
-        $command = new ListIndexesCommand($client);
+        $command = new ListIndexesCommand($orchestrator);
 
         static::assertSame('meili:list-indexes', $command->getName());
     }
 
     public function testCommandCannotListIndexesWithException(): void
     {
-        $client = $this->createMock(ClientInterface::class);
-        $client->expects(self::once())->method('getIndexes')->willThrowException(new RuntimeException('An error occurred'));
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getAllIndexes')->willThrowException(new RuntimeException('An error occurred'));
 
-        $command = new ListIndexesCommand($client);
+        $orchestrator = new IndexOrchestrator($client);
+
+        $command = new ListIndexesCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:list-indexes'));
@@ -42,10 +46,12 @@ final class ListIndexesCommandTest extends TestCase
 
     public function testCommandCannotListEmptyIndexes(): void
     {
-        $client = $this->createMock(ClientInterface::class);
-        $client->expects(self::once())->method('getIndexes')->willReturn([]);
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getAllIndexes')->willReturn([]);
 
-        $command = new ListIndexesCommand($client);
+        $orchestrator = new IndexOrchestrator($client);
+
+        $command = new ListIndexesCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:list-indexes'));
@@ -57,8 +63,8 @@ final class ListIndexesCommandTest extends TestCase
 
     public function testCommandCanListIndexes(): void
     {
-        $client = $this->createMock(ClientInterface::class);
-        $client->expects(self::once())->method('getIndexes')->willReturn([
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getAllIndexes')->willReturn([
             [
                 "uid" => "movies",
                 "primaryKey" => "movie_id",
@@ -73,7 +79,9 @@ final class ListIndexesCommandTest extends TestCase
             ],
         ]);
 
-        $command = new ListIndexesCommand($client);
+        $orchestrator = new IndexOrchestrator($client);
+
+        $command = new ListIndexesCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:list-indexes'));
