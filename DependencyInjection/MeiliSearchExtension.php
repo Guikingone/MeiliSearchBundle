@@ -7,6 +7,7 @@ namespace MeiliSearchBundle\DependencyInjection;
 use MeiliSearch\Client;
 use MeiliSearchBundle\Client\DocumentOrchestrator;
 use MeiliSearchBundle\Client\IndexOrchestrator;
+use MeiliSearchBundle\Client\SearchEntryPoint;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -53,5 +54,14 @@ final class MeiliSearchExtension extends Extension
             ->addTag('meili_search.index_orchestrator')
         ;
         $container->setDefinition('meili_search.index_orchestrator', $indexOrchestratorDefinition);
+
+        $searchEntryPoint = (new Definition(SearchEntryPoint::class))
+            ->setArguments([
+                new Reference('meili_search.index_orchestrator'),
+                new Reference('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+        ;
+        $container->setDefinition('meili_search.entry_point', $searchEntryPoint);
     }
 }

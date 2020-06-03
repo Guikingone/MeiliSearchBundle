@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class IndexOrchestratorIntegrationTest extends TestCase
+final class IndexOrchestratorSystemTest extends TestCase
 {
     /**
      * @var Client
@@ -28,14 +28,6 @@ final class IndexOrchestratorIntegrationTest extends TestCase
         $this->client = new Client('http://meili:7700');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function tearDown(): void
-    {
-        $this->client->deleteAllIndexes();
-    }
-
     public function testAllIndexesCanBeRetrieved(): void
     {
         $this->client->createIndex('foo');
@@ -47,6 +39,8 @@ final class IndexOrchestratorIntegrationTest extends TestCase
         static::assertArrayHasKey(0, $indexes);
         static::assertSame('foo', $indexes[0]['name']);
         static::assertSame('foo', $indexes[0]['uid']);
+
+        $this->client->deleteAllIndexes();
     }
 
     public function testSingleIndexCanBeRetrieved(): void
@@ -56,6 +50,8 @@ final class IndexOrchestratorIntegrationTest extends TestCase
         $orchestrator = new IndexOrchestrator($this->client);
 
         static::assertInstanceOf(Index::class, $orchestrator->getIndex('foo'));
+
+        $this->client->deleteAllIndexes();
     }
 
     public function testAllIndexesCanBeRemoved(): void
@@ -80,5 +76,7 @@ final class IndexOrchestratorIntegrationTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($this->client, null, $logger);
         $orchestrator->removeIndex('foo');
+
+        $this->client->deleteAllIndexes();
     }
 }

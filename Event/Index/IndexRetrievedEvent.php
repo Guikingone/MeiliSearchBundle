@@ -1,6 +1,8 @@
 <?php
 
-namespace MeiliSearchBundle\Event;
+declare(strict_types=1);
+
+namespace MeiliSearchBundle\Event\Index;
 
 use MeiliSearch\Index;
 use Symfony\Contracts\EventDispatcher\Event;

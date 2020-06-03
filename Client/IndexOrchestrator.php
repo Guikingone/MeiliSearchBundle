@@ -7,6 +7,7 @@ namespace MeiliSearchBundle\Client;
 use MeiliSearch\Client;
 use MeiliSearch\Index;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
+use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use MeiliSearchBundle\Exception\RuntimeException;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -16,7 +17,7 @@ use Throwable;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class IndexOrchestrator
+final class IndexOrchestrator implements IndexOrchestratorInterface
 {
     /**
      * @var Client
@@ -33,13 +34,19 @@ final class IndexOrchestrator
      */
     private $logger;
 
-    public function __construct(Client $client, ?EventDispatcherInterface $eventDispatcher = null, ?LoggerInterface $logger = null)
-    {
+    public function __construct(
+        Client $client,
+        ?EventDispatcherInterface $eventDispatcher = null,
+        ?LoggerInterface $logger = null
+    ) {
         $this->client = $client;
         $this->logger = $logger;
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function addIndex(string $uid, ?string $primaryKey = null): void
     {
         $config = [
@@ -48,16 +55,19 @@ final class IndexOrchestrator
         ];
 
         try {
-            $this->client->createIndex($config);
+            $index = $this->client->createIndex($config);
         } catch (Throwable $exception) {
             $this->logError(sprintf('The index cannot be created, error: "%s"', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
         }
 
-        $this->dispatch(new IndexCreatedEvent($config));
+        $this->dispatch(new IndexCreatedEvent($config, $index));
         $this->logInfo('An index has been created.', $config);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getIndexes(): array
     {
         try {
@@ -68,16 +78,27 @@ final class IndexOrchestrator
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getIndex(string $uid): Index
     {
         try {
-            return $this->client->getIndex($uid);
+            $index = $this->client->getIndex($uid);
+
+            $this->dispatch(new IndexRetrievedEvent($index));
+            $this->logInfo('An index has been retrieved', ['uid' => $uid]);
+
+            return $index;
         } catch (Throwable $exception) {
             $this->logError(sprintf('The index cannot be retrieved, error: "%s".', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeIndexes(): void
     {
         try {
@@ -90,6 +111,9 @@ final class IndexOrchestrator
         $this->logInfo('The indexes have been deleted');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeIndex(string $uid): void
     {
         try {

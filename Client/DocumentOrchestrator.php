@@ -35,13 +35,15 @@ final class DocumentOrchestrator
      */
     private $logger;
 
-    public function __construct(Client $client, ?EventDispatcherInterface $eventDispatcher, ?LoggerInterface $logger)
-    {
+    public function __construct(
+        Client $client,
+        ?EventDispatcherInterface $eventDispatcher = null,
+        ?LoggerInterface $logger = null
+    ) {
         $this->client = $client;
         $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger;
     }
-
 
     public function getDocument(string $uid, string $id): array
     {

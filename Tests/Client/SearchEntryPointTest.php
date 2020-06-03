@@ -9,6 +9,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class DocumentOrchestratorIntegrationTest extends TestCase
+final class SearchEntryPointTest extends TestCase
 {
 }

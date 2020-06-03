@@ -23,7 +23,7 @@ final class CreateIndexesCommand extends Command
      */
     private $indexOrchestrator;
 
-    protected static $defaultName = 'meili:create-indexes';
+    protected static $defaultName = 'meili:create-index';
 
     public function __construct(IndexOrchestrator $indexOrchestrator)
     {

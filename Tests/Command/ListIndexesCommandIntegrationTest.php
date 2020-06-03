@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MeiliSearchBundle\Tests\Command;
 
 use MeiliSearch\Client;
@@ -25,6 +27,7 @@ final class ListIndexesCommandIntegrationTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new Client('http://meili:7700');
+        $this->client->deleteAllIndexes();
     }
 
     /**
