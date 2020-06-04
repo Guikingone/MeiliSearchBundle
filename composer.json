@@ -21,10 +21,10 @@
     "symfony/http-kernel": "4.4.8"
   },
   "require-dev": {
-    "infection/infection": "0.15.3",
     "friendsofphp/php-cs-fixer": "^2.16",
-    "phpunit/phpunit": "8.5.5",
+    "infection/infection": "0.15.3",
     "phpstan/phpstan": "^0.12.23",
+    "phpunit/phpunit": "8.5.5",
     "symfony/event-dispatcher": "4.4.8",
     "symfony/http-client": "4.4.8"
   },
@@ -35,7 +35,8 @@
       "MeiliSearchBundle\\Command\\": "Command/",
       "MeiliSearchBundle\\DataCollector\\": "DataCollector/",
       "MeiliSearchBundle\\DependencyInjection\\": "DependencyInjection/",
-      "MeiliSearchBundle\\Event\\": "Event/"
+      "MeiliSearchBundle\\Event\\": "Event/",
+      "MeiliSearchBundle\\Exception\\": "Exception/"
     }
   },
   "autoload-dev": {

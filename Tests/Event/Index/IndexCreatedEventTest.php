@@ -1,6 +1,8 @@
 <?php
 
-namespace MeiliSearchBundle\Tests\Event;
+declare(strict_types=1);
+
+namespace MeiliSearchBundle\Tests\Event\Index;
 
 use PHPUnit\Framework\TestCase;
 

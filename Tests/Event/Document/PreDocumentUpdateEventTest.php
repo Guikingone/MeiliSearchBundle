@@ -9,6 +9,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PreDocumentUpdateEvent extends TestCase
+final class PreDocumentUpdateEventTest extends TestCase
 {
 }

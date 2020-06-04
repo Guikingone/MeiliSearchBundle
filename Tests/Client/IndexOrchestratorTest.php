@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Tests\Client;
 
 use MeiliSearch\Client;
+use MeiliSearch\Index;
 use MeiliSearchBundle\Client\IndexOrchestrator;
 use MeiliSearchBundle\Exception\RuntimeException as MeiliSeachBundleRuntimeException;
 use PHPUnit\Framework\TestCase;
@@ -45,11 +46,12 @@ final class IndexOrchestratorTest extends TestCase
         $logger->expects(self::never())->method('error');
         $logger->expects(self::once())->method('info');
 
+        $index = $this->createMock(Index::class);
+        $index->expects(self::never())->method('getUid')->willReturn('test');
+        $index->expects(self::never())->method('getPrimaryKey')->willReturn('test');
+
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('createIndex')->willReturn([
-            'uid' => 'test',
-            'primaryKey' => 'test',
-        ]);
+        $client->expects(self::once())->method('createIndex')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
         $orchestrator->addIndex('test', 'test');

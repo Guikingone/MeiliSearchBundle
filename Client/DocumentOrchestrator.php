@@ -18,7 +18,7 @@ use Throwable;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class DocumentOrchestrator
+final class DocumentOrchestrator implements DocumentOrchestratorInterface
 {
     /**
      * @var Client
@@ -45,6 +45,9 @@ final class DocumentOrchestrator
         $this->logger = $logger;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getDocument(string $uid, string $id): array
     {
         try {
@@ -57,6 +60,9 @@ final class DocumentOrchestrator
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getDocuments(string $uid, array $options = null): array
     {
         if (null !== $options) {
@@ -77,6 +83,9 @@ final class DocumentOrchestrator
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function updateDocument(string $uid, array $documentUpdate, array $documentKey = null): void
     {
         try {
@@ -91,6 +100,9 @@ final class DocumentOrchestrator
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeDocument(string $uid, string $id): void
     {
         try {
@@ -104,6 +116,9 @@ final class DocumentOrchestrator
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeSetOfDocuments(string $uid, array $ids): void
     {
         try {
@@ -118,6 +133,9 @@ final class DocumentOrchestrator
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeDocuments(string $uid): void
     {
         try {

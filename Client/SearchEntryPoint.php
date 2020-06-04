@@ -15,7 +15,7 @@ use Throwable;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class SearchEntryPoint
+final class SearchEntryPoint implements SearchEntryPointInterface
 {
     /**
      * @var EventDispatcherInterface|null

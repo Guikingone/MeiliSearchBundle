@@ -64,10 +64,11 @@ final class CreateIndexesCommandTest extends TestCase
         $client->expects(self::once())->method('createIndex')->willReturn($index);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error');
+        $logger->expects(self::never())->method('error');
+        $logger->expects(self::once())->method('info');
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $eventDispatcher->expects(self::never())->method('dispatch');
+        $eventDispatcher->expects(self::once())->method('dispatch');
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 

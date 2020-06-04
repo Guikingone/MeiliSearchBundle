@@ -37,15 +37,6 @@ final class MeiliSearchExtension extends Extension
         ;
         $container->setDefinition('meili_search.client', $clientDefinition);
 
-        $documentOrchestratorDefinition = (new Definition(DocumentOrchestrator::class))
-            ->setArguments([
-                new Reference('meili_search.client'),
-                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
-            ])
-            ->addTag('meili_search.document_orchestrator')
-        ;
-        $container->setDefinition('meili_search.document_orchestrator', $documentOrchestratorDefinition);
-
         $indexOrchestratorDefinition = (new Definition(IndexOrchestrator::class))
             ->setArguments([
                 new Reference('meili_search.client'),
@@ -54,6 +45,15 @@ final class MeiliSearchExtension extends Extension
             ->addTag('meili_search.index_orchestrator')
         ;
         $container->setDefinition('meili_search.index_orchestrator', $indexOrchestratorDefinition);
+
+        $documentOrchestratorDefinition = (new Definition(DocumentOrchestrator::class))
+            ->setArguments([
+                new Reference('meili_search.client'),
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->addTag('meili_search.document_orchestrator')
+        ;
+        $container->setDefinition('meili_search.document_orchestrator', $documentOrchestratorDefinition);
 
         $searchEntryPoint = (new Definition(SearchEntryPoint::class))
             ->setArguments([

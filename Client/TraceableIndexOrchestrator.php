@@ -81,4 +81,19 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface
 
         $this->deletedIndexes[] = ['uid' => $uid];
     }
+
+    public function getCreatedIndexes(): array
+    {
+        return $this->createdIndexes;
+    }
+
+    public function getFetchedIndexes(): array
+    {
+        return $this->fetchedIndexes;
+    }
+
+    public function getDeletedIndexes(): array
+    {
+        return $this->deletedIndexes;
+    }
 }

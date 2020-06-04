@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DataCollector;
 
-use MeiliSearchBundle\Client\TraceableClient;
+use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
+use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Client\TraceableSearchEntryPoint;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
@@ -15,11 +17,29 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
  */
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private $client;
+    /**
+     * @var TraceableIndexOrchestrator
+     */
+    private $indexOrchestrator;
 
-    public function __construct(TraceableClient $client)
-    {
-        $this->client = $client;
+    /**
+     * @var TraceableDocumentOrchestrator
+     */
+    private $documentOrchestrator;
+
+    /**
+     * @var TraceableSearchEntryPoint
+     */
+    private $searchEntryPoint;
+
+    public function __construct(
+        TraceableIndexOrchestrator $indexOrchestrator,
+        TraceableDocumentOrchestrator $documentOrchestrator,
+        TraceableSearchEntryPoint $searchEntryPoint
+    ) {
+        $this->indexOrchestrator = $indexOrchestrator;
+        $this->documentOrchestrator = $documentOrchestrator;
+        $this->searchEntryPoint = $searchEntryPoint;
     }
 
     /**
@@ -35,10 +55,11 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function lateCollect()
     {
         $this->data['system_info'] = $this->client->getSystemInformations();
-        $this->data['indexes'] = $this->client->getIndexes();
+        $this->data['indexes'] = $this->indexOrchestrator->getIndexes();
         $this->data['queries'] = $this->client->getQueries();
-        $this->data['created_indexes'] = $this->client->getCreatedIndexes();
-        $this->data['deleted_indexes'] = $this->client->getDeletedIndexes();
+        $this->data['created_indexes'] = $this->indexOrchestrator->getCreatedIndexes();
+        $this->data['deleted_indexes'] = $this->indexOrchestrator->getDeletedIndexes();
+        $this->data['fetched_indexes'] = $this->indexOrchestrator->getFetchedIndexes();
     }
 
     /**
@@ -75,6 +96,11 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function getDeletedIndexes(): array
     {
         return $this->data['deleted_indexes'];
+    }
+
+    public function getFetchedIndexes(): array
+    {
+        return $this->data['fetched_indexes'];
     }
 
     public function getQueriesCount(): int
