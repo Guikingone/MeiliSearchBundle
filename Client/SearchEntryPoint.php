@@ -45,7 +45,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = null): array
+    public function search(string $index, string $query, array $options = null): Search
     {
         $index = $this->indexOrchestrator->getIndex($index);
 
@@ -64,13 +64,19 @@ final class SearchEntryPoint implements SearchEntryPointInterface
             throw new RuntimeException($exception->getMessage());
         }
 
-        $this->dispatch(new PostSearchEvent([
-            'hits_count' => $result['nbHits'],
-            'processing_time' => sprintf('%s milliseconds', $result['processingTimeMs']),
-            'query' => $query,
-        ]));
+        $searchResult = Search::create(
+            $result['hits'],
+            $result['offset'],
+            $result['limit'],
+            $result['nbHits'],
+            $result['exhaustiveNbHits'],
+            $result['processingTimeMs'],
+            $result['query']
+        );
 
-        return $result;
+        $this->dispatch(new PostSearchEvent($searchResult));
+
+        return $searchResult;
     }
 
     private function dispatch(Event $event): void

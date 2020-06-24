@@ -7,6 +7,7 @@ namespace MeiliSearchBundle\Client;
 use MeiliSearch\Client;
 use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentUpdateEvent;
+use MeiliSearchBundle\Event\Document\PreDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentUpdateEvent;
 use MeiliSearchBundle\Exception\InvalidArgumentException;
 use MeiliSearchBundle\Exception\RuntimeException;
@@ -108,6 +109,7 @@ final class DocumentOrchestrator implements DocumentOrchestratorInterface
         try {
             $index = $this->client->getIndex($uid);
 
+            $this->dispatch(new PreDocumentDeletionEvent($index->getDocument($id)));
             $update = $index->deleteDocument($id);
             $this->dispatch(new PostDocumentDeletionEvent($update['updateId']));
         } catch (Throwable $exception) {

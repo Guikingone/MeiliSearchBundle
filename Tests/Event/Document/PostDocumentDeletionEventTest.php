@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Tests\Event\Document;
 
+use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -11,4 +12,10 @@ use PHPUnit\Framework\TestCase;
  */
 final class PostDocumentDeletionEventTest extends TestCase
 {
+    public function testUpdateIdCanBeRetrieved(): void
+    {
+        $event = new PostDocumentDeletionEvent(1);
+
+        static::assertSame(1, $event->getUpdate());
+    }
 }

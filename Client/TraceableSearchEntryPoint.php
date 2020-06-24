@@ -10,7 +10,7 @@ namespace MeiliSearchBundle\Client;
 final class TraceableSearchEntryPoint implements SearchEntryPointInterface
 {
     /**
-     * @var SearchEntryPoint
+     * @var SearchEntryPointInterface
      */
     private $searchEntryPoint;
 
@@ -19,7 +19,7 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
      */
     private $search = [];
 
-    public function __construct(SearchEntryPoint $searchEntryPoint)
+    public function __construct(SearchEntryPointInterface $searchEntryPoint)
     {
         $this->searchEntryPoint = $searchEntryPoint;
     }
@@ -27,12 +27,12 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = null): array
+    public function search(string $index, string $query, array $options = null): Search
     {
         $result = $this->searchEntryPoint->search($index, $query, $options);
 
         $this->search[$index] = [
-            'query' => $query,
+            'query' => $result->getQuery(),
             'options' => $options,
         ];
 
