@@ -16,7 +16,7 @@ use Throwable;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class CreateIndexesCommand extends Command
+final class CreateIndexCommand extends Command
 {
     /**
      * @var IndexOrchestrator

@@ -45,7 +45,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = null): Search
+    public function search(string $index, string $query, array $options = null): SearchInterface
     {
         $index = $this->indexOrchestrator->getIndex($index);
 

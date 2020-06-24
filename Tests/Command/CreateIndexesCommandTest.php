@@ -7,7 +7,7 @@ namespace Tests\Command;
 use MeiliSearch\Client;
 use MeiliSearch\Index;
 use MeiliSearchBundle\Client\IndexOrchestrator;
-use MeiliSearchBundle\Command\CreateIndexesCommand;
+use MeiliSearchBundle\Command\CreateIndexCommand;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
@@ -25,7 +25,7 @@ final class CreateIndexesCommandTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($client);
 
-        $command = new CreateIndexesCommand($orchestrator);
+        $command = new CreateIndexCommand($orchestrator);
 
         static::assertSame('meili:create-index', $command->getName());
         static::assertNotEmpty($command->getDefinition());
@@ -44,7 +44,7 @@ final class CreateIndexesCommandTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
-        $command = new CreateIndexesCommand($orchestrator);
+        $command = new CreateIndexCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:create-index'));
@@ -72,7 +72,7 @@ final class CreateIndexesCommandTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
-        $command = new CreateIndexesCommand($orchestrator);
+        $command = new CreateIndexCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:create-index'));
@@ -100,7 +100,7 @@ final class CreateIndexesCommandTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
-        $command = new CreateIndexesCommand($orchestrator);
+        $command = new CreateIndexCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:create-index'));
@@ -129,7 +129,7 @@ final class CreateIndexesCommandTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
-        $command = new CreateIndexesCommand($orchestrator);
+        $command = new CreateIndexCommand($orchestrator);
         $application = new Application();
         $application->add($command);
         $tester = new CommandTester($application->get('meili:create-index'));

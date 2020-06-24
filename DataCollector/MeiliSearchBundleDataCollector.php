@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DataCollector;
 
+use MeiliSearchBundle\Client\InstanceProbeInterface;
 use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
 use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
 use MeiliSearchBundle\Client\TraceableSearchEntryPoint;
@@ -21,6 +22,11 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
      * @var TraceableIndexOrchestrator
      */
     private $indexOrchestrator;
+
+    /**
+     * @var InstanceProbeInterface
+     */
+    private $instanceProbe;
 
     /**
      * @var TraceableDocumentOrchestrator
@@ -54,9 +60,9 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
      */
     public function lateCollect()
     {
-        $this->data['system_info'] = $this->client->getSystemInformations();
+        $this->data['system_info'] = $this->instanceProbe->getSystemInformations();
         $this->data['indexes'] = $this->indexOrchestrator->getIndexes();
-        $this->data['queries'] = $this->client->getQueries();
+        $this->data['queries'] = $this->searchEntryPoint->getSearch();
         $this->data['created_indexes'] = $this->indexOrchestrator->getCreatedIndexes();
         $this->data['deleted_indexes'] = $this->indexOrchestrator->getDeletedIndexes();
         $this->data['fetched_indexes'] = $this->indexOrchestrator->getFetchedIndexes();
@@ -105,6 +111,6 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
 
     public function getQueriesCount(): int
     {
-        return \count($this->client->getQueries());
+        return \count($this->searchEntryPoint->getSearch());
     }
 }

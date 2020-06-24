@@ -35,7 +35,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
         $container->setDefinition(
             'debug.meili_search.index_orchestrator',
             (new Definition(TraceableIndexOrchestrator::class, [
-                new Reference('meili_search.index_orchestrator'),
+                new Reference('meili_search.index_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ]))->setDecoratedService('meili_search.index_orchestrator')
         );
     }
@@ -45,7 +45,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
         $container->setDefinition(
             'debug.meili_search.document_orchestrator',
             (new Definition(TraceableDocumentOrchestrator::class, [
-                new Reference('meili_search.document_orchestrator'),
+                new Reference('meili_search.document_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ]))->setDecoratedService('meili_search.document_orchestrator')
         );
     }
@@ -55,7 +55,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
         $container->setDefinition(
             'debug.meili_search.entry_point',
             (new Definition(TraceableSearchEntryPoint::class, [
-                new Reference('meili_search.entry_point'),
+                new Reference('meili_search.entry_point', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ]))->setDecoratedService('meili_search.entry_point')
         );
     }

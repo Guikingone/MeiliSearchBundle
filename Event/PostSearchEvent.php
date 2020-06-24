@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event;
 
-use MeiliSearchBundle\Client\Search;
+use MeiliSearchBundle\Client\SearchInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -13,16 +13,16 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class PostSearchEvent extends Event
 {
     /**
-     * @var Search
+     * @var SearchInterface
      */
     private $result;
 
-    public function __construct(Search $result)
+    public function __construct(SearchInterface $result)
     {
         $this->result = $result;
     }
 
-    public function getResult(): Search
+    public function getResult(): SearchInterface
     {
         return $this->result;
     }

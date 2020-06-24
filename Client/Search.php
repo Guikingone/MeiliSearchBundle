@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Client;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class Search
+final class Search implements SearchInterface
 {
     /**
      * @var array<int,array>
@@ -45,6 +45,9 @@ final class Search
      */
     private $query;
 
+    /**
+     * {@inheritdoc}
+     */
     public static function create(
         array $hits,
         int $offset,
@@ -53,7 +56,7 @@ final class Search
         int $exhaustiveNbHits,
         int $processingTimeMs,
         string $query
-    ): self {
+    ): SearchInterface {
         $self = new self();
 
         $self->hits = $hits;
@@ -68,38 +71,66 @@ final class Search
     }
 
     /**
-     * @return array<int,array>
+     * {@inheritdoc}
+     */
+    public function filter(callable $callback): SearchInterface
+    {
+        $results = array_filter($this->hits, $callback, ARRAY_FILTER_USE_BOTH);
+
+        return self::create($results, $this->offset, $this->limit, $this->nbHits, $this->exhaustiveNbHits, $this->processingTimeMs, $this->query);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getHits(): array
     {
         return $this->hits;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getOffset(): int
     {
         return $this->offset;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getLimit(): int
     {
         return $this->limit;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getNbHits(): int
     {
         return $this->nbHits;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getExhaustiveNbHits(): int
     {
         return $this->exhaustiveNbHits;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getProcessingTimeMs(): int
     {
         return $this->processingTimeMs;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getQuery(): string
     {
         return $this->query;

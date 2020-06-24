@@ -15,9 +15,9 @@ Three events are available during the document lifecycle:
 
 Three events are available during the index lifecycle: 
 
-- `IndexCreatedEvent`: Allow to retrieve the `Index` and the related configuration
-- `IndexRemovedEvent`: Allow to retrieve the uid of the deleted index
-- `IndexRetrievedEvent`: Allow to retrieve the `Index` 
+- `IndexCreatedEvent`: Allow to retrieve the `Index` and the related configuration after creating it
+- `IndexRemovedEvent`: Allow to retrieve the uid of the deleted index after the deletion
+- `IndexRetrievedEvent`: Allow to retrieve the `Index` after retrieving it
 
 ## Searches
 

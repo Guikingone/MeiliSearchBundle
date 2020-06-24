@@ -3,7 +3,7 @@
   "description": "A Symfony bundle that enable MeiliSearch",
   "minimum-stability": "stable",
   "license": "MIT",
-  "keywords": ["bundle", "symfony", "meili"],
+  "keywords": ["bundle", "symfony", "meili", "search"],
   "authors": [
     {
       "name": "Guillaume Loulier",

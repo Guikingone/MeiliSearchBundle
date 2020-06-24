@@ -49,7 +49,7 @@ final class ListIndexesCommand extends Command
             $table = new Table($output);
             $table->setHeaders(['Uid', 'PrimaryKey', 'CreatedAt', 'UpdatedAt']);
 
-            array_walk($indexes, function (array $index) use ($table): void {
+            array_walk($indexes, function (array $index) use (&$table): void {
                 $table->addRow([$index['uid'], $index['primaryKey'] ?? 'Undefined', $index['createdAt'], $index['updatedAt']]);
             });
 

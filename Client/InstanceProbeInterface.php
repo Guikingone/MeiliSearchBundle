@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Client;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-interface SearchEntryPointInterface
+interface InstanceProbeInterface
 {
-    public function search(string $index, string $query, array $options = null): SearchInterface;
+    public function getSystemInformations(): array;
 }
