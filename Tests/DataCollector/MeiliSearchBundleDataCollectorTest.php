@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Tests\DataCollector;
 
-use MeiliSearchBundle\Client\ClientInterface;
-use MeiliSearchBundle\Client\TraceableClient;
+use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
+use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearchBundle\Client\InstanceProbeInterface;
+use MeiliSearchBundle\Client\SearchEntryPointInterface;
+use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
+use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Client\TraceableSearchEntryPoint;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
 use PHPUnit\Framework\TestCase;
 
@@ -14,10 +19,27 @@ use PHPUnit\Framework\TestCase;
  */
 final class MeiliSearchBundleDataCollectorTest extends TestCase
 {
+    public function testCollectorIsConfigured(): void
+    {
+        $probe = $this->createMock(InstanceProbeInterface::class);
+
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
+
+        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
+        $traceableDocumentOrchestrator = new TraceableDocumentOrchestrator($documentOrchestrator);
+
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
+
+        $collector = new MeiliSearchBundleDataCollector($probe, $traceableIndexOrchestrator, $traceableDocumentOrchestrator, $traceableSearchEntryPoint);
+        static::assertSame('meili', $collector->getName());
+    }
+
     public function testCollectorCanRetrieveSystemInformations(): void
     {
-        $meiliClient = $this->createMock(ClientInterface::class);
-        $meiliClient->expects(self::once())->method('getSystemInformations')->willReturn([
+        $probe = $this->createMock(InstanceProbeInterface::class);
+        $probe->expects(self::once())->method('getSystemInformations')->willReturn([
             "memoryUsage" => "56.3 %",
             "processorUsage" => [
                 "0.0 %",
@@ -44,11 +66,26 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
             ],
         ]);
 
-        $client = new TraceableClient($meiliClient);
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
 
-        $collector = new MeiliSearchBundleDataCollector($client);
+        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
+        $traceableDocumentOrchestrator = new TraceableDocumentOrchestrator($documentOrchestrator);
+
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
+
+        $collector = new MeiliSearchBundleDataCollector($probe, $traceableIndexOrchestrator, $traceableDocumentOrchestrator, $traceableSearchEntryPoint);
+
         $collector->lateCollect();
-
         static::assertNotEmpty($collector->getSystemInformations());
+    }
+
+    public function testCollectorCanCollect(): void
+    {
+    }
+
+    public function testCollectorCanCollectAndReset(): void
+    {
     }
 }

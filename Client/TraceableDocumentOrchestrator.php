@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Client;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
@@ -14,9 +16,17 @@ final class TraceableDocumentOrchestrator implements DocumentOrchestratorInterfa
      */
     private $documentOrchestrator;
 
-    public function __construct(DocumentOrchestratorInterface $documentOrchestrator)
-    {
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(
+        DocumentOrchestratorInterface $documentOrchestrator,
+        LoggerInterface $logger = null
+    ) {
         $this->documentOrchestrator = $documentOrchestrator;
+        $this->logger = $logger;
     }
 
     /**
@@ -24,7 +34,11 @@ final class TraceableDocumentOrchestrator implements DocumentOrchestratorInterfa
      */
     public function getDocument(string $uid, string $id): array
     {
-        return $this->documentOrchestrator->getDocument($uid, $id);
+        $document = $this->documentOrchestrator->getDocument($uid, $id);
+
+        $this->logger->info('A document has been retrieved', ['document' => $id]);
+
+        return $document;
     }
 
     /**
@@ -65,5 +79,7 @@ final class TraceableDocumentOrchestrator implements DocumentOrchestratorInterfa
     public function removeDocuments(string $uid): void
     {
         $this->documentOrchestrator->removeDocuments($uid);
+
+        $this->logger->info('All the documents have been deleted', ['index' => $uid]);
     }
 }

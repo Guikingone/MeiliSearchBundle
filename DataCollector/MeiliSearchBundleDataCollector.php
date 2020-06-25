@@ -18,6 +18,8 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
  */
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
+    private const NAME = 'meili';
+
     /**
      * @var TraceableIndexOrchestrator
      */
@@ -39,10 +41,12 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     private $searchEntryPoint;
 
     public function __construct(
+        InstanceProbeInterface $instanceProbe,
         TraceableIndexOrchestrator $indexOrchestrator,
         TraceableDocumentOrchestrator $documentOrchestrator,
         TraceableSearchEntryPoint $searchEntryPoint
     ) {
+        $this->instanceProbe = $instanceProbe;
         $this->indexOrchestrator = $indexOrchestrator;
         $this->documentOrchestrator = $documentOrchestrator;
         $this->searchEntryPoint = $searchEntryPoint;
@@ -81,7 +85,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
      */
     public function getName()
     {
-        return 'meili';
+        return self::NAME;
     }
 
     public function getSystemInformations(): array
