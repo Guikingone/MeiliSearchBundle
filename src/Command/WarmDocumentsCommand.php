@@ -63,7 +63,7 @@ final class WarmDocumentsCommand extends Command
         }
 
         $index = $input->getArgument('index');
-        $io->note(sprintf('Currently handling the documents for the "%s" index', $index));
+        $io->note(sprintf('Currently loading the documents for the "%s" index', $index));
 
         foreach ($this->dataProviders as $provider) {
             if ($index !== $provider->support()) {
