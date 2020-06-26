@@ -32,6 +32,14 @@ final class TraceableDocumentOrchestrator implements DocumentOrchestratorInterfa
     /**
      * {@inheritdoc}
      */
+    public function addDocument(string $uid, array $document, string $primaryKey = null): void
+    {
+        $this->documentOrchestrator->addDocument($uid, $document, $primaryKey);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getDocument(string $uid, string $id): array
     {
         $document = $this->documentOrchestrator->getDocument($uid, $id);

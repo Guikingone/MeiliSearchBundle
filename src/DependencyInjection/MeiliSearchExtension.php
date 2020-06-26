@@ -8,6 +8,7 @@ use MeiliSearch\Client;
 use MeiliSearchBundle\Client\DocumentOrchestrator;
 use MeiliSearchBundle\Client\IndexOrchestrator;
 use MeiliSearchBundle\Client\SearchEntryPoint;
+use MeiliSearchBundle\src\DataProvider\DocumentDataProviderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -63,5 +64,7 @@ final class MeiliSearchExtension extends Extension
             ])
         ;
         $container->setDefinition('meili_search.entry_point', $searchEntryPoint);
+
+        $container->registerForAutoconfiguration(DocumentDataProviderInterface::class)->setTags(['meili_search_bundle.document_provider']);
     }
 }

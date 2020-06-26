@@ -15,15 +15,15 @@
 
     <filter>
         <whitelist>
-            <directory>Client</directory>
-            <directory>Command</directory>
-            <directory>DependencyInjection</directory>
+            <directory>src/Client</directory>
+            <directory>src/Command</directory>
+            <directory>src/DependencyInjection</directory>
         </whitelist>
     </filter>
 
     <testsuites>
         <testsuite name="MeiliSearchBundle Test Suite">
-            <directory>Tests/</directory>
+            <directory>tests/</directory>
         </testsuite>
     </testsuites>
 </phpunit>

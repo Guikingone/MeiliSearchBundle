@@ -9,6 +9,8 @@ namespace MeiliSearchBundle\Client;
  */
 interface DocumentOrchestratorInterface
 {
+    public function addDocument(string $uid, array $document, string $primaryKey = null): void;
+
     public function getDocument(string $uid, string $id): array;
 
     public function getDocuments(string $uid, array $options = null): array;

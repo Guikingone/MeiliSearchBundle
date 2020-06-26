@@ -13,3 +13,9 @@ bin/console meili:create-indexes test
 ```bash
 bin/console meili:list-indexes test
 ```
+
+## Load documents
+
+```bash
+bin/console meili:warm test
+```

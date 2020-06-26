@@ -6,8 +6,10 @@ This bundle uses a set of events to allow developers to listen and interact duri
 
 Three events are available during the document lifecycle: 
 
+- `PostDocumentCreationEvent`: Allow to retrieve the update identifier when a document has been created
 - `PostDocumentDeletionEvent`: Allow to retrieve the document deletion identifier
 - `PostDocumentUpdateEvent`: Allow to retrieve the document update identifier
+- `PreDocumentCreationEvent`: Allow to retrieve the index and the document before the creation
 - `PreDocumentDeletionEvent`: Allow to retrieve the document before the deletion
 - `PreDocumentUpdateEvent`: Allow to retrieve the document before the update
 

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Client;
 
 use MeiliSearch\Client;
+use MeiliSearchBundle\Event\Document\PostDocumentCreationEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentUpdateEvent;
+use MeiliSearchBundle\Event\Document\PreDocumentCreationEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentUpdateEvent;
 use MeiliSearchBundle\Exception\InvalidArgumentException;
@@ -44,6 +46,23 @@ final class DocumentOrchestrator implements DocumentOrchestratorInterface
         $this->client = $client;
         $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addDocument(string $uid, array $document, string $primaryKey = null): void
+    {
+        try {
+            $index = $this->client->getIndex($uid);
+
+            $this->dispatch(new PreDocumentCreationEvent($index, $document));
+            $update = $index->addDocuments($document, $primaryKey);
+            $this->dispatch(new PostDocumentCreationEvent($index, $update['updateId']));
+        } catch (Throwable $exception) {
+            $this->logError(sprintf('The document cannot be created, error: "%s"', $exception->getMessage()));
+            throw new RuntimeException($exception->getMessage());
+        }
     }
 
     /**
