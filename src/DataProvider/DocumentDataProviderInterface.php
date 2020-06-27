@@ -35,4 +35,13 @@ interface DocumentDataProviderInterface
      * The returned array CAN contain multiple documents.
      */
     public function getDocument(): array;
+
+    /**
+     * Define the primary key of the loaded document(s).
+     *
+     * If the method return `null`, the primary key is the field `id` (MUST be present in the document payload).
+     *
+     * @return string
+     */
+    public function getPrimaryKey(): ?string;
 }

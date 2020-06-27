@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\MeiliSearchBundle\Event\Index;
+namespace Tests\MeiliSearchBundle\Event;
 
 use PHPUnit\Framework\TestCase;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class IndexRemovedEventTest extends TestCase
+final class PreSearchEventTest extends TestCase
 {
 }

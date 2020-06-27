@@ -35,21 +35,28 @@
       "MeiliSearchBundle\\Client\\": "src/Client/",
       "MeiliSearchBundle\\Command\\": "src/Command/",
       "MeiliSearchBundle\\DataCollector\\": "src/DataCollector/",
+      "MeiliSearchBundle\\DataProvider\\": "src/DataProvider/",
       "MeiliSearchBundle\\DependencyInjection\\": "src/DependencyInjection/",
-      "MeiliSearchBundle\\Doctrine\\": "src/Doctrine/",
-      "MeiliSearchBundle\\Doctrine\\Listener\\": "src/Doctrine/Listener/",
       "MeiliSearchBundle\\Event\\": "src/Event/",
-      "MeiliSearchBundle\\Exception\\": "src/Exception/"
+      "MeiliSearchBundle\\Event\\Document\\": "src/Event/Document/",
+      "MeiliSearchBundle\\Event\\Index\\": "src/Event/Index/",
+      "MeiliSearchBundle\\Exception\\": "src/Exception/",
+      "MeiliSearchBundle\\Messenger\\": "src/Messenger/",
+      "MeiliSearchBundle\\Messenger\\Handler\\": "src/Messenger/Handler/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "MeiliSearchBundle\\Tests\\": "tests/",
-      "MeiliSearchBundle\\Tests\\Client\\": "tests/Client/",
-      "MeiliSearchBundle\\Tests\\Command\\": "tests/Command/",
-      "MeiliSearchBundle\\Tests\\DataCollector\\": "tests/DataCollector/",
-      "MeiliSearchBundle\\Tests\\DependencyInjection\\": "tests/DependencyInjection/",
-      "MeiliSearchBundle\\Tests\\Event\\": "tests/Event/"
+      "Tests\\MeiliSearchBundle\\": "tests/",
+      "Tests\\MeiliSearchBundle\\Client\\": "tests/Client/",
+      "Tests\\MeiliSearchBundle\\Command\\": "tests/Command/",
+      "Tests\\MeiliSearchBundle\\DataCollector\\": "tests/DataCollector/",
+      "Tests\\MeiliSearchBundle\\DependencyInjection\\": "tests/DependencyInjection/",
+      "Tests\\MeiliSearchBundle\\Event\\": "tests/Event/",
+      "Tests\\MeiliSearchBundle\\Event\\Document\\": "tests/Event/Document/",
+      "Tests\\MeiliSearchBundle\\Event\\Index\\": "tests/Event/Index/",
+      "Tests\\MeiliSearchBundle\\Messenger\\": "tests/Messenger/",
+      "Tests\\MeiliSearchBundle\\Messenger\\Handler\\": "tests/Messenger/Handler/"
     }
   }
 }

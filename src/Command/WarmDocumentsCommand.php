@@ -71,7 +71,7 @@ final class WarmDocumentsCommand extends Command
             }
 
             if ($provider instanceof DocumentDataProviderInterface) {
-                $this->orchestrator->addDocument($index, $provider->getDocument());
+                $this->orchestrator->addDocument($index, $provider->getDocument(), $provider->getPrimaryKey());
             }
         }
 

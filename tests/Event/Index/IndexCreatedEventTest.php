@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Tests\Event\Index;
+namespace Tests\MeiliSearchBundle\Event\Index;
 
 use PHPUnit\Framework\TestCase;
 
