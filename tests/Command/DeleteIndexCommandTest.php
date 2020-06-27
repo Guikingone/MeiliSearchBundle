@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Command;
+namespace Tests\MeiliSearchBundle\Command;
 
 use PHPUnit\Framework\TestCase;
 

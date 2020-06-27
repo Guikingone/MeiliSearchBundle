@@ -8,7 +8,7 @@ use MeiliSearch\Client;
 use MeiliSearchBundle\Client\DocumentOrchestrator;
 use MeiliSearchBundle\Client\IndexOrchestrator;
 use MeiliSearchBundle\Client\SearchEntryPoint;
-use MeiliSearchBundle\src\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;

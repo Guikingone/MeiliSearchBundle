@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Tests\Command;
+namespace Tests\MeiliSearchBundle\Command;
 
 use MeiliSearch\Client;
 use MeiliSearchBundle\Client\IndexOrchestrator;

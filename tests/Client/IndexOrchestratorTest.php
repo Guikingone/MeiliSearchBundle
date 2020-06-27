@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Tests\Client;
+namespace Tests\MeiliSearchBundle\Client;
 
 use MeiliSearch\Client;
 use MeiliSearch\Index;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\tests\Messenger\Handler;
+namespace Tests\MeiliSearchBundle\Messenger\Handler;
 
 use PHPUnit\Framework\TestCase;
 

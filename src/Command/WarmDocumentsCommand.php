@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Client\DocumentOrchestrator;
-use MeiliSearchBundle\src\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

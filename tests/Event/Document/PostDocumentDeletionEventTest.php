@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Tests\Event\Document;
+namespace Tests\MeiliSearchBundle\Event\Document;
 
 use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use PHPUnit\Framework\TestCase;

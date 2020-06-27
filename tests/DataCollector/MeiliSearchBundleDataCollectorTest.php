@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Tests\DataCollector;
+namespace Tests\MeiliSearchBundle\DataCollector;
 
 use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
 use MeiliSearchBundle\Client\IndexOrchestratorInterface;

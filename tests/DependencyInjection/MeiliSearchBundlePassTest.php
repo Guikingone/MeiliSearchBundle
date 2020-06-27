@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Tests\DependencyInjection;
+namespace Tests\MeiliSearchBundle\DependencyInjection;
 
 use MeiliSearch\Client;
 use MeiliSearchBundle\Client\DocumentOrchestrator;
