@@ -4,12 +4,8 @@ parameters:
   autoload_paths:
     - 'vendor/autoload.php'
   paths:
-    - 'Client'
-    - 'Command'
-    - 'DataCollector'
-    - 'DependencyInjection'
-    - 'Event'
-    - 'Tests'
+    - 'src'
+    - 'tests'
   exclude_paths:
     - 'vendor'
   sets:

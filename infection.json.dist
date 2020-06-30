@@ -2,9 +2,7 @@
     "timeout": 10,
     "source": {
         "directories": [
-            "Client",
-            "Command",
-            "DependencyInjection"
+            "src"
         ]
     },
     "phpUnit": {

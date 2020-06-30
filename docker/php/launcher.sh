@@ -3,10 +3,9 @@ set -e
 
 uid=$(id -u)
 
-if [ "$uid" != "0" ]
-then
-      usermod -u "$(stat -c %u /srv/app)" www-data || true
-      groupmod -g "$(stat -c %g /srv/app)" www-data || true
+if [ "$uid" != "0" ]; then
+  usermod -u "$(stat -c %u /srv/app)" www-data || true
+  groupmod -g "$(stat -c %g /srv/app)" www-data || true
 else
-    /bin/bash -c "$*"
+  /bin/bash -c "$*"
 fi

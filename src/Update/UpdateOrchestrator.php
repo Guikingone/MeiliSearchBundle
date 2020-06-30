@@ -2,22 +2,31 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Client;
+namespace MeiliSearchBundle\Update;
 
 use MeiliSearch\Client;
 use MeiliSearch\Index;
 use MeiliSearchBundle\Exception\RuntimeException;
+use MeiliSearchBundle\src\Update\UpdateOrchestratorInterface;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class UpdateOrchestrator
+final class UpdateOrchestrator implements UpdateOrchestratorInterface
 {
     /**
      * @var Client
      */
     private $client;
 
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getUpdate(string $uid, int $updateId): Update
     {
         $index = $this->client->getIndex($uid);

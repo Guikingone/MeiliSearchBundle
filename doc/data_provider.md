@@ -1,14 +1,14 @@
 # Data provider
 
 Data providers are the main entry point for every document that you may want to add in MeiliSearch.
-The main role of a data provider is to return an array that contain the data stored as a document in MS.
+The main role of a data provider is to return an array that contain the data stored as a document in MeiliSearch.
 
 In order to see how to use it, let's use Doctrine:
 
 ```php
 <?php
 
-use MeiliSearchBundle\src\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 // ...
 
 final class PostDataProvider implements DocumentDataProviderInterface
@@ -20,6 +20,11 @@ final class PostDataProvider implements DocumentDataProviderInterface
     public function support() : string
     {
         return 'foo';
+    }
+
+    public function getPrimaryKey() : ?string
+    {
+        return 'id'; // null can be returned, if so, the primary key is `id`
     }
 
     public function getDocument() : array

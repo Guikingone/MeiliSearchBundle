@@ -42,7 +42,8 @@
       "MeiliSearchBundle\\Event\\Index\\": "src/Event/Index/",
       "MeiliSearchBundle\\Exception\\": "src/Exception/",
       "MeiliSearchBundle\\Messenger\\": "src/Messenger/",
-      "MeiliSearchBundle\\Messenger\\Handler\\": "src/Messenger/Handler/"
+      "MeiliSearchBundle\\Messenger\\Handler\\": "src/Messenger/Handler/",
+      "MeiliSearchBundle\\Search\\": "src/Search/"
     }
   },
   "autoload-dev": {
@@ -56,7 +57,8 @@
       "Tests\\MeiliSearchBundle\\Event\\Document\\": "tests/Event/Document/",
       "Tests\\MeiliSearchBundle\\Event\\Index\\": "tests/Event/Index/",
       "Tests\\MeiliSearchBundle\\Messenger\\": "tests/Messenger/",
-      "Tests\\MeiliSearchBundle\\Messenger\\Handler\\": "tests/Messenger/Handler/"
+      "Tests\\MeiliSearchBundle\\Messenger\\Handler\\": "tests/Messenger/Handler/",
+      "Tests\\MeiliSearchBundle\\Search\\": "tests/Search/"
     }
   }
 }

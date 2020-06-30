@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\src\Messenger\Handler;
+namespace MeiliSearchBundle\Messenger\Handler;
 
 use MeiliSearchBundle\Client\IndexOrchestratorInterface;
-use MeiliSearchBundle\Messenger\AddIndexMessage;
+use MeiliSearchBundle\Messenger\DeleteIndexMessage;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class AddIndexMessageHandler implements MessageHandlerInterface
+final class DeleteIndexMessageHandler implements MessageHandlerInterface
 {
     /**
      * @var IndexOrchestratorInterface
@@ -23,8 +23,8 @@ final class AddIndexMessageHandler implements MessageHandlerInterface
         $this->indexOrchestrator = $indexOrchestrator;
     }
 
-    public function __invoke(AddIndexMessage $message): void
+    public function __invoke(DeleteIndexMessage $message): void
     {
-        $this->indexOrchestrator->addIndex($message->getUid(), $message->getPrimaryKey());
+        $this->indexOrchestrator->removeIndex($message->getIndex());
     }
 }

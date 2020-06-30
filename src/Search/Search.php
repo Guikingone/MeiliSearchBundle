@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Client;
+namespace MeiliSearchBundle\Search;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -33,7 +33,6 @@ final class Search implements SearchInterface
      * @var int
      */
     private $exhaustiveNbHits;
-
 
     /**
      * @var int

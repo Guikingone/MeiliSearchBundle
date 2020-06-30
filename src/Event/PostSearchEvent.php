@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event;
 
-use MeiliSearchBundle\Client\SearchInterface;
+use MeiliSearchBundle\Search\SearchInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**

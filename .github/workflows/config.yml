@@ -1,5 +1,5 @@
 name: MeiliSearchBundle CI - Config
-on: [ push, pull_request ]
+on: [ push ]
 jobs:
   meili_configuration:
     name: Configuration

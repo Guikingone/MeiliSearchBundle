@@ -6,8 +6,9 @@ namespace MeiliSearchBundle\DependencyInjection;
 
 use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
 use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
-use MeiliSearchBundle\Client\TraceableSearchEntryPoint;
+use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
+use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,6 +28,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
         $this->registerTraceableIndexOrchestrator($container);
         $this->registerTraceableDocumentOrchestrator($container);
         $this->registerTraceableSearchEntryPoint($container);
+        $this->registerTraceableUpdateOrchestrator($container);
         $this->registerDataCollector($container);
     }
 
@@ -57,6 +59,16 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
             (new Definition(TraceableSearchEntryPoint::class, [
                 new Reference('meili_search.entry_point', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ]))->setDecoratedService('meili_search.entry_point')
+        );
+    }
+
+    private function registerTraceableUpdateOrchestrator(ContainerBuilder $container): void
+    {
+        $container->setDefinition(
+            'debug.meili_search.update_orchestrator',
+            (new Definition(TraceableUpdateOrchestrator::class, [
+                new Reference('meili_search.update_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ]))->setDecoratedService('meili_search.update_orchestrator')
         );
     }
 

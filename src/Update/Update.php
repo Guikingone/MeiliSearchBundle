@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Client;
+namespace MeiliSearchBundle\Update;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

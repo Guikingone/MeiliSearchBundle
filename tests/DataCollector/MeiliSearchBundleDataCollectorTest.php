@@ -7,10 +7,10 @@ namespace Tests\MeiliSearchBundle\DataCollector;
 use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
 use MeiliSearchBundle\Client\IndexOrchestratorInterface;
 use MeiliSearchBundle\Client\InstanceProbeInterface;
-use MeiliSearchBundle\Client\SearchEntryPointInterface;
+use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
 use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
-use MeiliSearchBundle\Client\TraceableSearchEntryPoint;
+use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
 use PHPUnit\Framework\TestCase;
 

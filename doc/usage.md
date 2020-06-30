@@ -48,7 +48,7 @@ In order to ease the search process, this bundle defines a `SearchEntryPoint` th
 ```php
 <?php
 
-use MeiliSearchBundle\Client\SearchEntryPointInterface;
+use MeiliSearchBundle\Search\SearchEntryPointInterface;
 
 // ...
 

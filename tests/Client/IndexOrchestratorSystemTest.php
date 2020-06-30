@@ -25,7 +25,7 @@ final class IndexOrchestratorSystemTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->client = new Client('http://meili:7700');
+        $this->client = new Client('http://meili:7700', 'masterKey');
     }
 
     public function testAllIndexesCanBeRetrieved(): void

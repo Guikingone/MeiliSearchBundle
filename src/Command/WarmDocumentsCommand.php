@@ -44,7 +44,7 @@ final class WarmDocumentsCommand extends Command
     {
         $this
             ->setDefinition([
-                new InputArgument('index',InputArgument::REQUIRED),
+                new InputArgument('index', InputArgument::REQUIRED),
             ])
         ;
     }

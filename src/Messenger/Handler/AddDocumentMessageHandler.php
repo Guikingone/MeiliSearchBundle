@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\src\Messenger\Handler;
 
 use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
-use MeiliSearchBundle\src\Messenger\AddDocumentMessage;
+use MeiliSearchBundle\Messenger\AddDocumentMessage;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 /**
@@ -23,7 +23,7 @@ final class AddDocumentMessageHandler implements MessageHandlerInterface
         $this->documentOrchestrator = $documentOrchestrator;
     }
 
-    public function __invoke(AddDocumentMessage $message)
+    public function __invoke(AddDocumentMessage $message): void
     {
         $this->documentOrchestrator->addDocument($message->getIndex(), $message->getDocument(), $message->getPrimaryKey());
     }

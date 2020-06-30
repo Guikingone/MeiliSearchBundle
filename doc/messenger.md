@@ -2,14 +2,16 @@
 
 This bundle allows you to use `Symfony/Messenger` in order to delay some actions.
 
-## Index(es) creation
+## Indexes
 
-Thanks to `AddIndexMessage`, you can easily submit new indexes: 
+### Creating an index
+
+Thanks to `AddIndexMessage`, you can easily submit a new index: 
 
 ```php
 <?php
 
-use MeiliSearchBundle\src\Messenger\AddIndexMessage;
+use MeiliSearchBundle\Messenger\AddIndexMessage;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final class FooService
@@ -23,14 +25,14 @@ final class FooService
 }
 ```
 
-## Document(s) creation
+### Deleting an index
 
-Thanks to `AddDocumentMessage`, you can easily submit new documents in the desired index: 
+Thanks to `AddIndexMessage`, you can easily delete an index: 
 
 ```php
 <?php
 
-use MeiliSearchBundle\src\Messenger\AddDocumentMessage;
+use MeiliSearchBundle\Messenger\DeleteIndexMessage;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final class FooService
@@ -38,7 +40,29 @@ final class FooService
     public function action(MessageBusInterface $bus): void 
     {
         // Do some actions
-        $index = 'foo';
+
+        $bus->dispatch(new DeleteIndexMessage('foo'));
+    }
+}
+```
+
+## Documents
+
+### Creating a document
+
+Thanks to `AddDocumentMessage`, you can easily submit new documents in the desired index: 
+
+```php
+<?php
+
+use MeiliSearchBundle\Messenger\AddDocumentMessage;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+final class FooService
+{
+    public function action(MessageBusInterface $bus): void 
+    {
+        // Do some actions
         $document = [
             [
                 'id' => 1,
@@ -46,7 +70,7 @@ final class FooService
             ],
         ];
 
-        $bus->dispatch(new AddDocumentMessage($index, $document, 'key')); // The third argument define the primary key of the document, it's optional.
+        $bus->dispatch(new AddDocumentMessage('foo', $document, 'key')); // The third argument define the primary key of the document, it's optional.
     }
 }
 ```

@@ -1,8 +1,5 @@
 name: MeiliSearchBundle CI
-on:
-  push:
-    branches:
-      - master
+on: [push]
 jobs:
   meili_search:
     name: PHP ${{ matrix.php-versions }} - ${{ matrix.composer-dependencies }}
@@ -11,6 +8,9 @@ jobs:
     services:
       meili:
         image: getmeili/meilisearch
+        env:
+          MEILI_DB_PATH: ./meilisearch
+          MEILI_NO_ANALYTICS: true
         ports:
           - 7700:7700
     strategy:
@@ -57,16 +57,16 @@ jobs:
         run: composer update --no-suggest --prefer-lowest
 
       # —— Style —————————————————————————————————————————————————————————
-      - name: Launch PHP-CS-FIXER - tests
+      - name: PHP-CS-FIXER
         uses: docker://oskarstark/php-cs-fixer-ga
         with:
           args: --dry-run .
 
-      # —— PHPUnit —————————————————————————————————————————————————————————
-      - name: Launch PHPUnit tests
-        run: php vendor/bin/phpunit Tests
+      # —— PHPUnit ———————————————————————————————————————————————————————
+      - name: PHPUnit
+        run: php vendor/bin/phpunit tests
 
-      # —— Infection —————————————————————————————————————————————————————————
-      - name: Launch Infection analysis
+      # —— Infection —————————————————————————————————————————————————————
+      - name: Infection
         run: php vendor/bin/infection
         continue-on-error: true

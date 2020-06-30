@@ -1,5 +1,10 @@
+# VCS
+.github
+.gitignore
+
 # Project
 README.md
+doc
 
 # Infection
 infection.log

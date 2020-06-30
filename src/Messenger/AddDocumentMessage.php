@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\src\Messenger;
+namespace MeiliSearchBundle\Messenger;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -37,7 +37,7 @@ final class AddDocumentMessage
     }
 
     /**
-     * @return array
+     * @return array<mixed,mixed>
      */
     public function getDocument(): array
     {

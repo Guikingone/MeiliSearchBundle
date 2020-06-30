@@ -6,9 +6,16 @@ namespace MeiliSearchBundle\DependencyInjection;
 
 use MeiliSearch\Client;
 use MeiliSearchBundle\Client\DocumentOrchestrator;
+use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
 use MeiliSearchBundle\Client\IndexOrchestrator;
-use MeiliSearchBundle\Client\SearchEntryPoint;
+use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearchBundle\Client\InstanceProbe;
+use MeiliSearchBundle\Client\InstanceProbeInterface;
+use MeiliSearchBundle\src\Update\UpdateOrchestratorInterface;
+use MeiliSearchBundle\Update\UpdateOrchestrator;
+use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -35,6 +42,7 @@ final class MeiliSearchExtension extends Extension
                 $config['api_key'] ?? null,
                 new Reference('http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
+            ->addTag('meili_search.client')
         ;
         $container->setDefinition('meili_search.client', $clientDefinition);
 
@@ -46,6 +54,7 @@ final class MeiliSearchExtension extends Extension
             ->addTag('meili_search.index_orchestrator')
         ;
         $container->setDefinition('meili_search.index_orchestrator', $indexOrchestratorDefinition);
+        $container->setAlias(IndexOrchestratorInterface::class, 'meili_search.index_orchestrator');
 
         $documentOrchestratorDefinition = (new Definition(DocumentOrchestrator::class))
             ->setArguments([
@@ -55,6 +64,16 @@ final class MeiliSearchExtension extends Extension
             ->addTag('meili_search.document_orchestrator')
         ;
         $container->setDefinition('meili_search.document_orchestrator', $documentOrchestratorDefinition);
+        $container->setAlias(DocumentOrchestratorInterface::class, 'meili_search.document_orchestrator');
+
+        $instanceProbeDefinition = (new Definition(InstanceProbe::class))
+            ->setArguments([
+                new Reference('meili_search.client'),
+            ])
+            ->addTag('meili_search.instance_probe')
+        ;
+        $container->setDefinition('meili_search.instance_probe', $instanceProbeDefinition);
+        $container->setAlias(InstanceProbeInterface::class, 'meili_search.instance_probe');
 
         $searchEntryPoint = (new Definition(SearchEntryPoint::class))
             ->setArguments([
@@ -62,8 +81,19 @@ final class MeiliSearchExtension extends Extension
                 new Reference('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
+            ->addTag('meili_search.entry_point')
         ;
         $container->setDefinition('meili_search.entry_point', $searchEntryPoint);
+        $container->setAlias(SearchEntryPointInterface::class, 'meili_search.entry_point');
+
+        $updateOrchestratorDefinition = (new Definition(UpdateOrchestrator::class))
+            ->setArguments([
+                new Reference('meili_search.client'),
+            ])
+            ->addTag('meili_search.update_orchestrator')
+        ;
+        $container->setDefinition('meili_search.update_orchestrator', $updateOrchestratorDefinition);
+        $container->setAlias(UpdateOrchestratorInterface::class, 'meili_search.update_orchestrator');
 
         $container->registerForAutoconfiguration(DocumentDataProviderInterface::class)->setTags(['meili_search_bundle.document_provider']);
     }

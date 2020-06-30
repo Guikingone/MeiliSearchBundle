@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Client;
+namespace MeiliSearchBundle\Search;
 
+use MeiliSearchBundle\Client\IndexOrchestratorInterface;
 use MeiliSearchBundle\Event\PostSearchEvent;
 use MeiliSearchBundle\Event\PreSearchEvent;
 use MeiliSearchBundle\Exception\RuntimeException;

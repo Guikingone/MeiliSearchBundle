@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\DataCollector;
 use MeiliSearchBundle\Client\InstanceProbeInterface;
 use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
 use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
-use MeiliSearchBundle\Client\TraceableSearchEntryPoint;
+use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
