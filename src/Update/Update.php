@@ -39,8 +39,14 @@ final class Update
      */
     private $processedAt;
 
-    public static function create(string $status, int $updateId, array $type, float $duration, string $enqueuedAt, string $processedAt): self
-    {
+    public static function create(
+        string $status,
+        int $updateId,
+        array $type,
+        float $duration,
+        string $enqueuedAt,
+        string $processedAt
+    ): Update {
         $self = new self();
 
         $self->status = $status;

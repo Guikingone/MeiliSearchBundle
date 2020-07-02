@@ -27,7 +27,7 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = null): SearchInterface
+    public function search(string $index, string $query, array $options = []): SearchInterface
     {
         $result = $this->searchEntryPoint->search($index, $query, $options);
 

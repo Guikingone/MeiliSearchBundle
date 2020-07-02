@@ -11,4 +11,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class UpdateTest extends TestCase
 {
+    public function testUpdateInformationsCanBeRetrieved(): void
+    {
+    }
 }

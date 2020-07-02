@@ -5,14 +5,6 @@ jobs:
     name: PHP ${{ matrix.php-versions }} - ${{ matrix.composer-dependencies }}
     # https://hub.docker.com/_/ubuntu/
     runs-on: ubuntu-18.04
-    services:
-      meili:
-        image: getmeili/meilisearch
-        env:
-          MEILI_DB_PATH: ./meilisearch
-          MEILI_NO_ANALYTICS: true
-        ports:
-          - 7700:7700
     strategy:
       fail-fast: true
       matrix:
@@ -61,6 +53,10 @@ jobs:
         uses: docker://oskarstark/php-cs-fixer-ga
         with:
           args: --dry-run .
+
+      # —— MeiliSearch ———————————————————————————————————————————————————
+      - name: MeiliSearch - Docker image
+        run: docker run -d -p 7700:7700 --name meili getmeili/meilisearch:latest ./meilisearch --no-analytics=true
 
       # —— PHPUnit ———————————————————————————————————————————————————————
       - name: PHPUnit

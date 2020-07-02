@@ -9,5 +9,5 @@ namespace MeiliSearchBundle\Search;
  */
 interface SearchEntryPointInterface
 {
-    public function search(string $index, string $query, array $options = null): SearchInterface;
+    public function search(string $index, string $query, array $options = []): SearchInterface;
 }

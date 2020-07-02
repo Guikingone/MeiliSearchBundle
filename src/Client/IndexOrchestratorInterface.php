@@ -11,7 +11,7 @@ use MeiliSearch\Index;
  */
 interface IndexOrchestratorInterface
 {
-    public function addIndex(string $uid, ?string $primaryKey = null): void;
+    public function addIndex(string $uid, ?string $primaryKey = null, array $config = []): void;
 
     public function getIndexes(): array;
 

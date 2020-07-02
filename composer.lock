@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "41706a1151268344cfe194abd4a23a89",
+    "content-hash": "7e1c02bf2209fe8bd09dfcbe8d4f2f91",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -247,16 +247,16 @@
         },
         {
             "name": "meilisearch/meilisearch-php",
-            "version": "v0.11.1",
+            "version": "v0.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/meilisearch/meilisearch-php.git",
-                "reference": "8ba90c36f0d71d92900b4ad662eabe4b052efa32"
+                "reference": "cfe0a45c0238f0958835d6684fcc45028f663acf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/meilisearch/meilisearch-php/zipball/8ba90c36f0d71d92900b4ad662eabe4b052efa32",
-                "reference": "8ba90c36f0d71d92900b4ad662eabe4b052efa32",
+                "url": "https://api.github.com/repos/meilisearch/meilisearch-php/zipball/cfe0a45c0238f0958835d6684fcc45028f663acf",
+                "reference": "cfe0a45c0238f0958835d6684fcc45028f663acf",
                 "shasum": ""
             },
             "require": {
@@ -295,20 +295,20 @@
                 "php",
                 "search"
             ],
-            "time": "2020-06-23T14:55:42+00:00"
+            "time": "2020-07-03T07:33:51+00:00"
         },
         {
             "name": "php-http/discovery",
-            "version": "1.8.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/discovery.git",
-                "reference": "10d9019f393773345aedc0dc79e7fd678da874ee"
+                "reference": "9ab7668fee74a5ad61996095e50917bd50ee8bfe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/discovery/zipball/10d9019f393773345aedc0dc79e7fd678da874ee",
-                "reference": "10d9019f393773345aedc0dc79e7fd678da874ee",
+                "url": "https://api.github.com/repos/php-http/discovery/zipball/9ab7668fee74a5ad61996095e50917bd50ee8bfe",
+                "reference": "9ab7668fee74a5ad61996095e50917bd50ee8bfe",
                 "shasum": ""
             },
             "require": {
@@ -331,7 +331,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.7-dev"
+                    "dev-master": "1.9-dev"
                 }
             },
             "autoload": {
@@ -360,7 +360,7 @@
                 "message",
                 "psr7"
             ],
-            "time": "2020-06-14T10:44:12+00:00"
+            "time": "2020-07-02T11:43:45+00:00"
         },
         {
             "name": "php-http/guzzle6-adapter",
@@ -2935,16 +2935,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.5.0",
+            "version": "v4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "53c2753d756f5adb586dca79c2ec0e2654dd9463"
+                "reference": "c346bbfafe2ff60680258b631afb730d186ed864"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/53c2753d756f5adb586dca79c2ec0e2654dd9463",
-                "reference": "53c2753d756f5adb586dca79c2ec0e2654dd9463",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/c346bbfafe2ff60680258b631afb730d186ed864",
+                "reference": "c346bbfafe2ff60680258b631afb730d186ed864",
                 "shasum": ""
             },
             "require": {
@@ -2983,7 +2983,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2020-06-03T07:24:19+00:00"
+            "time": "2020-07-02T17:12:47+00:00"
         },
         {
             "name": "ocramius/package-versions",

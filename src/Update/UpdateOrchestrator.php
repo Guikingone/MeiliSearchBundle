@@ -36,7 +36,14 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
 
         $update = $index->getUpdateStatus($updateId);
 
-        return Update::create($update['status'], $update['updateId'], $update['type'], $update['duration'], $update['enqueuedAt'], $update['processedAt']);
+        return Update::create(
+            $update['status'],
+            $update['updateId'],
+            $update['type'],
+            $update['duration'],
+            $update['enqueuedAt'],
+            $update['processedAt']
+        );
     }
 
     /**
@@ -55,7 +62,14 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
 
         $values = [];
         array_walk($updates, function (array $update) use (&$values): void {
-            $values[] = Update::create($update['status'], $update['updateId'], $update['type'], $update['duration'], $update['enqueuedAt'], $update['processedAt']);
+            $values[] = Update::create(
+                $update['status'],
+                $update['updateId'],
+                $update['type'],
+                $update['duration'],
+                $update['enqueuedAt'],
+                $update['processedAt']
+            );
         });
 
         return $values;

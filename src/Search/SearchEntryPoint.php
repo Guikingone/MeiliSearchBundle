@@ -46,7 +46,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = null): SearchInterface
+    public function search(string $index, string $query, array $options = []): SearchInterface
     {
         $index = $this->indexOrchestrator->getIndex($index);
 
@@ -56,7 +56,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
             'options' => $options,
         ]));
 
-        $this->logInfo('A query has been made', array_merge($options ?? [], ['index' => $index, 'query' => $query]));
+        $this->logInfo('A query has been made', array_merge($options, ['index' => $index, 'query' => $query]));
 
         try {
             $result = $index->search($query, $options);

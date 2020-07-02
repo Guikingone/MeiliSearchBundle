@@ -9,4 +9,5 @@ namespace MeiliSearchBundle\Exception;
  */
 interface ExceptionInterface
 {
+    public function getContext(): ?string;
 }

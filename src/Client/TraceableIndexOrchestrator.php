@@ -39,9 +39,9 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface
     /**
      * {@inheritdoc}
      */
-    public function addIndex(string $uid, ?string $primaryKey = null): void
+    public function addIndex(string $uid, ?string $primaryKey = null, array $config = []): void
     {
-        $this->orchestrator->addIndex($uid, $primaryKey);
+        $this->orchestrator->addIndex($uid, $primaryKey, $config);
 
         $this->createdIndexes[] = ['uid' => $uid, 'primaryKey' => $primaryKey];
     }

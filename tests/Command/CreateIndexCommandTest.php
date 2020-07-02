@@ -17,7 +17,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class CreateIndexesCommandTest extends TestCase
+final class CreateIndexCommandTest extends TestCase
 {
     public function testCommandIsConfigured(): void
     {

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Client\DocumentOrchestrator;
+use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
 use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -18,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class WarmDocumentsCommand extends Command
 {
     /**
-     * @var DocumentOrchestrator
+     * @var DocumentOrchestratorInterface
      */
     private $orchestrator;
 
@@ -27,9 +29,9 @@ final class WarmDocumentsCommand extends Command
      */
     private $dataProviders;
 
-    protected static $defaultName = 'meili:warm';
+    protected static $defaultName = 'meili:warm-documents';
 
-    public function __construct(DocumentOrchestrator $orchestrator, iterable $dataProviders = [])
+    public function __construct(DocumentOrchestratorInterface $orchestrator, iterable $dataProviders = [])
     {
         $this->orchestrator = $orchestrator;
         $this->dataProviders = $dataProviders;
@@ -44,7 +46,7 @@ final class WarmDocumentsCommand extends Command
     {
         $this
             ->setDefinition([
-                new InputArgument('index', InputArgument::REQUIRED),
+                new InputArgument('index', InputArgument::REQUIRED, 'The index to warm'),
             ])
         ;
     }
@@ -65,17 +67,28 @@ final class WarmDocumentsCommand extends Command
         $index = $input->getArgument('index');
         $io->note(sprintf('Currently loading the documents for the "%s" index', $index));
 
+        $progressBar = new ProgressBar($output, \count($this->dataProviders));
+        $progressBar->start();
+
         foreach ($this->dataProviders as $provider) {
             if ($index !== $provider->support()) {
                 continue;
             }
 
-            if ($provider instanceof DocumentDataProviderInterface) {
+            try {
                 $this->orchestrator->addDocument($index, $provider->getDocument(), $provider->getPrimaryKey());
+            } catch (Throwable $exception) {
+                $io->error(sprintf('An error occurred when warming the documents, error: "%s"', $exception->getMessage()));
+
+                return 1;
             }
+
+            $progressBar->advance();
         }
 
-        $io->success('The document have been imported, feel free to search them!');
+        $progressBar->finish();
+
+        $io->success('The documents have been imported, feel free to search them!');
 
         return 0;
     }

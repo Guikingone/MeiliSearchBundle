@@ -11,6 +11,7 @@ use MeiliSearchBundle\Client\IndexOrchestrator;
 use MeiliSearchBundle\Client\IndexOrchestratorInterface;
 use MeiliSearchBundle\Client\InstanceProbe;
 use MeiliSearchBundle\Client\InstanceProbeInterface;
+use MeiliSearchBundle\src\EventSubscriber\ExceptionSubscriber;
 use MeiliSearchBundle\src\Update\UpdateOrchestratorInterface;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
 use MeiliSearchBundle\Search\SearchEntryPoint;
@@ -94,6 +95,14 @@ final class MeiliSearchExtension extends Extension
         ;
         $container->setDefinition('meili_search.update_orchestrator', $updateOrchestratorDefinition);
         $container->setAlias(UpdateOrchestratorInterface::class, 'meili_search.update_orchestrator');
+
+        $exceptionSubscriberDefinition = (new Definition(ExceptionSubscriber::class))
+            ->setArguments([
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->addTag('kernel.event_subscriber')
+        ;
+        $container->setDefinition('meili_search.exception_subscriber', $exceptionSubscriberDefinition);
 
         $container->registerForAutoconfiguration(DocumentDataProviderInterface::class)->setTags(['meili_search_bundle.document_provider']);
     }

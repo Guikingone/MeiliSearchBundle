@@ -27,6 +27,7 @@
     "phpunit/phpunit": "8.5.5",
     "symfony/event-dispatcher": "^4.4",
     "symfony/http-client": "^4.4",
+    "symfony/http-kernel": "^4.4",
     "symfony/messenger": "^4.4"
   },
   "autoload": {
@@ -38,6 +39,7 @@
       "MeiliSearchBundle\\DataProvider\\": "src/DataProvider/",
       "MeiliSearchBundle\\DependencyInjection\\": "src/DependencyInjection/",
       "MeiliSearchBundle\\Event\\": "src/Event/",
+      "MeiliSearchBundle\\EventSubscriber\\": "src/EventSubscriber/",
       "MeiliSearchBundle\\Event\\Document\\": "src/Event/Document/",
       "MeiliSearchBundle\\Event\\Index\\": "src/Event/Index/",
       "MeiliSearchBundle\\Exception\\": "src/Exception/",
@@ -55,6 +57,7 @@
       "Tests\\MeiliSearchBundle\\DataCollector\\": "tests/DataCollector/",
       "Tests\\MeiliSearchBundle\\DependencyInjection\\": "tests/DependencyInjection/",
       "Tests\\MeiliSearchBundle\\Event\\": "tests/Event/",
+      "Tests\\MeiliSearchBundle\\EventSubscriber\\": "tests/EventSubscriber/",
       "Tests\\MeiliSearchBundle\\Event\\Document\\": "tests/Event/Document/",
       "Tests\\MeiliSearchBundle\\Event\\Index\\": "tests/Event/Index/",
       "Tests\\MeiliSearchBundle\\Messenger\\": "tests/Messenger/",

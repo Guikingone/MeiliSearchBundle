@@ -10,7 +10,7 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             <b>Indexes</b>
-            <span>{{ collector.indexes() }}</span>
+            <span>{{ collector.indexes()|length }}</span>
         </div>
 
         <div class="sf-toolbar-info-piece">
