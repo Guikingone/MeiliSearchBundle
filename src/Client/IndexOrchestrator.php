@@ -47,15 +47,12 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
     /**
      * {@inheritdoc}
      */
-    public function addIndex(string $uid, ?string $primaryKey = null): void
+    public function addIndex(string $uid, ?string $primaryKey = null, array $config = []): void
     {
-        $config = [
-            'uid' => $uid,
-            'primaryKey' => $primaryKey,
-        ];
-
         try {
-            $index = $this->client->createIndex($config);
+            $index = $this->client->createIndex($uid, array_merge($config, [
+                'primaryKey' => $primaryKey,
+            ]));
         } catch (Throwable $exception) {
             $this->logError(sprintf('The index cannot be created, error: "%s"', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());

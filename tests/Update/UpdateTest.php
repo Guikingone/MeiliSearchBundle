@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\MeiliSearchBundle\Client;
+namespace Tests\MeiliSearchBundle\Update;
 
 use PHPUnit\Framework\TestCase;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class UpdateOrchestratorTest extends TestCase
+final class UpdateTest extends TestCase
 {
 }

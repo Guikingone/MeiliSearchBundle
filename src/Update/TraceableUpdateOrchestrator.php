@@ -17,11 +17,20 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface
     private $updateOrchestrator;
 
     /**
+     * @var array<int,Update>
+     */
+    private $retrievedUpdates = [];
+
+    /**
      * {@inheritdoc}
      */
     public function getUpdate(string $uid, int $updateId): Update
     {
-        return $this->updateOrchestrator->getUpdate($uid, $updateId);
+        $update = $this->updateOrchestrator->getUpdate($uid, $updateId);
+
+        $this->retrievedUpdates[$updateId] = $update;
+
+        return $update;
     }
 
     /**
@@ -30,5 +39,13 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface
     public function getUpdates(string $uid): array
     {
         return $this->updateOrchestrator->getUpdates($uid);
+    }
+
+    /**
+     * @return array<int,Update>
+     */
+    public function getRetrievedUpdates(): array
+    {
+        return $this->retrievedUpdates;
     }
 }

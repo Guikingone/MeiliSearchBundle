@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1126b43ed218bf5a1320eb970c753343",
+    "content-hash": "41706a1151268344cfe194abd4a23a89",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -247,16 +247,16 @@
         },
         {
             "name": "meilisearch/meilisearch-php",
-            "version": "v0.10.2",
+            "version": "v0.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/meilisearch/meilisearch-php.git",
-                "reference": "6669408e06b182a20624fcc805a65f08b06edab8"
+                "reference": "8ba90c36f0d71d92900b4ad662eabe4b052efa32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/meilisearch/meilisearch-php/zipball/6669408e06b182a20624fcc805a65f08b06edab8",
-                "reference": "6669408e06b182a20624fcc805a65f08b06edab8",
+                "url": "https://api.github.com/repos/meilisearch/meilisearch-php/zipball/8ba90c36f0d71d92900b4ad662eabe4b052efa32",
+                "reference": "8ba90c36f0d71d92900b4ad662eabe4b052efa32",
                 "shasum": ""
             },
             "require": {
@@ -295,7 +295,7 @@
                 "php",
                 "search"
             ],
-            "time": "2020-04-30T13:35:53+00:00"
+            "time": "2020-06-23T14:55:42+00:00"
         },
         {
             "name": "php-http/discovery",

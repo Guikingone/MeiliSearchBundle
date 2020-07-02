@@ -54,7 +54,7 @@ final class ListIndexesCommandIntegrationTest extends TestCase
 
     public function testCommandCanListIndexes(): void
     {
-        $this->client->createIndex(['uid' => 'test', 'primaryKey' => 'test_test']);
+        $this->client->createIndex('foo', ['primaryKey' => 'test_test']);
 
         $orchestrator = new IndexOrchestrator($this->client);
 
@@ -71,7 +71,7 @@ final class ListIndexesCommandIntegrationTest extends TestCase
         static::assertStringContainsString('CreatedAt', $tester->getDisplay());
         static::assertStringContainsString('UpdatedAt', $tester->getDisplay());
 
-        static::assertStringContainsString('test', $tester->getDisplay());
+        static::assertStringContainsString('foo', $tester->getDisplay());
         static::assertStringContainsString('test_test', $tester->getDisplay());
     }
 }
