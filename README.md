@@ -1,25 +1,37 @@
 # MeiliSearchBundle
 
-MeiliSearchBundle is a Symfony bundle which configure and enable [MeiliSearch]('https://github.com/meilisearch/MeiliSearch').
+MeiliSearchBundle is an opiniated Symfony bundle which configure and enable [MeiliSearch]('https://github.com/meilisearch/MeiliSearch').
 
 The core logic act as a wrapper around the official [MeiliSearch PHP SDK]('https://github.com/meilisearch/meilisearch-php').
 
 ## Installation
 
+Make sure Composer is installed globally, as explained in the
+[installation chapter](https://getcomposer.org/doc/00-intro.md)
+of the Composer documentation.
+
 ```bash
 composer require guikingone/meili-search-bundle
 ```
 
+Once installed, time to update the `config/bundles.php`:
+
 ```php
 // config/bundles.php
 
+return [
+    // ...
+    MeiliSearchBundle\MeiliSearchBundle::class => ['all' => true],
+];
 ```
+
+Once done, just add a `config/packages/meili_search.yaml`:
 
 ```yaml
 # config/packages/meili_search.yaml
 meili_search:
     host: '%env(MEILI_HOST)%'
-    api_key: '%env(MEILI_API_KEY)%'
+    api_key: '%env(MEILI_API_KEY)%' # Optional but recommended in development mode
 ```
 
 ## Usage

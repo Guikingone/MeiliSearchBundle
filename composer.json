@@ -4,6 +4,7 @@
   "minimum-stability": "stable",
   "license": "MIT",
   "keywords": ["bundle", "symfony", "meili", "search"],
+  "type": "symfony-bundle",
   "authors": [
     {
       "name": "Guillaume Loulier",

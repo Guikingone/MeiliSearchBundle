@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Client\IndexOrchestrator;
+use MeiliSearchBundle\Client\IndexOrchestratorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,13 +19,13 @@ use Throwable;
 final class CreateIndexCommand extends Command
 {
     /**
-     * @var IndexOrchestrator
+     * @var IndexOrchestratorInterface
      */
     private $indexOrchestrator;
 
     protected static $defaultName = 'meili:create-index';
 
-    public function __construct(IndexOrchestrator $indexOrchestrator)
+    public function __construct(IndexOrchestratorInterface $indexOrchestrator)
     {
         $this->indexOrchestrator = $indexOrchestrator;
 

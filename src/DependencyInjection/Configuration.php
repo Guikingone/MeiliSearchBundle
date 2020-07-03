@@ -23,7 +23,9 @@ final class Configuration implements ConfigurationInterface
             ->getRootNode()
                 ->children()
                     ->scalarNode('host')->end()
-                    ->scalarNode('api_key')->end()
+                    ->scalarNode('api_key')
+                        ->defaultNull()
+                    ->end()
                 ->end()
             ->end()
         ;
