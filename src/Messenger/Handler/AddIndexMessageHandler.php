@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\src\Messenger\Handler;
+namespace MeiliSearchBundle\Messenger\Handler;
 
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Messenger\AddIndexMessage;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
@@ -25,6 +25,10 @@ final class AddIndexMessageHandler implements MessageHandlerInterface
 
     public function __invoke(AddIndexMessage $message): void
     {
-        $this->indexOrchestrator->addIndex($message->getUid(), $message->getPrimaryKey());
+        $this->indexOrchestrator->addIndex(
+            $message->getUid(),
+            $message->getPrimaryKey(),
+            $message->getConfiguration()
+        );
     }
 }

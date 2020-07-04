@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Messenger\Handler;
 
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Messenger\DeleteIndexMessage;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 

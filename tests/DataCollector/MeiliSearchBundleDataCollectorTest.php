@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\DataCollector;
 
-use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
-use MeiliSearchBundle\Client\InstanceProbeInterface;
+use MeiliSearchBundle\Document\DocumentEntryPointInterface;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
+use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
-use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
-use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
 use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
 use PHPUnit\Framework\TestCase;
@@ -21,71 +22,108 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
 {
     public function testCollectorIsConfigured(): void
     {
-        $probe = $this->createMock(InstanceProbeInterface::class);
-
         $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
 
-        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
-        $traceableDocumentOrchestrator = new TraceableDocumentOrchestrator($documentOrchestrator);
+        $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
 
         $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
         $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
 
-        $collector = new MeiliSearchBundleDataCollector($probe, $traceableIndexOrchestrator, $traceableDocumentOrchestrator, $traceableSearchEntryPoint);
+        $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
+        $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
+
+        $collector = new MeiliSearchBundleDataCollector(
+            $traceableIndexOrchestrator,
+            $traceableDocumentOrchestrator,
+            $traceableSearchEntryPoint,
+            $traceableSynonymsOrchestrator
+        );
+
         static::assertSame('meili', $collector->getName());
-    }
-
-    public function testCollectorCanRetrieveSystemInformations(): void
-    {
-        $probe = $this->createMock(InstanceProbeInterface::class);
-        $probe->expects(self::once())->method('getSystemInformations')->willReturn([
-            "memoryUsage" => "56.3 %",
-            "processorUsage" => [
-                "0.0 %",
-                "25.0 %",
-                "4.5 %",
-                "20.7 %",
-                "4.0 %",
-                "18.1 %",
-                "3.7 %",
-                "14.8 %",
-                "3.4 %",
-            ],
-            "global" => [
-                "totalMemory" => "17.18 GB",
-                "usedMemory" => "9.67 GB",
-                "totalSwap" => "4.29 GB",
-                "usedSwap" => "2.58 GB",
-                "inputData" => "29.82 GB",
-                "outputData" => "4.22 GB"
-            ],
-            "process" => [
-                "memory" => "5.2 MB",
-                "cpu" => "0.0 %"
-            ],
-        ]);
-
-        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
-
-        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
-        $traceableDocumentOrchestrator = new TraceableDocumentOrchestrator($documentOrchestrator);
-
-        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
-        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
-
-        $collector = new MeiliSearchBundleDataCollector($probe, $traceableIndexOrchestrator, $traceableDocumentOrchestrator, $traceableSearchEntryPoint);
-
-        $collector->lateCollect();
-        static::assertNotEmpty($collector->getSystemInformations());
     }
 
     public function testCollectorCanCollect(): void
     {
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
+        $traceableIndexOrchestrator->addIndex('foo', 'id');
+        $traceableIndexOrchestrator->removeIndex('bar');
+        $traceableIndexOrchestrator->getIndex('bar');
+
+        $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
+
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
+        $traceableSearchEntryPoint->search('foo', 'q=bar');
+
+        $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
+        $synonymsOrchestrator->expects(self::once())->method('getSynonyms')->willReturn([
+            'foo' => ['bar', 'foo'],
+        ]);
+
+        $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
+        $traceableSynonymsOrchestrator->getSynonyms('foo');
+
+        $collector = new MeiliSearchBundleDataCollector(
+            $traceableIndexOrchestrator,
+            $traceableDocumentOrchestrator,
+            $traceableSearchEntryPoint,
+            $traceableSynonymsOrchestrator
+        );
+        $collector->lateCollect();
+
+        static::assertNotEmpty($collector->getCreatedIndexes());
+        static::assertNotEmpty($collector->getDeletedIndexes());
+        static::assertNotEmpty($collector->getFetchedIndexes());
+        static::assertSame(1, $collector->getQueriesCount());
     }
 
     public function testCollectorCanCollectAndReset(): void
     {
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
+        $traceableIndexOrchestrator->addIndex('foo', 'id');
+        $traceableIndexOrchestrator->removeIndex('bar');
+        $traceableIndexOrchestrator->getIndex('bar');
+
+        $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
+
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
+        $traceableSearchEntryPoint->search('foo', 'q=bar');
+
+        $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
+        $synonymsOrchestrator->expects(self::once())->method('getSynonyms')->willReturn([
+            'foo' => ['bar', 'foo'],
+        ]);
+
+        $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
+        $traceableSynonymsOrchestrator->getSynonyms('foo');
+
+        $collector = new MeiliSearchBundleDataCollector(
+            $traceableIndexOrchestrator,
+            $traceableDocumentOrchestrator,
+            $traceableSearchEntryPoint,
+            $traceableSynonymsOrchestrator
+        );
+        $collector->lateCollect();
+
+        static::assertNotEmpty($collector->getCreatedIndexes());
+        static::assertNotEmpty($collector->getDeletedIndexes());
+        static::assertNotEmpty($collector->getFetchedIndexes());
+        static::assertSame(1, $collector->getQueriesCount());
+        static::assertNotEmpty($collector->getSynonyms());
+
+        $collector->reset();
+
+        static::assertEmpty($collector->getCreatedIndexes());
+        static::assertEmpty($collector->getDeletedIndexes());
+        static::assertEmpty($collector->getFetchedIndexes());
+        static::assertSame(0, $collector->getQueriesCount());
+        static::assertEmpty($collector->getSynonyms());
     }
 }

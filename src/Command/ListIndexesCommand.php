@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
+use function array_walk;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -34,13 +36,23 @@ final class ListIndexesCommand extends Command
     /**
      * {@inheritdoc}
      */
+    protected function configure(): void
+    {
+        $this
+            ->setDescription('List the indexes')
+        ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         try {
             $indexes = $this->indexOrchestrator->getIndexes();
-            if (0 === \count($indexes)) {
+            if (empty($indexes)) {
                 $io->warning('No indexes found, please ensure that indexes have been created');
 
                 return 0;
@@ -49,16 +61,21 @@ final class ListIndexesCommand extends Command
             $table = new Table($output);
             $table->setHeaders(['Uid', 'PrimaryKey', 'CreatedAt', 'UpdatedAt']);
 
-            array_walk($indexes, function (array $index) use (&$table): void {
-                $table->addRow([$index['uid'], $index['primaryKey'] ?? 'Undefined', $index['createdAt'], $index['updatedAt']]);
+            array_walk($indexes, function (Indexes $index) use (&$table): void {
+                $informations = $index->show();
+
+                $table->addRow([$informations['uid'], $informations['primaryKey'] ?? 'Undefined', $informations['createdAt'], $informations['updatedAt']]);
             });
 
             $io->note('The following indexes have been found:');
             $table->render();
 
             return 0;
-        } catch (Throwable $exception) {
-            $io->error(sprintf('The list cannot be retrieved as an error occurred, message: "%s".', $exception->getMessage()));
+        } catch (Throwable $throwable) {
+            $io->error([
+                'The list cannot be retrieved as an error occurred',
+                sprintf('Error: %s', $throwable->getMessage()),
+            ]);
 
             return 1;
         }

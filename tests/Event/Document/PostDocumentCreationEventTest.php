@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event\Document;
 
+use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\Event\Document\PostDocumentCreationEvent;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -11,4 +13,13 @@ use PHPUnit\Framework\TestCase;
  */
 final class PostDocumentCreationEventTest extends TestCase
 {
+    public function testEventAllowToRetrieveInformations(): void
+    {
+        $index = $this->createMock(Indexes::class);
+
+        $event = new PostDocumentCreationEvent($index, 1);
+
+        static::assertSame($index, $event->getIndex());
+        static::assertSame(1, $event->getUpdate());
+    }
 }

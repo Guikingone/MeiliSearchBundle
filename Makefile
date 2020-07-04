@@ -39,9 +39,9 @@ php-cs-fixer-dry: ## Run PHP-CS-FIXER in --dry-run mode
 php-cs-fixer-dry:
 	$(PHP) vendor/bin/php-cs-fixer fix . --dry-run
 
-phpstan: ## Run PHPStan (a specific LEVEL can be defined)
+phpstan: ## Run PHPStan (the configuration must be defined in phpstan.neon)
 phpstan:
-	$(PHP) vendor/bin/phpstan analyse -c phpstan.neon --level $(or $(LEVEL), 8)
+	$(DOCKER) run --rm -v $(PWD):/app phpstan/phpstan analyse /app/src
 
 rector-dry: ## Run Rector in --dry-run mode
 rector-dry:
@@ -49,7 +49,7 @@ rector-dry:
 
 rector: ## Run Rector
 rector:
-	$(DOCKER) run -v $(PWD):/project rector/rector process /project --config /project/rector.yaml --dry-run
+	$(DOCKER) run -v $(PWD):/project rector/rector process /project --config /project/rector.yaml
 
 ##
 ## Tests

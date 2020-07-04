@@ -33,15 +33,8 @@ interface DocumentDataProviderInterface
      * CAN be overridden when loading the document into an index.
      *
      * The returned array CAN contain multiple documents.
+     *
+     * @return array<string,mixed>
      */
     public function getDocument(): array;
-
-    /**
-     * Define the primary key of the loaded document(s).
-     *
-     * If the method return `null`, the primary key is the field `id` (MUST be present in the document payload).
-     *
-     * @return string
-     */
-    public function getPrimaryKey(): ?string;
 }

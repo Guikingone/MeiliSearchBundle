@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class DeleteIndexCommand extends Command
 {
+    private const INDEX = 'index';
+
     /**
      * @var IndexOrchestratorInterface
      */
@@ -34,28 +37,32 @@ final class DeleteIndexCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDefinition([
-                new InputArgument('index', InputArgument::REQUIRED, 'The index to delete'),
+                new InputArgument(self::INDEX, InputArgument::REQUIRED, 'The index to delete'),
             ])
+            ->setDescription('Allow to delete an index')
         ;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $index = $input->getArgument('index');
+        $index = $input->getArgument(self::INDEX);
 
         try {
             $this->indexOrchestrator->removeIndex($index);
-        } catch (Throwable $exception) {
-            $io->error(sprintf('An error occurred when trying to delete the index, error: "%s"', $exception->getMessage()));
+        } catch (Throwable $throwable) {
+            $io->error([
+                'An error occurred when trying to delete the index',
+                sprintf('Error: %s', $throwable->getMessage()),
+            ]);
 
             return 1;
         }

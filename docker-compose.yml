@@ -8,7 +8,9 @@ services:
       - ./:/srv/app
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
 
-  meili:
+  meilisearch:
     image: getmeili/meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: 'true'
     volumes:
       - './docker/meili/data.ms:/data.ms'

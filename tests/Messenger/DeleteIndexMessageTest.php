@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\tests\Messenger;
+namespace Tests\MeiliSearchBundle\Messenger;
 
 use MeiliSearchBundle\Messenger\DeleteIndexMessage;
 use PHPUnit\Framework\TestCase;

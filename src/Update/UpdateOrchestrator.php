@@ -5,36 +5,58 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Update;
 
 use MeiliSearch\Client;
-use MeiliSearch\Index;
-use MeiliSearchBundle\Exception\RuntimeException;
-use MeiliSearchBundle\src\Update\UpdateOrchestratorInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Throwable;
+use function array_walk;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class UpdateOrchestrator implements UpdateOrchestratorInterface
 {
+    private const INDEX_LOG_KEY = 'index';
+
     /**
      * @var Client
      */
     private $client;
 
-    public function __construct(Client $client)
-    {
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(
+        Client $client,
+        ?LoggerInterface $logger = null
+    ) {
         $this->client = $client;
+        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getUpdate(string $uid, int $updateId): Update
+    public function getUpdate(string $uid, int $updateId): UpdateInterface
     {
-        $index = $this->client->getIndex($uid);
-        if (!$index instanceof Index) {
-            throw new RuntimeException('The index uid does not exist');
+        try {
+            $index = $this->client->getIndex($uid);
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf(
+                'An error occurred when trying to fetch the index, error "%s"',
+                $throwable->getMessage()
+            ));
+
+            throw $throwable;
         }
 
         $update = $index->getUpdateStatus($updateId);
+
+        $this->logger->info('An update has been retrieved', [
+            self::INDEX_LOG_KEY => $uid,
+        ]);
 
         return Update::create(
             $update['status'],
@@ -47,15 +69,19 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
     }
 
     /**
-     * @param string $uid
-     *
-     * @return array<int,Update>
+     * {@inheritdoc}
      */
     public function getUpdates(string $uid): array
     {
-        $index = $this->client->getIndex($uid);
-        if (!$index instanceof Index) {
-            throw new RuntimeException('The index uid does not exist');
+        try {
+            $index = $this->client->getIndex($uid);
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf(
+                'An error occurred when trying to fetch the index, error "%s"',
+                $throwable->getMessage()
+            ));
+
+            throw $throwable;
         }
 
         $updates = $index->getAllUpdateStatus();
@@ -71,6 +97,10 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
                 $update['processedAt']
             );
         });
+
+        $this->logger->info('A set of updates has been retrieved', [
+            self::INDEX_LOG_KEY => $uid,
+        ]);
 
         return $values;
     }

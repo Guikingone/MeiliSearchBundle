@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DependencyInjection;
 
-use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
-use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Document\DocumentEntryPointInterface;
+use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
+use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
+use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
 use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
+use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -20,6 +25,8 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 final class MeiliSearchBundlePass implements CompilerPassInterface
 {
+    private const INNER = 'inner';
+
     /**
      * {@inheritdoc}
      */
@@ -28,64 +35,74 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
         $this->registerTraceableIndexOrchestrator($container);
         $this->registerTraceableDocumentOrchestrator($container);
         $this->registerTraceableSearchEntryPoint($container);
+        $this->registerTraceableSynonymsOrchestrator($container);
         $this->registerTraceableUpdateOrchestrator($container);
         $this->registerDataCollector($container);
     }
 
     private function registerTraceableIndexOrchestrator(ContainerBuilder $container): void
     {
-        $container->setDefinition(
-            'debug.meili_search.index_orchestrator',
-            (new Definition(TraceableIndexOrchestrator::class, [
-                new Reference('meili_search.index_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ]))->setDecoratedService('meili_search.index_orchestrator')
-        );
+        $container->register(TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
+            ->setArguments([
+                new Reference(IndexOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+        ;
     }
 
     private function registerTraceableDocumentOrchestrator(ContainerBuilder $container): void
     {
-        $container->setDefinition(
-            'debug.meili_search.document_orchestrator',
-            (new Definition(TraceableDocumentOrchestrator::class, [
-                new Reference('meili_search.document_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ]))->setDecoratedService('meili_search.document_orchestrator')
-        );
+        $container->register(TraceableDocumentEntryPoint::class, TraceableDocumentEntryPoint::class)
+            ->setArguments([
+                new Reference(DocumentEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(DocumentEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+        ;
     }
 
     private function registerTraceableSearchEntryPoint(ContainerBuilder $container): void
     {
-        $container->setDefinition(
-            'debug.meili_search.entry_point',
-            (new Definition(TraceableSearchEntryPoint::class, [
-                new Reference('meili_search.entry_point', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ]))->setDecoratedService('meili_search.entry_point')
-        );
+        $container->register(TraceableSearchEntryPoint::class, TraceableSearchEntryPoint::class)
+            ->setArguments([
+                new Reference(SearchEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(SearchEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+        ;
+    }
+
+    private function registerTraceableSynonymsOrchestrator(ContainerBuilder $container): void
+    {
+        $container->register(TraceableSynonymsOrchestrator::class, TraceableSynonymsOrchestrator::class)
+            ->setArguments([
+                new Reference(SynonymsOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(SynonymsOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+        ;
     }
 
     private function registerTraceableUpdateOrchestrator(ContainerBuilder $container): void
     {
-        $container->setDefinition(
-            'debug.meili_search.update_orchestrator',
-            (new Definition(TraceableUpdateOrchestrator::class, [
-                new Reference('meili_search.update_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ]))->setDecoratedService('meili_search.update_orchestrator')
-        );
+        $container->register(TraceableUpdateOrchestrator::class, TraceableUpdateOrchestrator::class)
+            ->setArguments([
+                new Reference(UpdateOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(UpdateOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+        ;
     }
 
     private function registerDataCollector(ContainerBuilder $container): void
     {
-        $dataCollector = (new Definition(MeiliSearchBundleDataCollector::class))
+        $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
             ->setArguments([
-                new Reference('debug.meili_search.index_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference('debug.meili_search.document_orchestrator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference('debug.meili_search.entry_point', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(TraceableIndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->addTag('data_collector', [
                 'template' => 'data_collector.html.twig',
-                'id'       => 'app.request_collector',
+                'id'       => 'app.meili_search_collector',
             ])
         ;
-
-        $container->setDefinition('meili_search.data_collector', $dataCollector);
     }
 }

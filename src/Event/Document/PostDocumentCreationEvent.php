@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Document;
 
-use MeiliSearch\Index;
+use MeiliSearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -13,7 +13,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class PostDocumentCreationEvent extends Event
 {
     /**
-     * @var Index
+     * @var Indexes
      */
     private $index;
 
@@ -22,13 +22,13 @@ final class PostDocumentCreationEvent extends Event
      */
     private $update;
 
-    public function __construct(Index $index, int $update)
+    public function __construct(Indexes $index, int $update)
     {
         $this->index = $index;
         $this->update = $update;
     }
 
-    public function getIndex(): Index
+    public function getIndex(): Indexes
     {
         return $this->index;
     }

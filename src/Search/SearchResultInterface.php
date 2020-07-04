@@ -1,0 +1,56 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MeiliSearchBundle\Search;
+
+use Countable;
+use IteratorAggregate;
+
+/**
+ * @author Guillaume Loulier <contact@guillaumeloulier.fr>
+ */
+interface SearchResultInterface extends Countable, IteratorAggregate
+{
+    public static function create(
+        array $hits,
+        int $offset,
+        int $limit,
+        int $nbHits,
+        bool $exhaustiveNbHits,
+        int $processingTimeMs,
+        string $query
+    ): SearchResultInterface;
+
+    /**
+     * Return a new `SearchResultInterface` instance with the hits filtered using `array_filter($this->hits, $callback, ARRAY_FILTER_USE_BOTH)`.
+     *
+     * The method DOES not trigger a new request.
+     *
+     * @param callable $callback
+     *
+     * @return SearchResultInterface
+     */
+    public function filter(callable $callback): SearchResultInterface;
+
+    public function getHit(int $key, $default = null);
+
+    public function getHits(): array;
+
+    public function getOffset(): int;
+
+    public function getLimit(): int;
+
+    public function getNbHits(): int;
+
+    public function getExhaustiveNbHits(): bool;
+
+    public function getProcessingTimeMs(): int;
+
+    public function getQuery(): string;
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function toArray(): array;
+}

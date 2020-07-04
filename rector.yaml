@@ -10,7 +10,10 @@ parameters:
     - 'vendor'
   sets:
     - 'Php71'
-    - 'DeadCode'
+    - 'Php72'
+    #- 'DeadCode'
     - 'Performance'
-    - 'Privatization'
+    #- 'Privatization'
+    - 'phpunit-code-quality'
+    - 'phpstan'
     - 'SOLID'

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Index;
+use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +15,7 @@ final class IndexRetrievedEventTest extends TestCase
 {
     public function testIndexCanBeRetrieved(): void
     {
-        $index = $this->createMock(Index::class);
+        $index = $this->createMock(Indexes::class);
 
         $event = new IndexRetrievedEvent($index);
 

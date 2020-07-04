@@ -4,20 +4,29 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Search;
 
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Event\PostSearchEvent;
 use MeiliSearchBundle\Event\PreSearchEvent;
 use MeiliSearchBundle\Exception\RuntimeException;
+use MeiliSearchBundle\Result\ResultBuilderInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
+use function array_merge;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class SearchEntryPoint implements SearchEntryPointInterface
 {
+    private const INDEX = 'index';
+    private const ERROR = 'error';
+    private const HITS = 'hits';
+    private const QUERY = 'query';
+    private const OPTIONS = 'options';
+
     /**
      * @var EventDispatcherInterface|null
      */
@@ -33,51 +42,86 @@ final class SearchEntryPoint implements SearchEntryPointInterface
      */
     private $logger;
 
+    /**
+     * @var ResultBuilderInterface|null
+     */
+    private $resultBuilder;
+
     public function __construct(
         IndexOrchestratorInterface $indexOrchestrator,
+        ?ResultBuilderInterface $resultBuilder = null,
         ?EventDispatcherInterface $eventDispatcher = null,
         ?LoggerInterface $logger = null
     ) {
         $this->indexOrchestrator = $indexOrchestrator;
+        $this->resultBuilder = $resultBuilder;
         $this->eventDispatcher = $eventDispatcher;
-        $this->logger = $logger;
+        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = []): SearchInterface
+    public function search(string $index, string $query, array $options = []): SearchResultInterface
     {
-        $index = $this->indexOrchestrator->getIndex($index);
+        try {
+            $index = $this->indexOrchestrator->getIndex($index);
+        } catch (Throwable $throwable) {
+            $this->logger->error('The search cannot occur as an error occurred when fetching the index', [
+                self::INDEX => $index,
+                self::ERROR => $throwable->getMessage(),
+            ]);
+
+            throw $throwable;
+        }
 
         $this->dispatch(new PreSearchEvent([
-            'index' => $index,
-            'query' => $query,
-            'options' => $options,
+            self::INDEX => $index,
+            self::QUERY => $query,
+            self::OPTIONS => $options,
         ]));
 
-        $this->logInfo('A query has been made', array_merge($options, ['index' => $index, 'query' => $query]));
+        $this->logger->info('A query has been made', array_merge($options, [
+            self::INDEX => $index,
+            self::QUERY => $query,
+        ]));
 
         try {
             $result = $index->search($query, $options);
-        } catch (Throwable $exception) {
-            $this->logError('The query has failed', ['error' => $exception->getMessage()]);
-            throw new RuntimeException($exception->getMessage());
+        } catch (Throwable $throwable) {
+            $this->logger->error('The query has failed', [
+                self::ERROR => $throwable->getMessage(),
+                self::QUERY => $query,
+                self::OPTIONS => $options,
+            ]);
+
+            throw new RuntimeException($throwable->getMessage());
         }
 
-        $searchResult = Search::create(
-            $result['hits'],
+        $this->buildModels($result[self::HITS]);
+
+        $searchResult = SearchResult::create(
+            $result[self::HITS],
             $result['offset'],
             $result['limit'],
             $result['nbHits'],
             $result['exhaustiveNbHits'],
             $result['processingTimeMs'],
-            $result['query']
+            $result[self::QUERY]
         );
 
         $this->dispatch(new PostSearchEvent($searchResult));
 
         return $searchResult;
+    }
+
+    private function buildModels(array &$results): void
+    {
+        foreach ($results as $key => $hit) {
+            if (null !== $this->resultBuilder && $this->resultBuilder->support($hit)) {
+                $results[$key] = $this->resultBuilder->build($hit);
+            }
+        }
     }
 
     private function dispatch(Event $event): void
@@ -87,23 +131,5 @@ final class SearchEntryPoint implements SearchEntryPointInterface
         }
 
         $this->eventDispatcher->dispatch($event);
-    }
-
-    private function logError(string $message, array $context = []): void
-    {
-        if (null === $this->logger) {
-            return;
-        }
-
-        $this->logger->error($message, $context);
-    }
-
-    private function logInfo(string $message, array $context = []): void
-    {
-        if (null === $this->logger) {
-            return;
-        }
-
-        $this->logger->info($message, $context);
     }
 }

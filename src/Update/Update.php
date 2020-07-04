@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Update;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class Update
+final class Update implements UpdateInterface
 {
     /**
      * @var string
@@ -39,6 +39,9 @@ final class Update
      */
     private $processedAt;
 
+    /**
+     * {@inheritdoc}
+     */
     public static function create(
         string $status,
         int $updateId,
@@ -46,7 +49,7 @@ final class Update
         float $duration,
         string $enqueuedAt,
         string $processedAt
-    ): Update {
+    ): UpdateInterface {
         $self = new self();
 
         $self->status = $status;
@@ -70,7 +73,7 @@ final class Update
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function getType(): array
     {

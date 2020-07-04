@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Document;
 
+use MeiliSearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -12,20 +13,31 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class PreDocumentDeletionEvent extends Event
 {
     /**
-     * @var array<string,mixed>
+     * @var Indexes
      */
     private $index;
 
-    public function __construct(array $index)
+    /**
+     * @var array<string,mixed>
+     */
+    private $document;
+
+    public function __construct(Indexes $index, array $document)
     {
         $this->index = $index;
+        $this->document = $document;
+    }
+
+    public function getIndex(): Indexes
+    {
+        return $this->index;
     }
 
     /**
      * @return array<string,mixed>
      */
-    public function getIndex(): array
+    public function getDocument(): array
     {
-        return $this->index;
+        return $this->document;
     }
 }

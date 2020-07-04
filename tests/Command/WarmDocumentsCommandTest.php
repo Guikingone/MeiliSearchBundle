@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Command;
 
-use Exception;
-use MeiliSearchBundle\Client\DocumentOrchestratorInterface;
 use MeiliSearchBundle\Command\WarmDocumentsCommand;
-use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\Exception\RuntimeException;
+use MeiliSearchBundle\Loader\LoaderInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -18,78 +17,44 @@ final class WarmDocumentsCommandTest extends TestCase
 {
     public function testCommandIsConfigured(): void
     {
-        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
-        $dataProvider = $this->createMock(DocumentDataProviderInterface::class);
+        $loader = $this->createMock(LoaderInterface::class);
 
-        $command = new WarmDocumentsCommand($documentOrchestrator, [$dataProvider]);
-
+        $command = new WarmDocumentsCommand($loader);
         static::assertSame('meili:warm-documents', $command->getName());
+        static::assertSame('Warm the documents defined in DocumentDataProviders', $command->getDescription());
     }
 
     public function testCommandCannotWarmWithEmptyProviders(): void
     {
-        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
+        $loader = $this->createMock(LoaderInterface::class);
+        $loader->expects(self::once())->method('load')->willThrowException(new RuntimeException('No providers found'));
 
-        $command = new WarmDocumentsCommand($documentOrchestrator, []);
-
+        $command = new WarmDocumentsCommand($loader);
         $tester = new CommandTester($command);
-        $tester->execute([
-            'index' => 'foo',
-        ]);
+        $tester->execute([]);
 
-        static::assertStringContainsString('No providers found, please be sure that you define at least a single provider', $tester->getDisplay());
-        static::assertSame(0, $tester->getStatusCode());
-    }
-
-    public function testCommandCannotWarmWithProvidersAndAnException(): void
-    {
-        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
-        $documentOrchestrator->expects(self::once())->method('addDocument')->willThrowException(new Exception('An error occurred'));
-
-        $dataProvider = $this->createMock(DocumentDataProviderInterface::class);
-        $dataProvider->expects(self::once())->method('support')->willReturn('foo');
-        $dataProvider->expects(self::once())->method('getDocument')->willReturn([
-            [
-                'id' => 'bar',
-                'key' => 'foo',
-            ],
-        ]);
-        $dataProvider->expects(self::once())->method('getPrimaryKey')->willReturn(null);
-
-        $command = new WarmDocumentsCommand($documentOrchestrator, [$dataProvider]);
-
-        $tester = new CommandTester($command);
-        $tester->execute([
-            'index' => 'foo',
-        ]);
-
-        static::assertStringContainsString('An error occurred when warming the documents, error: "An error occurred"', $tester->getDisplay());
         static::assertSame(1, $tester->getStatusCode());
+        static::assertStringContainsString(
+            '[ERROR] An error occurred during the documents warm process',
+            $tester->getDisplay()
+        );
+        static::assertStringContainsString('Error: No providers found', $tester->getDisplay());
     }
 
     public function testCommandCanWarmWithProviders(): void
     {
-        $documentOrchestrator = $this->createMock(DocumentOrchestratorInterface::class);
-        $documentOrchestrator->expects(self::once())->method('addDocument');
+        $loader = $this->createMock(LoaderInterface::class);
+        $loader->expects(self::once())->method('load');
 
-        $dataProvider = $this->createMock(DocumentDataProviderInterface::class);
-        $dataProvider->expects(self::once())->method('support')->willReturn('foo');
-        $dataProvider->expects(self::once())->method('getDocument')->willReturn([
-            [
-                'id' => 'bar',
-                'key' => 'foo',
-            ],
-        ]);
-        $dataProvider->expects(self::once())->method('getPrimaryKey')->willReturn(null);
-
-        $command = new WarmDocumentsCommand($documentOrchestrator, [$dataProvider]);
+        $command = new WarmDocumentsCommand($loader);
 
         $tester = new CommandTester($command);
-        $tester->execute([
-            'index' => 'foo',
-        ]);
+        $tester->execute([]);
 
-        static::assertStringContainsString('The documents have been imported, feel free to search them!', $tester->getDisplay());
         static::assertSame(0, $tester->getStatusCode());
+        static::assertStringContainsString(
+            'The documents have been imported, feel free to search them!',
+            $tester->getDisplay()
+        );
     }
 }

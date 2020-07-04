@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DataCollector;
 
-use MeiliSearchBundle\Client\InstanceProbeInterface;
-use MeiliSearchBundle\Client\TraceableDocumentOrchestrator;
-use MeiliSearchBundle\Client\TraceableIndexOrchestrator;
+use Countable;
+use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
+use function count;
+use function is_array;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -19,6 +22,12 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
     private const NAME = 'meili';
+    private const INDEXES = 'indexes';
+    private const CREATED_INDEXES = 'created_indexes';
+    private const DELETED_INDEXES = 'deleted_indexes';
+    private const FETCHED_INDEXES = 'fetched_indexes';
+    private const QUERIES = 'queries';
+    private const SYNONYMS = 'synonyms';
 
     /**
      * @var TraceableIndexOrchestrator
@@ -26,12 +35,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     private $indexOrchestrator;
 
     /**
-     * @var InstanceProbeInterface
-     */
-    private $instanceProbe;
-
-    /**
-     * @var TraceableDocumentOrchestrator
+     * @var TraceableDocumentEntryPoint
      */
     private $documentOrchestrator;
 
@@ -40,81 +44,96 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
      */
     private $searchEntryPoint;
 
+    /**
+     * @var TraceableSynonymsOrchestrator
+     */
+    private $synonymsOrchestrator;
+
     public function __construct(
-        InstanceProbeInterface $instanceProbe,
         TraceableIndexOrchestrator $indexOrchestrator,
-        TraceableDocumentOrchestrator $documentOrchestrator,
-        TraceableSearchEntryPoint $searchEntryPoint
+        TraceableDocumentEntryPoint $documentOrchestrator,
+        TraceableSearchEntryPoint $searchEntryPoint,
+        TraceableSynonymsOrchestrator $synonymsOrchestrator
     ) {
-        $this->instanceProbe = $instanceProbe;
         $this->indexOrchestrator = $indexOrchestrator;
         $this->documentOrchestrator = $documentOrchestrator;
         $this->searchEntryPoint = $searchEntryPoint;
+        $this->synonymsOrchestrator = $synonymsOrchestrator;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function collect(Request $request, Response $response)
+    public function collect(Request $request, Response $response): void
     {
     }
 
     /**
      * {@inheritdoc}
      */
-    public function lateCollect()
+    public function lateCollect(): void
     {
-        $this->data['system_info'] = $this->instanceProbe->getSystemInformations();
-        $this->data['indexes'] = $this->indexOrchestrator->getIndexes();
-        $this->data['queries'] = $this->searchEntryPoint->getSearch();
-        $this->data['created_indexes'] = $this->indexOrchestrator->getCreatedIndexes();
-        $this->data['deleted_indexes'] = $this->indexOrchestrator->getDeletedIndexes();
-        $this->data['fetched_indexes'] = $this->indexOrchestrator->getFetchedIndexes();
+        $this->data[self::INDEXES] = $this->indexOrchestrator->getIndexes();
+        $this->data[self::CREATED_INDEXES] = $this->indexOrchestrator->getCreatedIndexes();
+        $this->data[self::DELETED_INDEXES] = $this->indexOrchestrator->getDeletedIndexes();
+        $this->data[self::FETCHED_INDEXES] = $this->indexOrchestrator->getFetchedIndexes();
+        $this->data[self::QUERIES] = $this->searchEntryPoint->getSearch();
+        $this->data[self::SYNONYMS] = $this->synonymsOrchestrator->getData();
+    }
+
+    public function reset(): void
+    {
+        $this->data[self::INDEXES] = [];
+        $this->data[self::CREATED_INDEXES] = [];
+        $this->data[self::DELETED_INDEXES] = [];
+        $this->data[self::FETCHED_INDEXES] = [];
+        $this->data[self::QUERIES] = [];
+        $this->data[self::SYNONYMS] = [];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function reset()
-    {
-        $this->data = [];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
+    public function getName(): string
     {
         return self::NAME;
     }
 
-    public function getSystemInformations(): array
-    {
-        return $this->data['system_info'];
-    }
-
     public function getIndexes(): array
     {
-        return $this->data['indexes'];
+        return $this->data[self::INDEXES];
     }
 
     public function getCreatedIndexes(): array
     {
-        return $this->data['created_indexes'];
+        return $this->data[self::CREATED_INDEXES];
     }
 
     public function getDeletedIndexes(): array
     {
-        return $this->data['deleted_indexes'];
+        return $this->data[self::DELETED_INDEXES];
     }
 
     public function getFetchedIndexes(): array
     {
-        return $this->data['fetched_indexes'];
+        return $this->data[self::FETCHED_INDEXES];
+    }
+
+    public function getQueries(): array
+    {
+        return $this->data[self::QUERIES];
     }
 
     public function getQueriesCount(): int
     {
-        return \count($this->searchEntryPoint->getSearch());
+        return is_array($this->data[self::QUERIES]) || $this->data[self::QUERIES] instanceof Countable ? count($this->data[self::QUERIES]) : 0;
+    }
+
+    /**
+     * @return array<string,array>
+     */
+    public function getSynonyms(): array
+    {
+        return $this->data[self::SYNONYMS];
     }
 }

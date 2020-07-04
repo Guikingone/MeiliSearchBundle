@@ -25,9 +25,13 @@ jobs:
         env:
           update: true
 
-      # —— Composer️ —————————————————————————————————————————————————————————
+      # —— Composer️ —————————————————————————————————————————————————————
       - name: Validate composer.json and composer.lock
         run: composer validate
+
+      # —— Security ——————————————————————————————————————————————————————
+      - name: Symfony Security Checker
+        uses: symfonycorp/security-checker-action@v2
 
       - name: Get composer cache directory
         id: composer-cache
@@ -42,21 +46,17 @@ jobs:
 
       - name: Install Composer dependencies
         if: matrix.composer-dependencies == ''
-        run: composer update --no-suggest
+        run: composer update
 
       - name: Install Composer dependencies - Lowest
         if: matrix.composer-dependencies == 'lowest'
-        run: composer update --no-suggest --prefer-lowest
+        run: composer update --prefer-lowest
 
       # —— Style —————————————————————————————————————————————————————————
       - name: PHP-CS-FIXER
         uses: docker://oskarstark/php-cs-fixer-ga
         with:
           args: --dry-run .
-
-      # —— MeiliSearch ———————————————————————————————————————————————————
-      - name: MeiliSearch - Docker image
-        run: docker run -d -p 7700:7700 --name meili getmeili/meilisearch:latest ./meilisearch --no-analytics=true
 
       # —— PHPUnit ———————————————————————————————————————————————————————
       - name: PHPUnit

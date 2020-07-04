@@ -5,10 +5,23 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\DependencyInjection;
 
 use MeiliSearch\Client;
-use MeiliSearchBundle\Client\DocumentOrchestrator;
-use MeiliSearchBundle\Client\IndexOrchestrator;
-use MeiliSearchBundle\Client\SearchEntryPoint;
+use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
+use MeiliSearchBundle\Document\DocumentEntryPoint;
+use MeiliSearchBundle\Document\DocumentEntryPointInterface;
+use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Index\IndexOrchestrator;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\SynonymsOrchestrator;
+use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
+use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
+use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\DependencyInjection\MeiliSearchBundlePass;
+use MeiliSearchBundle\Search\SearchEntryPointInterface;
+use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
+use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
+use MeiliSearchBundle\Update\UpdateOrchestrator;
+use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -25,10 +38,34 @@ final class MeiliSearchBundlePassTest extends TestCase
 
         (new MeiliSearchBundlePass())->process($container);
 
-        static::assertTrue($container->hasDefinition('debug.meili_search.index_orchestrator'));
-        static::assertTrue($container->hasDefinition('debug.meili_search.document_orchestrator'));
-        static::assertTrue($container->hasDefinition('debug.meili_search.entry_point'));
-        static::assertTrue($container->hasDefinition('meili_search.data_collector'));
+        static::assertTrue($container->has(TraceableIndexOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableIndexOrchestrator::class)->getArgument(0));
+        static::assertSame(IndexOrchestratorInterface::class, $container->getDefinition(TraceableIndexOrchestrator::class)->getDecoratedService()[0]);
+
+        static::assertTrue($container->has(TraceableDocumentEntryPoint::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableDocumentEntryPoint::class)->getArgument(0));
+        static::assertSame(DocumentEntryPointInterface::class, $container->getDefinition(TraceableDocumentEntryPoint::class)->getDecoratedService()[0]);
+
+        static::assertTrue($container->has(TraceableSearchEntryPoint::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableSearchEntryPoint::class)->getArgument(0));
+        static::assertSame(SearchEntryPointInterface::class, $container->getDefinition(TraceableSearchEntryPoint::class)->getDecoratedService()[0]);
+
+        static::assertTrue($container->has(TraceableSynonymsOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableSynonymsOrchestrator::class)->getArgument(0));
+        static::assertSame(SynonymsOrchestratorInterface::class, $container->getDefinition(TraceableSynonymsOrchestrator::class)->getDecoratedService()[0]);
+
+        static::assertTrue($container->has(TraceableUpdateOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableUpdateOrchestrator::class)->getArgument(0));
+        static::assertSame(UpdateOrchestratorInterface::class, $container->getDefinition(TraceableUpdateOrchestrator::class)->getDecoratedService()[0]);
+
+        static::assertTrue($container->has(MeiliSearchBundleDataCollector::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(1));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(2));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(3));
+        static::assertTrue($container->getDefinition(MeiliSearchBundleDataCollector::class)->hasTag('data_collector'));
+        static::assertArrayHasKey('template', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]);
+        static::assertArrayHasKey('id', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]);
     }
 
     private function getContainer(): ContainerBuilder
@@ -36,16 +73,31 @@ final class MeiliSearchBundlePassTest extends TestCase
         $client = $this->createMock(Client::class);
 
         $container = new ContainerBuilder();
-        $container->setDefinition('meili_search.index_orchestrator', (new Definition(IndexOrchestrator::class, [
+        $container->setDefinition(IndexOrchestrator::class, (new Definition(IndexOrchestrator::class, [
             $client,
         ])));
-        $container->setDefinition('meili_search.document_orchestrator', (new Definition(DocumentOrchestrator::class, [
-            $client,
-        ])));
-        $container->setDefinition('meili_search.entry_point', (new Definition(SearchEntryPoint::class, [
-            new Reference('meili_search.index_orchestrator'),
-        ])));
+        $container->setAlias(IndexOrchestratorInterface::class, IndexOrchestrator::class);
 
-        return new ContainerBuilder();
+        $container->setDefinition(DocumentEntryPoint::class, (new Definition(DocumentEntryPoint::class, [
+            $client,
+        ])));
+        $container->setAlias(DocumentEntryPointInterface::class, DocumentEntryPoint::class);
+
+        $container->setDefinition(SynonymsOrchestrator::class, (new Definition(SynonymsOrchestrator::class, [
+            new Reference(IndexOrchestratorInterface::class),
+        ])));
+        $container->setAlias(SynonymsOrchestratorInterface::class, SynonymsOrchestrator::class);
+
+        $container->setDefinition(SearchEntryPoint::class, (new Definition(SearchEntryPoint::class, [
+            new Reference(IndexOrchestratorInterface::class),
+        ])));
+        $container->setAlias(SearchEntryPointInterface::class, SearchEntryPoint::class);
+
+        $container->setDefinition(UpdateOrchestrator::class, (new Definition(UpdateOrchestrator::class, [
+            $client,
+        ])));
+        $container->setAlias(UpdateOrchestratorInterface::class, UpdateOrchestrator::class);
+
+        return $container;
     }
 }

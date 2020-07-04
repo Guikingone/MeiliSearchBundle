@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Command;
 
 use Exception;
-use MeiliSearchBundle\Client\IndexOrchestratorInterface;
+use Generator;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Command\DeleteIndexCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -22,9 +24,14 @@ final class DeleteIndexCommandTest extends TestCase
         $command = new DeleteIndexCommand($orchestrator);
 
         static::assertSame('meili:delete-index', $command->getName());
+        static::assertTrue($command->getDefinition()->hasArgument('index'));
+        static::assertSame('Allow to delete an index', $command->getDescription());
     }
 
-    public function testCommandCannotDeleteInvalidIndex(): void
+    /**
+     * @dataProvider provideIndexes
+     */
+    public function testCommandCannotDeleteInvalidIndex(string $index): void
     {
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::once())->method('removeIndex')->willThrowException(new Exception('An error occurred'));
@@ -33,23 +40,38 @@ final class DeleteIndexCommandTest extends TestCase
 
         $tester = new CommandTester($command);
         $tester->execute([
-            'index' => 'foo',
+            'index' => $index,
         ]);
 
-        static::assertStringContainsString('An error occurred when trying to delete the index, error: "An error occurred"', $tester->getDisplay());
+        static::assertSame(1, $tester->getStatusCode());
+        static::assertStringContainsString(
+            '[ERROR] An error occurred when trying to delete the index',
+            $tester->getDisplay()
+        );
+        static::assertStringContainsString('Error: An error occurred', $tester->getDisplay());
     }
 
-    public function testCommandCanDeleteValidIndex(): void
+    /**
+     * @dataProvider provideIndexes
+     */
+    public function testCommandCanDeleteValidIndex(string $index): void
     {
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::once())->method('removeIndex')->with(self::equalTo($index));
 
         $command = new DeleteIndexCommand($orchestrator);
 
         $tester = new CommandTester($command);
         $tester->execute([
-            'index' => 'foo',
+            'index' => $index,
         ]);
 
-        static::assertStringContainsString('The index "foo" has been deleted', $tester->getDisplay());
+        static::assertSame(0, $tester->getStatusCode());
+        static::assertStringContainsString(sprintf('The index "%s" has been deleted', $index), $tester->getDisplay());
+    }
+
+    public function provideIndexes(): Generator
+    {
+        yield ['foo', 'bar', 'random'];
     }
 }

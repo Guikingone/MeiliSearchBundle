@@ -2,11 +2,31 @@
 
 This bundle allows you to use `Symfony/Messenger` in order to delay some actions.
 
-## Indexes
+Most of the MeiliSearch API actions can be performed thanks to a message, here's the full list:
 
-### Creating an index
+### Indexes
 
-Thanks to `AddIndexMessage`, you can easily submit a new index: 
+- [AddIndexMessage](../src/Messenger/AddIndexMessage.php)
+- [DeleteIndexMessage](../src/Messenger/DeleteIndexMessage.php)
+
+### Documents
+
+- [AddDocumentMessage](../src/Messenger/Document/AddDocumentMessage.php)
+- [DeleteDocumentMessage](../src/Messenger/Document/DeleteDocumentMessage.php)
+- [UpdateDocumentMessage](../src/Messenger/Document/UpdateDocumentMessage.php)
+
+### Synonyms
+
+- [ResetSynonymsMessage](../src/Messenger/Synonyms/ResetSynonymsMessage.php)
+- [UpdateSynonymsMessage](../src/Messenger/Synonyms/UpdateSynonymsMessage.php)
+
+## Usage
+
+### Indexes
+
+#### Creating an index
+
+Thanks to [AddIndexMessage](../src/Messenger/AddIndexMessage.php), you can easily submit a new index: 
 
 ```php
 <?php
@@ -16,7 +36,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 final class FooService
 {
-    public function action(MessageBusInterface $bus): void 
+    public function __invoke(MessageBusInterface $bus): void 
     {
         // Do some actions
 
@@ -25,9 +45,19 @@ final class FooService
 }
 ```
 
+#### Extra configuration
+
+The `AddIndexMessage` allows you to configure extra informations thanks to the third `$configuration` attribute:
+
+- **searchableAttributes**: An array of fields that can be used to trigger a search,
+by default, every attribute found in the document is "searchable".
+
+- **displayedAttributes**: An array of fields that are displayed for each matching documents,
+by default, every attribute found in the document is displayed in the search result.
+
 ### Deleting an index
 
-Thanks to `AddIndexMessage`, you can easily delete an index: 
+Thanks to [DeleteIndexMessage](../src/Messenger/DeleteIndexMessage.php), you can easily delete an index: 
 
 ```php
 <?php
@@ -37,7 +67,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 final class FooService
 {
-    public function action(MessageBusInterface $bus): void 
+    public function __invoke(MessageBusInterface $bus): void 
     {
         // Do some actions
 
@@ -50,17 +80,17 @@ final class FooService
 
 ### Creating a document
 
-Thanks to `AddDocumentMessage`, you can easily submit new documents in the desired index: 
+Thanks to [AddDocumentMessage](../src/Messenger/Document/AddDocumentMessage.php), you can easily submit new documents in the desired index: 
 
 ```php
 <?php
 
-use MeiliSearchBundle\Messenger\AddDocumentMessage;
+use MeiliSearchBundle\Messenger\Document\AddDocumentMessage;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final class FooService
 {
-    public function action(MessageBusInterface $bus): void 
+    public function __invoke(MessageBusInterface $bus): void 
     {
         // Do some actions
         $document = [
@@ -74,3 +104,86 @@ final class FooService
     }
 }
 ```
+
+### Deleting a document
+
+Thanks to [DeleteDocumentMessage](../src/Messenger/Document/DeleteDocumentMessage.php), you can easily delete a document: 
+
+```php
+<?php
+
+use MeiliSearchBundle\Messenger\Document\DeleteDocumentMessage;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+final class FooService
+{
+    public function __invoke(MessageBusInterface $bus): void 
+    {
+        // Do some actions
+
+        $bus->dispatch(new DeleteDocumentMessage('foo', 1));
+    }
+}
+```
+
+### Updating a document
+
+// TODO
+
+## Synonyms
+
+### Updating a set of synonyms
+
+Thanks to [UpdateSynonymsMessage](../src/Messenger/Synonyms/UpdateSynonymsMessage.php), you can update the synonyms of an index:
+
+```php
+<?php
+
+use MeiliSearchBundle\Messenger\Synonyms\UpdateSynonymsMessage;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+final class FooService
+{
+    public function __invoke(MessageBusInterface $bus): void 
+    {
+        $bus->dispatch(new UpdateSynonymsMessage('movies', [
+            'xmen' => ['logan', 'wolverine'],
+        ]));
+    }
+}
+```
+
+### Resetting the synonyms
+
+Thanks to [ResetSynonymsMessage](../src/Messenger/Synonyms/ResetSynonymsMessage.php), you can reset the synonyms of an index:
+
+```php
+<?php
+
+use MeiliSearchBundle\Messenger\Synonyms\ResetSynonymsMessage;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+final class FooService
+{
+    public function __invoke(MessageBusInterface $bus): void 
+    {
+        $bus->dispatch(new ResetSynonymsMessage('movies'));
+    }
+}
+```
+
+## Routing
+
+Each message defined by the bundle implements `MessageInterface`, 
+if you need to route every message to a specific transport, 
+here's the easiest way to do:
+
+```yaml
+framework:
+    messenger:
+        transports:
+            async: "%env(MESSENGER_TRANSPORT_DSN)%"
+
+        routing:
+            'MeiliSearchBundle\Messenger\MessageInterface':  async
+``` 

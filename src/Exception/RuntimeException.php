@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Exception;
 
+use RuntimeException as InternalRuntimeException;
 use Throwable;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class RuntimeException extends \RuntimeException implements ExceptionInterface
+final class RuntimeException extends InternalRuntimeException implements ExceptionInterface
 {
     /**
      * @var string

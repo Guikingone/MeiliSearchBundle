@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event;
 
-use MeiliSearchBundle\Search\Search;
+use MeiliSearchBundle\Search\SearchResult;
 use MeiliSearchBundle\Event\PostSearchEvent;
 use PHPUnit\Framework\TestCase;
 
@@ -15,8 +15,8 @@ final class PostSearchEventTest extends TestCase
 {
     public function testResultIsAccessible(): void
     {
-        $event = new PostSearchEvent(Search::create([], 0, 0, 0, 0, 0, 'foo'));
+        $event = new PostSearchEvent(SearchResult::create([], 0, 0, 0, false, 0, 'foo'));
 
-        static::assertInstanceOf(Search::class, $event->getResult());
+        static::assertInstanceOf(SearchResult::class, $event->getResult());
     }
 }

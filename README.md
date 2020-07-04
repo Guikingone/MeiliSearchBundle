@@ -1,8 +1,11 @@
 # MeiliSearchBundle
 
-MeiliSearchBundle is an opiniated Symfony bundle which configure and enable [MeiliSearch]('https://github.com/meilisearch/MeiliSearch').
+![MeiliSearchBundle CI](https://github.com/Guikingone/MeiliSearchBundle/workflows/MeiliSearchBundle%20CI/badge.svg?branch=master)
+![MeiliSearchBundle CI - Config](https://github.com/Guikingone/MeiliSearchBundle/workflows/MeiliSearchBundle%20CI%20-%20Config/badge.svg?branch=master)
 
-The core logic act as a wrapper around the official [MeiliSearch PHP SDK]('https://github.com/meilisearch/meilisearch-php').
+MeiliSearchBundle is an opiniated Symfony bundle which configure and enable [MeiliSearch](https://github.com/meilisearch/MeiliSearch).
+
+The core logic act as a wrapper around the official [MeiliSearch PHP SDK](https://github.com/meilisearch/meilisearch-php).
 
 ## Installation
 
@@ -30,7 +33,7 @@ Once done, just add a `config/packages/meili_search.yaml`:
 ```yaml
 # config/packages/meili_search.yaml
 meili_search:
-    host: '%env(MEILI_HOST)%'
+    host: '%env(MEILI_HOST)%' # Default to http://127.0.0.1
     api_key: '%env(MEILI_API_KEY)%' # Optional but recommended in development mode
 ```
 

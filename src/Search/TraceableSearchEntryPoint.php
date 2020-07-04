@@ -17,7 +17,7 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
     /**
      * @var array<string,array>
      */
-    private $search = [];
+    private $data = [];
 
     public function __construct(SearchEntryPointInterface $searchEntryPoint)
     {
@@ -27,14 +27,15 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
     /**
      * {@inheritdoc}
      */
-    public function search(string $index, string $query, array $options = []): SearchInterface
+    public function search(string $index, string $query, array $options = []): SearchResultInterface
     {
         $result = $this->searchEntryPoint->search($index, $query, $options);
 
-        $this->search[$index] = [
+        $this->data[$index][] = [
+            'index' => $index,
             'query' => $result->getQuery(),
             'options' => $options,
-            'result' => $result,
+            'result' => $result->toArray(),
         ];
 
         return $result;
@@ -45,6 +46,6 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
      */
     public function getSearch(): array
     {
-        return $this->search;
+        return $this->data;
     }
 }

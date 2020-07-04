@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Messenger;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class DeleteIndexMessage
+final class DeleteIndexMessage implements MessageInterface
 {
     /**
      * @var string

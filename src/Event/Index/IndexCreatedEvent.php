@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Index;
+use MeiliSearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -13,27 +13,34 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class IndexCreatedEvent extends Event
 {
     /**
-     * @var <string, mixed>
+     * @var array<string, mixed>
      */
     private $config;
 
     /**
-     * @var Index
+     * @var Indexes
      */
     private $index;
 
-    public function __construct(array $config, Index $index)
+    /**
+     * @param array<string,mixed> $config
+     * @param Indexes             $index
+     */
+    public function __construct(array $config, Indexes $index)
     {
         $this->config = $config;
         $this->index = $index;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getConfig(): array
     {
         return $this->config;
     }
 
-    public function getIndex(): Index
+    public function getIndex(): Indexes
     {
         return $this->index;
     }
