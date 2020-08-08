@@ -87,6 +87,7 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->hasAlias(IndexOrchestratorInterface::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(IndexOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(IndexOrchestrator::class)->getArgument(1));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexOrchestrator::class)->getArgument(2));
         static::assertTrue($container->getDefinition(IndexOrchestrator::class)->hasTag('container.preload'));
         static::assertNotEmpty($container->getDefinition(IndexOrchestrator::class)->getArguments());
         static::assertArrayHasKey('class', $container->getDefinition(IndexOrchestrator::class)->getTag('container.preload')[0]);

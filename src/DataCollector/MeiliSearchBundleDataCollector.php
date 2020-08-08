@@ -7,12 +7,14 @@ namespace MeiliSearchBundle\DataCollector;
 use Countable;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
+use Throwable;
 use function count;
 use function is_array;
 
@@ -27,12 +29,18 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     private const DELETED_INDEXES = 'deleted_indexes';
     private const FETCHED_INDEXES = 'fetched_indexes';
     private const QUERIES = 'queries';
+    private const SETTINGS = 'settings';
     private const SYNONYMS = 'synonyms';
 
     /**
      * @var TraceableIndexOrchestrator
      */
     private $indexOrchestrator;
+
+    /**
+     * @var TraceableIndexSettingsOrchestrator
+     */
+    private $indexSettingsOrchestrator;
 
     /**
      * @var TraceableDocumentEntryPoint
@@ -51,11 +59,13 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
 
     public function __construct(
         TraceableIndexOrchestrator $indexOrchestrator,
+        TraceableIndexSettingsOrchestrator $indexSettingsOrchestrator,
         TraceableDocumentEntryPoint $documentOrchestrator,
         TraceableSearchEntryPoint $searchEntryPoint,
         TraceableSynonymsOrchestrator $synonymsOrchestrator
     ) {
         $this->indexOrchestrator = $indexOrchestrator;
+        $this->indexSettingsOrchestrator = $indexSettingsOrchestrator;
         $this->documentOrchestrator = $documentOrchestrator;
         $this->searchEntryPoint = $searchEntryPoint;
         $this->synonymsOrchestrator = $synonymsOrchestrator;
@@ -64,7 +74,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     /**
      * {@inheritdoc}
      */
-    public function collect(Request $request, Response $response)
+    public function collect(Request $request, Response $response, Throwable $exception = null)
     {
     }
 
@@ -74,6 +84,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function lateCollect(): void
     {
         $this->data[self::INDEXES] = $this->indexOrchestrator->getIndexes();
+        $this->data[self::SETTINGS] = $this->indexSettingsOrchestrator->getData();
         $this->data[self::CREATED_INDEXES] = $this->indexOrchestrator->getCreatedIndexes();
         $this->data[self::DELETED_INDEXES] = $this->indexOrchestrator->getDeletedIndexes();
         $this->data[self::FETCHED_INDEXES] = $this->indexOrchestrator->getFetchedIndexes();
@@ -84,6 +95,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function reset(): void
     {
         $this->data[self::INDEXES] = [];
+        $this->data[self::SETTINGS] = [];
         $this->data[self::CREATED_INDEXES] = [];
         $this->data[self::DELETED_INDEXES] = [];
         $this->data[self::FETCHED_INDEXES] = [];
@@ -119,6 +131,9 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
         return $this->data[self::FETCHED_INDEXES];
     }
 
+    /**
+     * @return array<string,array>
+     */
     public function getQueries(): array
     {
         return $this->data[self::QUERIES];
@@ -135,5 +150,13 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function getSynonyms(): array
     {
         return $this->data[self::SYNONYMS];
+    }
+
+    /**
+     * @return array<string,array>
+     */
+    public function getSettings(): array
+    {
+        return $this->data[self::SETTINGS];
     }
 }

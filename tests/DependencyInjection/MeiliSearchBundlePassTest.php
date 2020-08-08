@@ -11,9 +11,12 @@ use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
+use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
 use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\DependencyInjection\MeiliSearchBundlePass;
@@ -41,6 +44,10 @@ final class MeiliSearchBundlePassTest extends TestCase
         static::assertTrue($container->has('.debug.'.TraceableIndexOrchestrator::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->getArgument(0));
         static::assertSame(IndexOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->getDecoratedService()[0]);
+
+        static::assertTrue($container->has('.debug.'.TraceableIndexSettingsOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableIndexSettingsOrchestrator::class)->getArgument(0));
+        static::assertSame(IndexSettingsOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableIndexSettingsOrchestrator::class)->getDecoratedService()[0]);
 
         static::assertTrue($container->has('.debug.'.TraceableDocumentEntryPoint::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getArgument(0));
@@ -77,6 +84,11 @@ final class MeiliSearchBundlePassTest extends TestCase
             $client,
         ])));
         $container->setAlias(IndexOrchestratorInterface::class, IndexOrchestrator::class);
+
+        $container->setDefinition(IndexSettingsOrchestrator::class, (new Definition(IndexSettingsOrchestrator::class, [
+            $client,
+        ])));
+        $container->setAlias(IndexSettingsOrchestratorInterface::class, IndexSettingsOrchestrator::class);
 
         $container->setDefinition(DocumentEntryPoint::class, (new Definition(DocumentEntryPoint::class, [
             $client,

@@ -15,7 +15,7 @@ use function sprintf;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class ExceptionSubscriber implements EventSubscriberInterface
+final class ExceptionSubscriber implements EventSubscriberInterface, MeiliSearchEventSubscriberInterface
 {
     /**
      * @var LoggerInterface
@@ -30,7 +30,7 @@ final class ExceptionSubscriber implements EventSubscriberInterface
     /**
      * {@inheritdoc}
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::EXCEPTION => 'onException',
@@ -44,7 +44,7 @@ final class ExceptionSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->logger->critical(sprintf('[MeiliSearchBundle] An error occurred: %s', $exception->getMessage()), [
+        $this->logger->critical(sprintf(self::LOG_MASK, sprintf('An error occurred: %s', $exception->getMessage())), [
             'context' => $exception->getContext(),
             'code' => $exception->getCode(),
             'trace' => $exception->getTrace(),

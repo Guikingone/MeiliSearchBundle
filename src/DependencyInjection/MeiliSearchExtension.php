@@ -94,10 +94,10 @@ final class MeiliSearchExtension extends Extension
         $this->registerSerializer($container);
         $this->registerMessengerHandler($container);
         $this->registerTwig($container);
-        $this->configureIndexes($container, $config);
         $this->registerSearchEntryPoint($container, $config);
         $this->registerSubscribers($container);
         $this->registerCommands($container, $config);
+        $this->configureIndexes($container, $config);
 
         $container->registerForAutoconfiguration(DocumentDataProviderInterface::class)
             ->addTag(self::DOCUMENT_PROVIDER_IDENTIFIER)
@@ -140,7 +140,6 @@ final class MeiliSearchExtension extends Extension
                 new Reference(EventDispatcherInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
-            ->addTag('meili_search.index_orchestrator')
             ->addTag('container.preload', [
                 'class' => IndexOrchestrator::class,
             ])
@@ -393,12 +392,18 @@ final class MeiliSearchExtension extends Extension
                     new Reference(CacheItemPoolInterface::class),
                     new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 ])
+                ->addTag('container.preload', [
+                    'class' => SearchResultCacheOrchestrator::class,
+                ])
             ;
 
             $container->register(CachedSearchEntryPoint::class, CachedSearchEntryPoint::class)
                 ->setArguments([
                     new Reference(SearchResultCacheOrchestrator::class),
                     new Reference(SearchEntryPoint::class),
+                ])
+                ->addTag('container.preload', [
+                    'class' => CachedSearchEntryPoint::class,
                 ])
             ;
 
