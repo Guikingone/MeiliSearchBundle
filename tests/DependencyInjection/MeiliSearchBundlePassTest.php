@@ -38,25 +38,25 @@ final class MeiliSearchBundlePassTest extends TestCase
 
         (new MeiliSearchBundlePass())->process($container);
 
-        static::assertTrue($container->has(TraceableIndexOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableIndexOrchestrator::class)->getArgument(0));
-        static::assertSame(IndexOrchestratorInterface::class, $container->getDefinition(TraceableIndexOrchestrator::class)->getDecoratedService()[0]);
+        static::assertTrue($container->has('.debug.'.TraceableIndexOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->getArgument(0));
+        static::assertSame(IndexOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->getDecoratedService()[0]);
 
-        static::assertTrue($container->has(TraceableDocumentEntryPoint::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableDocumentEntryPoint::class)->getArgument(0));
-        static::assertSame(DocumentEntryPointInterface::class, $container->getDefinition(TraceableDocumentEntryPoint::class)->getDecoratedService()[0]);
+        static::assertTrue($container->has('.debug.'.TraceableDocumentEntryPoint::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getArgument(0));
+        static::assertSame(DocumentEntryPointInterface::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getDecoratedService()[0]);
 
-        static::assertTrue($container->has(TraceableSearchEntryPoint::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableSearchEntryPoint::class)->getArgument(0));
-        static::assertSame(SearchEntryPointInterface::class, $container->getDefinition(TraceableSearchEntryPoint::class)->getDecoratedService()[0]);
+        static::assertTrue($container->has('.debug.'.TraceableSearchEntryPoint::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableSearchEntryPoint::class)->getArgument(0));
+        static::assertSame(SearchEntryPointInterface::class, $container->getDefinition('.debug.'.TraceableSearchEntryPoint::class)->getDecoratedService()[0]);
 
-        static::assertTrue($container->has(TraceableSynonymsOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableSynonymsOrchestrator::class)->getArgument(0));
-        static::assertSame(SynonymsOrchestratorInterface::class, $container->getDefinition(TraceableSynonymsOrchestrator::class)->getDecoratedService()[0]);
+        static::assertTrue($container->has('.debug.'.TraceableSynonymsOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableSynonymsOrchestrator::class)->getArgument(0));
+        static::assertSame(SynonymsOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableSynonymsOrchestrator::class)->getDecoratedService()[0]);
 
-        static::assertTrue($container->has(TraceableUpdateOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(TraceableUpdateOrchestrator::class)->getArgument(0));
-        static::assertSame(UpdateOrchestratorInterface::class, $container->getDefinition(TraceableUpdateOrchestrator::class)->getDecoratedService()[0]);
+        static::assertTrue($container->has('.debug.'.TraceableUpdateOrchestrator::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableUpdateOrchestrator::class)->getArgument(0));
+        static::assertSame(UpdateOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableUpdateOrchestrator::class)->getDecoratedService()[0]);
 
         static::assertTrue($container->has(MeiliSearchBundleDataCollector::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(0));

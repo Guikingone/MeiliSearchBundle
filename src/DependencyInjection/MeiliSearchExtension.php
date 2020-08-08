@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DependencyInjection;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use MeiliSearch\Client;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReader;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
@@ -215,7 +214,7 @@ final class MeiliSearchExtension extends Extension
 
     private function registerDoctrineSubscribers(ContainerBuilder $container): void
     {
-        if (!$container->has(AnnotationReader::class)) {
+        if (!$container->has('annotation_reader')) {
             return;
         }
 

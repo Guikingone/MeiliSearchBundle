@@ -62,7 +62,7 @@ final class MeiliSearchExtensionTest extends TestCase
         $extension = new MeiliSearchExtension();
 
         $container = new ContainerBuilder();
-        $container->setDefinition('annotations.reader', new Definition(AnnotationReader::class));
+        $container->setDefinition('annotation_reader', new Definition(AnnotationReader::class));
         $extension->load([], $container);
 
         static::assertTrue($container->hasDefinition(Client::class));
@@ -242,7 +242,6 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(WarmDocumentsCommand::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(WarmDocumentsCommand::class)->getArgument(0));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(WarmDocumentsCommand::class)->getArgument(1));
         static::assertTrue($container->getDefinition(WarmDocumentsCommand::class)->hasTag('console.command'));
         static::assertTrue($container->getDefinition(WarmDocumentsCommand::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(WarmDocumentsCommand::class)->getTag('container.preload')[0]);
@@ -270,7 +269,7 @@ final class MeiliSearchExtensionTest extends TestCase
         $extension = new MeiliSearchExtension();
 
         $container = new ContainerBuilder();
-        $container->setDefinition('annotations_reader', new Definition(AnnotationReader::class));
+        $container->setDefinition('annotation_reader', new Definition(AnnotationReader::class));
         $container->setDefinition(MessageBusInterface::class, new Definition(MessageBusInterface::class));
         $extension->load([], $container);
 

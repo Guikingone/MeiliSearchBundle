@@ -43,7 +43,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
     private function registerTraceableIndexOrchestrator(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition(IndexOrchestratorInterface::class)) {
+        if (!$container->hasAlias(IndexOrchestratorInterface::class)) {
             return;
         }
 
@@ -57,7 +57,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
     private function registerTraceableDocumentOrchestrator(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition(DocumentEntryPointInterface::class)) {
+        if (!$container->hasAlias(DocumentEntryPointInterface::class)) {
             return;
         }
 
@@ -71,7 +71,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
     private function registerTraceableSearchEntryPoint(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition(SearchEntryPointInterface::class)) {
+        if (!$container->hasAlias(SearchEntryPointInterface::class)) {
             return;
         }
 
@@ -85,7 +85,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
     private function registerTraceableSynonymsOrchestrator(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition(SynonymsOrchestratorInterface::class)) {
+        if (!$container->hasAlias(SynonymsOrchestratorInterface::class)) {
             return;
         }
 
@@ -99,7 +99,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
     private function registerTraceableUpdateOrchestrator(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition(UpdateOrchestratorInterface::class)) {
+        if (!$container->hasAlias(UpdateOrchestratorInterface::class)) {
             return;
         }
 
