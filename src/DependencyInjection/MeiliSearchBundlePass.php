@@ -25,7 +25,8 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 final class MeiliSearchBundlePass implements CompilerPassInterface
 {
-    private const INNER = 'inner';
+    private const DEBUG = '.debug.';
+    private const INNER = '.inner';
 
     /**
      * {@inheritdoc}
@@ -42,51 +43,71 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
     private function registerTraceableIndexOrchestrator(ContainerBuilder $container): void
     {
-        $container->register(TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
+        if (!$container->hasDefinition(IndexOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
             ->setArguments([
-                new Reference(IndexOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.IndexOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+            ->setDecoratedService(IndexOrchestratorInterface::class)
         ;
     }
 
     private function registerTraceableDocumentOrchestrator(ContainerBuilder $container): void
     {
-        $container->register(TraceableDocumentEntryPoint::class, TraceableDocumentEntryPoint::class)
+        if (!$container->hasDefinition(DocumentEntryPointInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableDocumentEntryPoint::class, TraceableDocumentEntryPoint::class)
             ->setArguments([
-                new Reference(DocumentEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.DocumentEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(DocumentEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+            ->setDecoratedService(DocumentEntryPointInterface::class)
         ;
     }
 
     private function registerTraceableSearchEntryPoint(ContainerBuilder $container): void
     {
-        $container->register(TraceableSearchEntryPoint::class, TraceableSearchEntryPoint::class)
+        if (!$container->hasDefinition(SearchEntryPointInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableSearchEntryPoint::class, TraceableSearchEntryPoint::class)
             ->setArguments([
-                new Reference(SearchEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.SearchEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(SearchEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+            ->setDecoratedService(SearchEntryPointInterface::class)
         ;
     }
 
     private function registerTraceableSynonymsOrchestrator(ContainerBuilder $container): void
     {
-        $container->register(TraceableSynonymsOrchestrator::class, TraceableSynonymsOrchestrator::class)
+        if (!$container->hasDefinition(SynonymsOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableSynonymsOrchestrator::class, TraceableSynonymsOrchestrator::class)
             ->setArguments([
-                new Reference(SynonymsOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.SynonymsOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(SynonymsOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+            ->setDecoratedService(SynonymsOrchestratorInterface::class)
         ;
     }
 
     private function registerTraceableUpdateOrchestrator(ContainerBuilder $container): void
     {
-        $container->register(TraceableUpdateOrchestrator::class, TraceableUpdateOrchestrator::class)
+        if (!$container->hasDefinition(UpdateOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableUpdateOrchestrator::class, TraceableUpdateOrchestrator::class)
             ->setArguments([
-                new Reference(UpdateOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.UpdateOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(UpdateOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+            ->setDecoratedService(UpdateOrchestratorInterface::class)
         ;
     }
 
@@ -94,14 +115,15 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
     {
         $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
             ->setArguments([
-                new Reference(TraceableIndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableIndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->addTag('data_collector', [
-                'template' => 'data_collector.html.twig',
-                'id'       => 'app.meili_search_collector',
+                'template' => '@MeiliSearch/Collector/data_collector.html.twig',
+                'id'       => 'meili_search',
+                'priority' => 255,
             ])
         ;
     }

@@ -16,12 +16,12 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 use function count;
 use function is_array;
 
-/**
+/**s
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private const NAME = 'meili';
+    private const NAME = 'meili_search';
     private const INDEXES = 'indexes';
     private const CREATED_INDEXES = 'created_indexes';
     private const DELETED_INDEXES = 'deleted_indexes';
@@ -64,7 +64,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     /**
      * {@inheritdoc}
      */
-    public function collect(Request $request, Response $response): void
+    public function collect(Request $request, Response $response)
     {
     }
 

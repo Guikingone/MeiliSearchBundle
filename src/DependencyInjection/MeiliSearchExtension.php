@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DependencyInjection;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use MeiliSearch\Client;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReader;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
@@ -57,6 +58,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function array_key_exists;
@@ -135,8 +138,10 @@ final class MeiliSearchExtension extends Extension
         $container->register(IndexOrchestrator::class, IndexOrchestrator::class)
             ->setArguments([
                 new Reference(Client::class),
+                new Reference(EventDispatcherInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
+            ->addTag('meili_search.index_orchestrator')
             ->addTag('container.preload', [
                 'class' => IndexOrchestrator::class,
             ])
@@ -195,7 +200,7 @@ final class MeiliSearchExtension extends Extension
     {
         $container->register(DocumentLoader::class, DocumentLoader::class)
             ->setArguments([
-                new Reference(DocumentEntryPointInterface::class),
+                new Reference(DocumentEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new TaggedIteratorArgument(self::DOCUMENT_PROVIDER_IDENTIFIER),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
@@ -210,7 +215,7 @@ final class MeiliSearchExtension extends Extension
 
     private function registerDoctrineSubscribers(ContainerBuilder $container): void
     {
-        if (!$container->has('annotations.reader')) {
+        if (!$container->has(AnnotationReader::class)) {
             return;
         }
 
@@ -287,8 +292,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(WarmDocumentsCommand::class, WarmDocumentsCommand::class)
             ->setArguments([
-                new Reference(self::LOADER_LIST['document']),
-                new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference(DocumentLoader::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->addTag('console.command')
             ->addTag('container.preload', [
@@ -299,11 +303,15 @@ final class MeiliSearchExtension extends Extension
 
     private function registerSerializer(ContainerBuilder $container): void
     {
+        if (!$container->has(DocumentReader::class)) {
+            return;
+        }
+
         $container->register(DocumentNormalizer::class, DocumentNormalizer::class)
             ->setArguments([
                 new Reference(DocumentReader::class),
-                new Reference('serializer.object_normalizer'),
-                new Reference('property_accessor'),
+                new Reference(ObjectNormalizer::class),
+                new Reference(PropertyAccessorInterface::class),
             ])
             ->addTag('serializer.normalizer')
             ->addTag('container.preload', [
