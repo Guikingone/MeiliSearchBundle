@@ -1,7 +1,7 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block toolbar %}
-    {% set indexes, queriesCount = collector.indexes, collector.queriesCount() %}
+    {% set indexes, queriesCount = collector.getIndexes(), collector.queriesCount() %}
 
     {% set icon %}
         {{ include('@MeiliSearch/Collector/logo.svg') }}
