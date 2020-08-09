@@ -35,11 +35,6 @@ final class IndexMetadata
     private $stopWords;
 
     /**
-     * @var bool
-     */
-    private $acceptNewFields;
-
-    /**
      * @var string|null
      */
     private $distinctAttribute;
@@ -65,7 +60,6 @@ final class IndexMetadata
         ?string $primaryKey = null,
         array $rankingRules = [],
         array $stopWords = [],
-        bool $acceptNewFields = true,
         ?string $distinctAttribute = null,
         array $facetedAttributes = [],
         array $searchableAttributes = [],
@@ -76,7 +70,6 @@ final class IndexMetadata
         $this->primaryKey = $primaryKey;
         $this->rankingRules = $rankingRules;
         $this->stopWords = $stopWords;
-        $this->acceptNewFields = $acceptNewFields;
         $this->distinctAttribute = $distinctAttribute;
         $this->facetedAttributes = $facetedAttributes;
         $this->searchableAttributes = $searchableAttributes;
@@ -112,11 +105,6 @@ final class IndexMetadata
     public function getStopWords(): array
     {
         return $this->stopWords;
-    }
-
-    public function acceptNewFields(): bool
-    {
-        return $this->acceptNewFields;
     }
 
     public function getDistinctAttribute(): ?string

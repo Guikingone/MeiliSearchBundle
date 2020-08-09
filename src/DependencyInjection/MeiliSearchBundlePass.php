@@ -6,6 +6,7 @@ namespace MeiliSearchBundle\DependencyInjection;
 
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
@@ -36,12 +37,12 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $this->registerTraceableIndexOrchestrator($container);
-        $this->registerTraceableIndexSettingsOrchestrator($container);
-        $this->registerTraceableDocumentOrchestrator($container);
-        $this->registerTraceableSearchEntryPoint($container);
-        $this->registerTraceableSynonymsOrchestrator($container);
-        $this->registerTraceableUpdateOrchestrator($container);
-        $this->registerDataCollector($container);
+        //$this->registerTraceableIndexSettingsOrchestrator($container);
+        //$this->registerTraceableDocumentOrchestrator($container);
+        //$this->registerTraceableSearchEntryPoint($container);
+        //$this->registerTraceableSynonymsOrchestrator($container);
+        //$this->registerTraceableUpdateOrchestrator($container);
+        //$this->registerDataCollector($container);
     }
 
     private function registerTraceableIndexOrchestrator(ContainerBuilder $container): void
@@ -52,9 +53,10 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
         $container->register(self::DEBUG.TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
             ->setArguments([
-                new Reference(self::DEBUG.IndexOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(IndexOrchestratorInterface::class)
+            ->setDecoratedService(IndexOrchestrator::class)
+            ->setPublic(false)
         ;
     }
 
@@ -69,6 +71,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
                 new Reference(self::DEBUG.IndexSettingsOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setDecoratedService(IndexSettingsOrchestratorInterface::class)
+            ->setPublic(false)
         ;
     }
 
@@ -83,6 +86,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
                 new Reference(self::DEBUG.DocumentEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setDecoratedService(DocumentEntryPointInterface::class)
+            ->setPublic(false)
         ;
     }
 
@@ -97,6 +101,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
                 new Reference(self::DEBUG.SearchEntryPointInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setDecoratedService(SearchEntryPointInterface::class)
+            ->setPublic(false)
         ;
     }
 
@@ -111,6 +116,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
                 new Reference(self::DEBUG.SynonymsOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setDecoratedService(SynonymsOrchestratorInterface::class)
+            ->setPublic(false)
         ;
     }
 
@@ -125,6 +131,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
                 new Reference(self::DEBUG.UpdateOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setDecoratedService(UpdateOrchestratorInterface::class)
+            ->setPublic(false)
         ;
     }
 
@@ -138,9 +145,10 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
                 new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
+            ->setPublic(false)
             ->addTag('data_collector', [
                 'template' => '@MeiliSearch/Collector/data_collector.html.twig',
-                'id'       => 'meili_search',
+                'id'       => 'meilisearch',
                 'priority' => 255,
             ])
         ;

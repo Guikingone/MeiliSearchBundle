@@ -66,18 +66,26 @@ final class MeiliSearchExtensionTest extends TestCase
         $extension->load([], $container);
 
         static::assertTrue($container->hasDefinition(Client::class));
-        static::assertTrue($container->getDefinition(Client::class)->hasTag('container.preload'));
         static::assertNotEmpty($container->getDefinition(Client::class)->getArguments());
         static::assertSame('http://127.0.0.1', $container->getDefinition(Client::class)->getArgument(0));
         static::assertNull($container->getDefinition(Client::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(Client::class)->getArgument(2));
+        static::assertFalse($container->getDefinition(Client::class)->isPublic());
+        static::assertTrue($container->getDefinition(Client::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(Client::class)->getTag('container.preload')[0]);
         static::assertSame(Client::class, $container->getDefinition(Client::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(IndexMetadataRegistry::class));
+        static::assertFalse($container->getDefinition(IndexMetadataRegistry::class)->isPublic());
+        static::assertTrue($container->getDefinition(IndexMetadataRegistry::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]);
+        static::assertSame(IndexMetadataRegistry::class, $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]['class']);
 
         static::assertTrue($container->hasDefinition(ResultBuilder::class));
         static::assertTrue($container->hasAlias(ResultBuilderInterface::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(ResultBuilder::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(ResultBuilder::class)->getArgument(1));
+        static::assertFalse($container->getDefinition(ResultBuilder::class)->isPublic());
         static::assertTrue($container->getDefinition(ResultBuilder::class)->hasTag('container.preload'));
         static::assertNotEmpty($container->getDefinition(ResultBuilder::class)->getArguments());
         static::assertArrayHasKey('class', $container->getDefinition(ResultBuilder::class)->getTag('container.preload')[0]);
@@ -88,6 +96,7 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition(IndexOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(IndexOrchestrator::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(IndexOrchestrator::class)->getArgument(2));
+        static::assertFalse($container->getDefinition(IndexOrchestrator::class)->isPublic());
         static::assertTrue($container->getDefinition(IndexOrchestrator::class)->hasTag('container.preload'));
         static::assertNotEmpty($container->getDefinition(IndexOrchestrator::class)->getArguments());
         static::assertArrayHasKey('class', $container->getDefinition(IndexOrchestrator::class)->getTag('container.preload')[0]);

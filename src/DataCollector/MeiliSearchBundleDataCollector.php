@@ -18,12 +18,12 @@ use Throwable;
 use function count;
 use function is_array;
 
-/**s
+/**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private const NAME = 'meili_search';
+    private const NAME = 'meilisearch';
     private const INDEXES = 'indexes';
     private const CREATED_INDEXES = 'created_indexes';
     private const DELETED_INDEXES = 'deleted_indexes';
