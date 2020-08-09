@@ -21,7 +21,6 @@ final class IndexMetadataTest extends TestCase
         static::assertSame('id', $metadata->getPrimaryKey());
         static::assertEmpty($metadata->getRankingRules());
         static::assertEmpty($metadata->getStopWords());
-        static::assertTrue($metadata->acceptNewFields());
         static::assertEmpty($metadata->getFacetedAttributes());
         static::assertEmpty($metadata->getSearchableAttributes());
         static::assertEmpty($metadata->getDisplayedAttributes());

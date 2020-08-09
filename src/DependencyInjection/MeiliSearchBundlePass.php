@@ -37,8 +37,8 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $this->registerTraceableIndexOrchestrator($container);
-        //$this->registerTraceableIndexSettingsOrchestrator($container);
-        //$this->registerTraceableDocumentOrchestrator($container);
+        $this->registerTraceableIndexSettingsOrchestrator($container);
+        $this->registerTraceableDocumentOrchestrator($container);
         //$this->registerTraceableSearchEntryPoint($container);
         //$this->registerTraceableSynonymsOrchestrator($container);
         //$this->registerTraceableUpdateOrchestrator($container);
@@ -53,10 +53,13 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
 
         $container->register(self::DEBUG.TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
             ->setArguments([
-                new Reference(IndexOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.IndexOrchestratorInterface::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
-            ->setDecoratedService(IndexOrchestrator::class)
+            ->setDecoratedService(IndexOrchestratorInterface::class)
             ->setPublic(false)
+            ->addTag('kernel.reset', [
+                'method' => 'reset',
+            ])
         ;
     }
 
@@ -72,6 +75,9 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
             ])
             ->setDecoratedService(IndexSettingsOrchestratorInterface::class)
             ->setPublic(false)
+            ->addTag('kernel.reset', [
+                'method' => 'reset',
+            ])
         ;
     }
 
@@ -87,6 +93,9 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
             ])
             ->setDecoratedService(DocumentEntryPointInterface::class)
             ->setPublic(false)
+            ->addTag('kernel.reset', [
+                'method' => 'reset',
+            ])
         ;
     }
 
@@ -102,6 +111,9 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
             ])
             ->setDecoratedService(SearchEntryPointInterface::class)
             ->setPublic(false)
+            ->addTag('kernel.reset', [
+                'method' => 'reset',
+            ])
         ;
     }
 
@@ -117,6 +129,9 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
             ])
             ->setDecoratedService(SynonymsOrchestratorInterface::class)
             ->setPublic(false)
+            ->addTag('kernel.reset', [
+                'method' => 'reset',
+            ])
         ;
     }
 
@@ -132,6 +147,9 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
             ])
             ->setDecoratedService(UpdateOrchestratorInterface::class)
             ->setPublic(false)
+            ->addTag('kernel.reset', [
+                'method' => 'reset',
+            ])
         ;
     }
 

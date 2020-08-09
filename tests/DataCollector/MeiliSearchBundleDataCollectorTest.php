@@ -47,7 +47,7 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
             $traceableSynonymsOrchestrator
         );
 
-        static::assertSame('meili_search', $collector->getName());
+        static::assertSame('meilisearch', $collector->getName());
     }
 
     public function testCollectorCanCollect(): void

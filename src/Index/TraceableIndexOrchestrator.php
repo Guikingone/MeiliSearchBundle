@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Index;
 
 use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class TraceableIndexOrchestrator implements IndexOrchestratorInterface
+final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, TraceableDataCollectorInterface
 {
     private const CREATED_INDEXES = 'createdIndexes';
     private const FETCHED_INDEXES = 'fetchedIndexes';
@@ -113,5 +114,17 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface
     public function getDeletedIndexes(): array
     {
         return $this->data[self::DELETED_INDEXES];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset(): void
+    {
+        $this->data= [
+            self::CREATED_INDEXES => [],
+            self::FETCHED_INDEXES => [],
+            self::DELETED_INDEXES => [],
+        ];
     }
 }

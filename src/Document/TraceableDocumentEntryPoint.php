@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Document;
 
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface
+final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, TraceableDataCollectorInterface
 {
     private const DOCUMENT = 'document';
     private const PRIMARY_KEY = 'primaryKey';
@@ -29,7 +30,12 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface
     /**
      * @var array<string,array>
      */
-    private $data = [];
+    private $data = [
+        'addedDocuments' => [],
+        'removedDocuments' => [],
+        'retrievedDocuments' => [],
+        'updatedDocuments' => [],
+    ];
 
     public function __construct(
         DocumentEntryPointInterface $documentOrchestrator,
@@ -139,6 +145,19 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface
     public function getData(): array
     {
         return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset(): void
+    {
+        $this->data = [
+            'addedDocuments' => [],
+            'removedDocuments' => [],
+            'retrievedDocuments' => [],
+            'updatedDocuments' => [],
+        ];
     }
 
     private function logInfo(string $message, array $context = []): void

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Index;
 
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
+
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestratorInterface
+final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestratorInterface, TraceableDataCollectorInterface
 {
     /**
      * @var IndexSettingsOrchestratorInterface
@@ -66,5 +68,17 @@ final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestra
     public function getData(): array
     {
         return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset(): void
+    {
+        $this->data = [
+            'updatedSettings' => [],
+            'retrievedSettings' => [],
+            'resetSettings' => [],
+        ];
     }
 }

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Search;
 
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
+
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class TraceableSearchEntryPoint implements SearchEntryPointInterface
+final class TraceableSearchEntryPoint implements SearchEntryPointInterface, TraceableDataCollectorInterface
 {
     /**
      * @var SearchEntryPointInterface
@@ -47,5 +49,13 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface
     public function getSearch(): array
     {
         return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset(): void
+    {
+        $this->data = [];
     }
 }

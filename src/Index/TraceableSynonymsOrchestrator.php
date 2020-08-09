@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Index;
 
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class TraceableSynonymsOrchestrator implements SynonymsOrchestratorInterface
+final class TraceableSynonymsOrchestrator implements SynonymsOrchestratorInterface, TraceableDataCollectorInterface
 {
     private const INDEX = 'index';
     private const SYNONYMS = 'synonyms';
@@ -70,6 +71,9 @@ final class TraceableSynonymsOrchestrator implements SynonymsOrchestratorInterfa
         ]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function resetSynonyms(string $uid): void
     {
         $this->orchestrator->resetSynonyms($uid);
@@ -85,5 +89,16 @@ final class TraceableSynonymsOrchestrator implements SynonymsOrchestratorInterfa
     public function getData(): array
     {
         return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset(): void
+    {
+        $this->data = [
+            'fetchedSynonyms' => [],
+            'updatedSynonyms' => [],
+        ];
     }
 }
