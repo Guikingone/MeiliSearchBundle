@@ -23,9 +23,17 @@ interface IndexOrchestratorInterface
      */
     public function getIndexes(): array;
 
+    /**
+     * @param string $uid
+     *
+     * @return Indexes
+     */
     public function getIndex(string $uid): Indexes;
 
     public function removeIndexes(): void;
 
+    /**
+     * @param string $uid
+     */
     public function removeIndex(string $uid): void;
 }

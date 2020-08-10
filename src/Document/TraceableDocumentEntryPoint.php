@@ -6,6 +6,9 @@ namespace MeiliSearchBundle\Document;
 
 use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use function get_class;
+use function is_object;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -16,6 +19,11 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     private const PRIMARY_KEY = 'primaryKey';
     private const INDEX = 'index';
     private const MODEL = 'model';
+
+    private const DATA_ADDED_DOCUMENTS_KEY = 'addedDocuments';
+    private const DATA_REMOVED_DOCUMENTS = 'removedDocuments';
+    private const DATA_RETRIEVED_DOCUMENTS = 'retrievedDocuments';
+    private const DATA_UPDATED_DOCUMENTS = 'updatedDocuments';
 
     /**
      * @var DocumentEntryPointInterface
@@ -31,10 +39,10 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
      * @var array<string,array>
      */
     private $data = [
-        'addedDocuments' => [],
-        'removedDocuments' => [],
-        'retrievedDocuments' => [],
-        'updatedDocuments' => [],
+        self::DATA_ADDED_DOCUMENTS_KEY => [],
+        self::DATA_REMOVED_DOCUMENTS => [],
+        self::DATA_RETRIEVED_DOCUMENTS => [],
+        self::DATA_UPDATED_DOCUMENTS => [],
     ];
 
     public function __construct(
@@ -42,7 +50,7 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
         ?LoggerInterface $logger = null
     ) {
         $this->documentOrchestrator = $documentOrchestrator;
-        $this->logger = $logger;
+        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
@@ -52,26 +60,19 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     {
         $this->documentOrchestrator->addDocument($uid, $document, $primaryKey, $model);
 
-        $this->data['addedDocuments'][$uid][] = [
+        $this->data[self::DATA_ADDED_DOCUMENTS_KEY][$uid][] = [
             self::DOCUMENT => $document,
             self::PRIMARY_KEY => $primaryKey,
             self::MODEL => $model,
         ];
-
-        $this->logInfo('A document has been added', [
-            self::DOCUMENT => $document,
-            self::INDEX => $uid,
-            self::PRIMARY_KEY => $primaryKey,
-            self::MODEL => $model,
-        ]);
     }
 
     public function getDocument(string $uid, $id)
     {
         $document = $this->documentOrchestrator->getDocument($uid, $id);
 
-        $this->data['retrievedDocuments'][$uid][] = [
-            self::DOCUMENT => $document,
+        $this->data[self::DATA_RETRIEVED_DOCUMENTS][$uid][] = [
+            self::DOCUMENT => is_object($document) ? get_class($document) : $document,
             'id' => $id,
         ];
 
@@ -85,9 +86,13 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     {
         $documents = $this->documentOrchestrator->getDocuments($uid, $options);
 
-        $this->data['retrievedDocuments'][$uid][] = $documents;
+        foreach ($documents as $document) {
+            $this->data[self::DATA_RETRIEVED_DOCUMENTS][$uid][] = [
+                self::DOCUMENT => is_object($document) ? get_class($document) : $document,
+            ];
+        }
 
-        $this->logInfo('A set of documents has been retrieved', [
+        $this->logger->info('A set of documents has been retrieved', [
             self::INDEX => $uid,
             'options' => $options,
         ]);
@@ -102,24 +107,18 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     {
         $this->documentOrchestrator->updateDocument($uid, $documentUpdate, $primaryKey);
 
-        $this->data['updatedDocuments'][$uid][] = [
+        $this->data[self::DATA_UPDATED_DOCUMENTS][$uid][] = [
             self::DOCUMENT => $documentUpdate,
             self::INDEX => $uid,
             self::PRIMARY_KEY => $primaryKey,
         ];
-
-        $this->logInfo('A document has been updated', [
-            self::DOCUMENT => $documentUpdate,
-            self::INDEX => $uid,
-            self::PRIMARY_KEY => $primaryKey,
-        ]);
     }
 
     public function removeDocument(string $uid, $id): void
     {
         $this->documentOrchestrator->removeDocument($uid, $id);
 
-        $this->data['removedDocuments'][$uid][] = $id;
+        $this->data[self::DATA_REMOVED_DOCUMENTS][$uid][] = $id;
     }
 
     /**
@@ -129,14 +128,14 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     {
         $this->documentOrchestrator->removeSetOfDocuments($uid, $ids);
 
-        $this->data['removedDocuments'][$uid][] = $ids;
+        $this->data[self::DATA_REMOVED_DOCUMENTS][$uid][] = $ids;
     }
 
     public function removeDocuments(string $uid): void
     {
         $this->documentOrchestrator->removeDocuments($uid);
 
-        $this->logInfo('All the documents have been deleted', [self::INDEX => $uid]);
+        $this->logger->info('All the documents have been deleted', [self::INDEX => $uid]);
     }
 
     /**
@@ -153,19 +152,10 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     public function reset(): void
     {
         $this->data = [
-            'addedDocuments' => [],
-            'removedDocuments' => [],
-            'retrievedDocuments' => [],
-            'updatedDocuments' => [],
+            self::DATA_ADDED_DOCUMENTS_KEY => [],
+            self::DATA_REMOVED_DOCUMENTS => [],
+            self::DATA_RETRIEVED_DOCUMENTS => [],
+            self::DATA_UPDATED_DOCUMENTS => [],
         ];
-    }
-
-    private function logInfo(string $message, array $context = []): void
-    {
-        if (null === $this->logger) {
-            return;
-        }
-
-        $this->logger->info($message, $context);
     }
 }

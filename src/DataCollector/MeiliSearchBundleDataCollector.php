@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DataCollector;
 
-use Countable;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
 use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
@@ -16,7 +15,6 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 use Throwable;
 use function count;
-use function is_array;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -24,6 +22,7 @@ use function is_array;
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
     private const NAME = 'meilisearch';
+    private const DOCUMENTS = 'documents';
     private const INDEXES = 'indexes';
     private const QUERIES = 'queries';
     private const SETTINGS = 'settings';
@@ -84,16 +83,27 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
             'count' => count($this->indexOrchestrator->getIndexes()),
             'data' => $this->indexOrchestrator->getData(),
         ];
+        $this->data[self::QUERIES] = [
+            'count' => count($this->searchEntryPoint->getData()),
+            'data' => $this->searchEntryPoint->getData(),
+        ];
+        $this->data[self::DOCUMENTS] = $this->documentOrchestrator->getData();
         $this->data[self::SETTINGS] = $this->indexSettingsOrchestrator->getData();
-        $this->data[self::QUERIES] = $this->searchEntryPoint->getSearch();
         $this->data[self::SYNONYMS] = $this->synonymsOrchestrator->getData();
     }
 
     public function reset(): void
     {
-        $this->data[self::INDEXES] = [];
+        $this->data[self::INDEXES] = [
+            'count' => 0,
+            'data' => [],
+        ];
+        $this->data[self::QUERIES] = [
+            'count' => 0,
+            'data' => [],
+        ];
+        $this->data[self::DOCUMENTS] = [];
         $this->data[self::SETTINGS] = [];
-        $this->data[self::QUERIES] = [];
         $this->data[self::SYNONYMS] = [];
     }
 
@@ -105,22 +115,28 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
         return self::NAME;
     }
 
+    /**
+     * @return array<string,array>
+     */
+    public function getDocuments(): array
+    {
+        return $this->data[self::DOCUMENTS];
+    }
+
+    /**
+     * @return array<string,array|int>
+     */
     public function getIndexes(): array
     {
         return $this->data[self::INDEXES];
     }
 
     /**
-     * @return array<string,array>
+     * @return array<string,array|int>
      */
     public function getQueries(): array
     {
         return $this->data[self::QUERIES];
-    }
-
-    public function getQueriesCount(): int
-    {
-        return is_array($this->data[self::QUERIES]) || $this->data[self::QUERIES] instanceof Countable ? count($this->data[self::QUERIES]) : 0;
     }
 
     /**

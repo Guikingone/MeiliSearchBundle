@@ -52,7 +52,7 @@ final class Document implements ConfigurationAnnotationInterface
 
         $this->index = $configuration['index'];
 
-        if (null !== $configuration[self::PRIMARY_KEY] && !$this->primaryKeyIsValid($configuration[self::PRIMARY_KEY])) {
+        if ((array_key_exists(self::PRIMARY_KEY, $configuration) && null !== $configuration[self::PRIMARY_KEY]) && !$this->primaryKeyIsValid($configuration[self::PRIMARY_KEY])) {
             throw new InvalidDocumentConfigurationException('The primaryKey is not valid');
         }
 

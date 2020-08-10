@@ -3,7 +3,7 @@
 {% import _self as helper %}
 
 {% block toolbar %}
-    {% set indexes, queriesCount = collector.getIndexes(), collector.queriesCount() %}
+    {% set indexes, queries = collector.getIndexes(), collector.getQueries() %}
 
     {% set icon %}
         {{ include('@MeiliSearch/Collector/logo.svg') }}
@@ -18,7 +18,7 @@
 
         <div class="sf-toolbar-info-piece">
             <b>{{ 'Queries count' }}</b>
-            <span>{{- queriesCount is same as(0) ? 'No query made' : queriesCount -}}</span>
+            <span>{{- queries['count'] is same as(0) ? 'No query made' : queries['count'] -}}</span>
         </div>
     {% endset %}
 
@@ -33,20 +33,22 @@
 {% endblock %}
 
 {% block panel %}
+    {% set indexes, queries = collector.getIndexes(), collector.getQueries() %}
+
     <h2>{{- 'MeiliSearch' -}}</h2>
 
     <h4>{{ 'Indexes' }}</h4>
-    {% if collector.indexes.count is same as(0) %}
+    {% if indexes['count'] is same as(0) %}
         <div class="empty">
             <p>{{ 'No index found' }}</p>
         </div>
     {% else %}
         <div class="sf-tabs">
             <div class="tab">
-                <h3 class="tab-title">{{- 'Indexes' -}}</h3>
+                <h3 class="tab-title">
+                    {{- 'Indexes' -}}
+                </h3>
                 <div class="tab-content">
-                    {% set indexes = collector.indexes %}
-
                     <h3>{{ 'Created indexes' }}</h3>
                     {{ helper.index_table(indexes, 'createdIndexes') }}
 
@@ -58,16 +60,25 @@
                 </div>
             </div>
             <div class="tab">
-                <h3 class="tab-title">{{- 'Queries' -}}</h3>
+                <h3 class="tab-title">
+                    {{- 'Queries' -}}
+                </h3>
                 <div class="tab-content">
-                    {% if collector.queriesCount() is same as(0) %}
+                    {% if queries['count'] is same as(0) %}
                         <div class="empty">
                             <p>{{ 'No queries have been made' }}</p>
                         </div>
                     {% else %}
-                        {% set queries = collector.queries %}
-
+                        {{ helper.search_table(queries['data']) }}
                     {% endif %}
+                </div>
+            </div>
+            <div class="tab">
+                <h3 class="tab-title">
+                    {{- 'Documents' -}}
+                </h3>
+                <div class="tab-content">
+                    {% set documents = collector.getDocuments() %}
                 </div>
             </div>
         </div>
@@ -103,6 +114,6 @@
     </table>
 {% endmacro %}
 
-{% macro search_table() %}
+{% macro search_table(queries) %}
 
 {% endmacro %}

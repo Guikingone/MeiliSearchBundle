@@ -58,11 +58,13 @@ final class AddIndexMessage implements MessageInterface
     private function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'acceptNewFields' => false,
             'distinctAttribute' => null,
             'facetedAttributes' => [],
             'searchableAttributes' => [],
             'displayedAttributes' => [],
+            'rankingRules' => [],
+            'stopWords' => [],
+            'synonyms' => [],
         ]);
     }
 }

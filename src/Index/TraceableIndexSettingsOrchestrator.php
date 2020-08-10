@@ -11,6 +11,10 @@ use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
  */
 final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestratorInterface, TraceableDataCollectorInterface
 {
+    private const UPDATED_SETTINGS_KEY = 'updatedSettings';
+    private const RETRIEVED_SETTINGS_KEY = 'retrievedSettings';
+    private const RESET_SETTINGS_KEY = 'resetSettings';
+
     /**
      * @var IndexSettingsOrchestratorInterface
      */
@@ -20,9 +24,9 @@ final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestra
      * @var array<string,array>
      */
     private $data = [
-        'updatedSettings' => [],
-        'retrievedSettings' => [],
-        'resetSettings' => [],
+        self::UPDATED_SETTINGS_KEY => [],
+        self::RETRIEVED_SETTINGS_KEY => [],
+        self::RESET_SETTINGS_KEY => [],
     ];
 
     public function __construct(IndexSettingsOrchestratorInterface $orchestrator)
@@ -37,7 +41,7 @@ final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestra
     {
         $this->orchestrator->updateSettings($uid, $updatePayload);
 
-        $this->data['updatedSettings'][$uid][] = $updatePayload;
+        $this->data[self::UPDATED_SETTINGS_KEY][$uid][] = $updatePayload;
     }
 
     /**
@@ -47,7 +51,7 @@ final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestra
     {
         $settings = $this->orchestrator->retrieveSettings($index);
 
-        $this->data['retrievedSettings'][$index][] = $settings;
+        $this->data[self::RETRIEVED_SETTINGS_KEY][$index][] = $settings;
 
         return $settings;
     }
@@ -59,7 +63,7 @@ final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestra
     {
         $this->orchestrator->resetSettings($uid);
 
-        $this->data['resetSettings'][] = $uid;
+        $this->data[self::RESET_SETTINGS_KEY][] = $uid;
     }
 
     /**
@@ -76,9 +80,9 @@ final class TraceableIndexSettingsOrchestrator implements IndexSettingsOrchestra
     public function reset(): void
     {
         $this->data = [
-            'updatedSettings' => [],
-            'retrievedSettings' => [],
-            'resetSettings' => [],
+            self::UPDATED_SETTINGS_KEY => [],
+            self::RETRIEVED_SETTINGS_KEY => [],
+            self::RESET_SETTINGS_KEY => [],
         ];
     }
 }

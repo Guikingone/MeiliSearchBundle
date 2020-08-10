@@ -17,9 +17,13 @@ meili_search:
             # ...
 ```
 
-Once defined, the indexes are loaded into the MeiliSearch instance and available for search.
+Once defined, the indexes need to be sent to MeiliSearch:
 
-You can find more informations about the configurations keys in [the configuration section](configuration.md).
+```bash
+php bin/console meili:warm-indexes
+```
+
+_Note: You can find more information about the configurations keys in [the configuration section](configuration.md)._
 
 ## Load documents
 

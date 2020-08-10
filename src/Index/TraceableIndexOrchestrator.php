@@ -15,8 +15,11 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, Tr
     private const CREATED_INDEXES = 'createdIndexes';
     private const FETCHED_INDEXES = 'fetchedIndexes';
     private const DELETED_INDEXES = 'deletedIndexes';
+
     private const UID_DATA_KEY = 'uid';
     private const PRIMARY_KEY_LOG_KEY = 'primaryKey';
+    private const INDEX_CREATION_DATE_KEY = 'createdAt';
+    private const INDEX_UPDATE_DATE_KEY = 'updateddAt';
 
     /**
      * @var IndexOrchestratorInterface
@@ -58,9 +61,13 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, Tr
         $indexes = $this->orchestrator->getIndexes();
 
         array_walk($indexes, function (Indexes $index): void {
+            $informations = $index->show();
+
             $this->data[self::FETCHED_INDEXES][] = [
-                self::UID_DATA_KEY => $index->getUid(),
-                self::PRIMARY_KEY_LOG_KEY => $index->getPrimaryKey(),
+                self::UID_DATA_KEY => $informations['uid'],
+                self::PRIMARY_KEY_LOG_KEY => $informations['primaryKey'],
+                self::INDEX_CREATION_DATE_KEY => $informations['createdAt'],
+                self::INDEX_UPDATE_DATE_KEY => $informations['updatedAt'],
             ];
         });
 
@@ -72,9 +79,17 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, Tr
      */
     public function getIndex(string $uid): Indexes
     {
-        $this->data[self::FETCHED_INDEXES][] = [self::UID_DATA_KEY => $uid];
+        $index = $this->orchestrator->getIndex($uid);
 
-        return $this->orchestrator->getIndex($uid);
+        $informations = $index->show();
+        $this->data[self::FETCHED_INDEXES][] = [
+            self::UID_DATA_KEY => $informations['uid'],
+            self::PRIMARY_KEY_LOG_KEY => $informations['primaryKey'],
+            self::INDEX_CREATION_DATE_KEY => $informations['createdAt'],
+            self::INDEX_UPDATE_DATE_KEY => $informations['updatedAt'],
+        ];
+
+        return $index;
     }
 
     /**
@@ -93,30 +108,6 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, Tr
         $this->orchestrator->removeIndex($uid);
 
         $this->data[self::DELETED_INDEXES][] = [self::UID_DATA_KEY => $uid];
-    }
-
-    /**
-     * @return array<int,array>
-     */
-    public function getCreatedIndexes(): array
-    {
-        return $this->data[self::CREATED_INDEXES];
-    }
-
-    /**
-     * @return array<int,array>
-     */
-    public function getFetchedIndexes(): array
-    {
-        return $this->data[self::FETCHED_INDEXES];
-    }
-
-    /**
-     * @return array<int,array>
-     */
-    public function getDeletedIndexes(): array
-    {
-        return $this->data[self::DELETED_INDEXES];
     }
 
     /**

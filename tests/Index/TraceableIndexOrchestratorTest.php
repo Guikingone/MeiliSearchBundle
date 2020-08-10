@@ -22,31 +22,37 @@ final class TraceableIndexOrchestratorTest extends TestCase
         $traceableOrchestrator = new TraceableIndexOrchestrator($orchestrator);
         $traceableOrchestrator->addIndex('foo', 'id');
 
-        static::assertNotEmpty($traceableOrchestrator->getCreatedIndexes());
+        static::assertNotEmpty($traceableOrchestrator->getData()['createdIndexes']);
     }
 
     public function testIndexesCanBeRetrieved(): void
     {
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('show')->willReturn([
+            'uid' => 'movies',
+            'primaryKey' => 'movie_id',
+            'createdAt' => '2019-11-20T09:40:33.711324Z',
+            'updatedAt' => '2019-11-20T10:16:42.761858Z',
+        ]);
+
+        $secondIndex = $this->createMock(Indexes::class);
+        $secondIndex->expects(self::once())->method('show')->willReturn([
+            'uid' => 'bar',
+            'primaryKey' => 'id',
+            'createdAt' => '2019-11-20T09:40:33.711324Z',
+            'updatedAt' => '2019-11-20T10:16:42.761858Z',
+        ]);
+
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::once())->method('getIndexes')->willReturn([
-            [
-                'uid' => 'movies',
-                'primaryKey' => 'movie_id',
-                'createdAt' => '2019-11-20T09:40:33.711324Z',
-                'updatedAt' => '2019-11-20T10:16:42.761858Z',
-            ],
-            [
-                'uid' => 'bar',
-                'primaryKey' => 'id',
-                'createdAt' => '2019-11-20T09:40:33.711324Z',
-                'updatedAt' => '2019-11-20T10:16:42.761858Z',
-            ],
+            $index,
+            $secondIndex
         ]);
 
         $traceableOrchestrator = new TraceableIndexOrchestrator($orchestrator);
 
         static::assertNotEmpty($traceableOrchestrator->getIndexes());
-        static::assertNotEmpty($traceableOrchestrator->getFetchedIndexes());
+        static::assertNotEmpty($traceableOrchestrator->getData()['fetchedIndexes']);
     }
 
     public function testSingleIndexCanBeRetrieved(): void
@@ -61,7 +67,7 @@ final class TraceableIndexOrchestratorTest extends TestCase
 
         static::assertInstanceOf(Indexes::class, $fetchedIndex);
         static::assertSame($index, $fetchedIndex);
-        static::assertNotEmpty($traceableOrchestrator->getFetchedIndexes());
+        static::assertNotEmpty($traceableOrchestrator->getData()['fetchedIndexes']);
     }
 
     public function testIndexesCanBeRemoved(): void
@@ -72,7 +78,7 @@ final class TraceableIndexOrchestratorTest extends TestCase
         $traceableOrchestrator = new TraceableIndexOrchestrator($orchestrator);
         $traceableOrchestrator->removeIndexes();
 
-        static::assertEmpty($traceableOrchestrator->getDeletedIndexes());
+        static::assertEmpty($traceableOrchestrator->getData()['deletedIndexes']);
     }
 
     public function testSingleIndexCanBeRemoved(): void
@@ -83,8 +89,8 @@ final class TraceableIndexOrchestratorTest extends TestCase
         $traceableOrchestrator = new TraceableIndexOrchestrator($orchestrator);
         $traceableOrchestrator->removeIndex('foo');
 
-        static::assertNotEmpty($traceableOrchestrator->getDeletedIndexes());
-        static::assertCount(1, $traceableOrchestrator->getDeletedIndexes());
-        static::assertArrayHasKey('uid', $traceableOrchestrator->getDeletedIndexes()[0]);
+        static::assertNotEmpty($traceableOrchestrator->getData()['deletedIndexes']);
+        static::assertCount(1, $traceableOrchestrator->getData()['deletedIndexes']);
+        static::assertArrayHasKey('uid', $traceableOrchestrator->getData()['deletedIndexes'][0]);
     }
 }

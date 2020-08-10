@@ -54,16 +54,22 @@ final class IndexMetadata
      */
     private $displayedAttributes;
 
+    /**
+     * @var array<string,array>
+     */
+    private $synonyms;
+
     public function __construct(
         string $uid,
-        bool $async = false,
+        ?bool $async = false,
         ?string $primaryKey = null,
-        array $rankingRules = [],
-        array $stopWords = [],
+        ?array $rankingRules = [],
+        ?array $stopWords = [],
         ?string $distinctAttribute = null,
-        array $facetedAttributes = [],
-        array $searchableAttributes = [],
-        array $displayedAttributes = []
+        ?array $facetedAttributes = [],
+        ?array $searchableAttributes = [],
+        ?array $displayedAttributes = [],
+        ?array $synonyms = []
     ) {
         $this->uid = $uid;
         $this->async = $async;
@@ -74,6 +80,7 @@ final class IndexMetadata
         $this->facetedAttributes = $facetedAttributes;
         $this->searchableAttributes = $searchableAttributes;
         $this->displayedAttributes = $displayedAttributes;
+        $this->synonyms = $synonyms;
     }
 
     public function getUid(): string
@@ -134,5 +141,13 @@ final class IndexMetadata
     public function getDisplayedAttributes(): array
     {
         return $this->displayedAttributes;
+    }
+
+    /**
+     * @return array<string,array>
+     */
+    public function getSynonyms(): array
+    {
+        return $this->synonyms;
     }
 }

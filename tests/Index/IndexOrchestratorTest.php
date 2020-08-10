@@ -44,7 +44,6 @@ final class IndexOrchestratorTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('error');
-        $logger->expects(self::once())->method('info');
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::never())->method('getUid')->willReturn('test');
@@ -87,20 +86,25 @@ final class IndexOrchestratorTest extends TestCase
 
     public function testAllIndexesCanBeRetrieved(): void
     {
+        $firstIndexes = $this->createMock(Indexes::class);
+        $firstIndexes->expects(self::never())->method('show')->willReturn([
+            "uid" => "movies",
+            "primaryKey" => "movie_id",
+            "createdAt" => "2019-11-20T09:40:33.711324Z",
+            "updatedAt" => "2019-11-20T10:16:42.761858Z"
+        ]);
+        $secondIndexes = $this->createMock(Indexes::class);
+        $secondIndexes->expects(self::never())->method('show')->willReturn([
+            "uid" => "movie_reviews",
+            "primaryKey" => null,
+            "createdAt" => "2019-11-20T09:40:33.711324Z",
+            "updatedAt" => "2019-11-20T10:16:42.761858Z"
+        ]);
+
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getAllIndexes')->willReturn([
-            [
-                "uid" => "movies",
-                "primaryKey" => "movie_id",
-                "createdAt" => "2019-11-20T09:40:33.711324Z",
-                "updatedAt" => "2019-11-20T10:16:42.761858Z"
-            ],
-            [
-                "uid" => "movie_reviews",
-                "primaryKey" => null,
-                "createdAt" => "2019-11-20T09:40:33.711324Z",
-                "updatedAt" => "2019-11-20T10:16:42.761858Z"
-            ],
+            $firstIndexes,
+            $secondIndexes,
         ]);
 
         $orchestrator = new IndexOrchestrator($client);

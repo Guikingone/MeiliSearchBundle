@@ -10,6 +10,7 @@ use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidNormalizer;
 use MeiliSearchBundle\Cache\SearchResultCacheOrchestrator;
 use MeiliSearchBundle\Command\ClearSearchResultCacheCommand;
+use MeiliSearchBundle\Command\DeleteIndexesCommand;
 use MeiliSearchBundle\Command\WarmIndexesCommand;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
 use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
@@ -249,7 +250,7 @@ final class MeiliSearchExtension extends Extension
         $container->registerForAutoconfiguration(LoaderInterface::class)->addTag(self::LOADER_TAG);
     }
 
-    public function registerForm(ContainerBuilder $container): void
+    private function registerForm(ContainerBuilder $container): void
     {
         if (!$container->has(FormFactoryInterface::class)) {
             return;
@@ -349,6 +350,7 @@ final class MeiliSearchExtension extends Extension
                 new Reference(EventDispatcherInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
+            ->setPublic(false)
             ->addTag('container.preload', [
                 'class' => SearchEntryPoint::class,
             ])
@@ -361,6 +363,7 @@ final class MeiliSearchExtension extends Extension
                     new Reference(CacheItemPoolInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                     new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 ])
+                ->setPublic(false)
                 ->addTag('container.preload', [
                     'class' => SearchResultCacheOrchestrator::class,
                 ])
@@ -371,6 +374,7 @@ final class MeiliSearchExtension extends Extension
                     new Reference(SearchResultCacheOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                     new Reference(SearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 ])
+                ->setPublic(false)
                 ->addTag('container.preload', [
                     'class' => CachedSearchEntryPoint::class,
                 ])
@@ -558,7 +562,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(DeleteIndexCommand::class, DeleteIndexCommand::class)
             ->setArguments([
-                new Reference(IndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('console.command')
@@ -567,9 +571,20 @@ final class MeiliSearchExtension extends Extension
             ])
         ;
 
+        $container->register(DeleteIndexesCommand::class, DeleteIndexesCommand::class)
+            ->setArguments([
+                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('console.command')
+            ->addTag('container.preload', [
+                'class' => DeleteIndexesCommand::class,
+            ])
+        ;
+
         $container->register(ListIndexesCommand::class, ListIndexesCommand::class)
             ->setArguments([
-                new Reference(IndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('console.command')
@@ -695,7 +710,7 @@ final class MeiliSearchExtension extends Extension
         ;
     }
 
-    public function registerDataCollector(ContainerBuilder $container): void
+    private function registerDataCollector(ContainerBuilder $container): void
     {
         $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
             ->setArguments([

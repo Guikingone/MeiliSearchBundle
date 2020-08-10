@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Messenger\AddIndexMessage;
 use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use Symfony\Component\Console\Command\Command;
@@ -12,6 +13,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Throwable;
+use function array_filter;
+use function array_key_exists;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -88,36 +93,75 @@ final class WarmIndexesCommand extends Command
         if (empty($this->indexes)) {
             $io->warning('No indexes found, please define at least a single index');
 
-            return 0;
+            return 1;
         }
 
-        foreach ($this->indexes as $indexName => $configuration) {
-            if ($configuration['async'] && null === $this->messageBus) {
-                $io->error([
-                    'The "async" attribute cannot be used when Messenger is not installed',
-                    'Consider using "composer require symfony/messenger"'
-                ]);
+        $asyncIndexes = $asyncIndexes = array_filter($this->indexes, function (array $index): bool {
+            return array_key_exists('async', $index);
+        });
+        if (!empty($asyncIndexes) && null === $this->messageBus) {
+            $io->error([
+                'The "async" attribute cannot be used when Messenger is not installed',
+                'Consider using "composer require symfony/messenger"'
+            ]);
+
+            return 1;
+        }
+
+        try {
+            foreach ($this->indexes as $indexName => $configuration) {
+                $indexName = null !== $this->prefix ? sprintf('%s_%s', $this->prefix, $indexName) : $indexName;
+                $primaryKey = $configuration['primaryKey'];
+                $configuration['synonyms'] = $this->handleSynonyms($configuration['synonyms']);
+
+                $this->indexMetadataRegistry->add($indexName, new IndexMetadata(
+                    $indexName,
+                    $configuration['async'],
+                    $primaryKey,
+                    $configuration['rankingRules'],
+                    $configuration['stopWords'],
+                    $configuration['distinctAttribute'],
+                    $configuration['facetedAttributes'],
+                    $configuration['searchableAttributes'],
+                    $configuration['displayedAttributes'],
+                    $configuration['synonyms']
+                ));
+
+                if ($configuration['async']) {
+                    unset($configuration['async'], $configuration['primaryKey']);
+
+                    $this->messageBus->dispatch(new AddIndexMessage($indexName, $primaryKey, $configuration));
+
+                    continue;
+                }
+
+                $this->indexOrchestrator->addIndex($indexName, $configuration['primaryKey'], $configuration);
             }
+        } catch (Throwable $throwable) {
+            $io->error([
+                'The indexes cannot be warmed!',
+                sprintf('Error: "%s"', $throwable->getMessage())
+            ]);
 
-            $indexName = null !== $this->prefix ? sprintf('%s_%s', $this->prefix, $indexName) : $indexName;
-
-            $this->indexOrchestrator->addIndex($indexName, $configuration['primaryKey']);
-
-            $this->indexMetadataRegistry->add($indexName, new IndexMetadata(
-                $indexName,
-                $configuration['async'],
-                $configuration['primaryKey'],
-                $configuration['rankingRules'],
-                $configuration['stopWords'],
-                $configuration['distinctAttribute'],
-                $configuration['facetedAttributes'],
-                $configuration['searchableAttributes'],
-                $configuration['displayedAttributes']
-            ));
+            return 1;
         }
 
         $io->success('The indexes has been warmed, feel free to query them!');
 
         return 0;
+    }
+
+    private function handleSynonyms(array $synonyms): array
+    {
+        if (empty($synonyms)) {
+            return [];
+        }
+
+        $filteredSynonyms = [];
+        foreach ($synonyms as $synonym => $values) {
+            $filteredSynonyms[$synonym] = $values['values'];
+        }
+
+        return $filteredSynonyms;
     }
 }

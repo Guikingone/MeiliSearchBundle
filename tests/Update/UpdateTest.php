@@ -22,6 +22,5 @@ final class UpdateTest extends TestCase
         static::assertSame(0.0, $update->getDuration());
         static::assertSame('2020-08-01', $update->getEnqueuedAt());
         static::assertSame('2020-08-01', $update->getProcessedAt());
-        ;
     }
 }

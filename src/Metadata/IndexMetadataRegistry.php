@@ -43,11 +43,29 @@ final class IndexMetadataRegistry
 
     public function get(string $index): IndexMetadata
     {
-        if (!array_key_exists($index, $this->indexes)) {
+        if (!$this->has($index)) {
             throw new InvalidArgumentException('The desired index does not exist');
         }
 
         return $this->indexes[$index];
+    }
+
+    public function remove(string $index): void
+    {
+        if (!$this->has($index)) {
+            throw new InvalidArgumentException('The desired index does not exist');
+        }
+
+        unset($this->indexes[$index]);
+    }
+
+    public function clear(): void
+    {
+        if (empty($this->indexes)) {
+            return;
+        }
+
+        $this->indexes = [];
     }
 
     /**

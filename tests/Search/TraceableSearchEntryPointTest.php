@@ -25,7 +25,7 @@ final class TraceableSearchEntryPointTest extends TestCase
         $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
         $result = $traceableSearchEntryPoint->search('foo', 'q=bar');
 
-        static::assertNotEmpty($traceableSearchEntryPoint->getSearch());
+        static::assertNotEmpty($traceableSearchEntryPoint->getData());
         static::assertSame($searchResult, $result);
     }
 }

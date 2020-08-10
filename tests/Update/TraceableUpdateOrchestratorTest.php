@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
  */
 final class TraceableUpdateOrchestratorTest extends TestCase
 {
-    public function testOrchestratorCanGetUpdateWithoutLogger(): void
+    public function testOrchestratorCanGetUpdate(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('info');
@@ -30,22 +30,8 @@ final class TraceableUpdateOrchestratorTest extends TestCase
         static::assertNotEmpty($traceableOrchestrator->getData()['retrievedUpdates']['foo']);
     }
 
-    public function testOrchestratorCanGetUpdateWithLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
 
-        $orchestrator = $this->createMock(UpdateOrchestratorInterface::class);
-
-        $traceableOrchestrator = new TraceableUpdateOrchestrator($orchestrator, $logger);
-        $traceableOrchestrator->getUpdate('foo', 1);
-
-        static::assertNotEmpty($traceableOrchestrator->getData());
-        static::assertNotEmpty($traceableOrchestrator->getData()['retrievedUpdates']);
-        static::assertNotEmpty($traceableOrchestrator->getData()['retrievedUpdates']['foo']);
-    }
-
-    public function testOrchestratorCanGetUpdatesWithoutLogger(): void
+    public function testOrchestratorCanGetUpdates(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('info');
@@ -58,26 +44,6 @@ final class TraceableUpdateOrchestratorTest extends TestCase
         ]);
 
         $traceableOrchestrator = new TraceableUpdateOrchestrator($orchestrator);
-        $traceableOrchestrator->getUpdates('foo');
-
-        static::assertNotEmpty($traceableOrchestrator->getData());
-        static::assertNotEmpty($traceableOrchestrator->getData()['retrievedUpdates']);
-        static::assertNotEmpty($traceableOrchestrator->getData()['retrievedUpdates']['foo']);
-    }
-
-    public function testOrchestratorCanGetUpdatesWithLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
-        $update = $this->createMock(UpdateInterface::class);
-
-        $orchestrator = $this->createMock(UpdateOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('getUpdates')->willReturn([
-            $update,
-        ]);
-
-        $traceableOrchestrator = new TraceableUpdateOrchestrator($orchestrator, $logger);
         $traceableOrchestrator->getUpdates('foo');
 
         static::assertNotEmpty($traceableOrchestrator->getData());

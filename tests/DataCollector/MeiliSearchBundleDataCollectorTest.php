@@ -87,10 +87,80 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         );
         $collector->lateCollect();
 
-        static::assertNotEmpty($collector->getCreatedIndexes());
-        static::assertNotEmpty($collector->getDeletedIndexes());
-        static::assertNotEmpty($collector->getFetchedIndexes());
-        static::assertSame(1, $collector->getQueriesCount());
+        static::assertNotEmpty($collector->getIndexes()['data']['createdIndexes']);
+        static::assertNotEmpty($collector->getIndexes()['data']['fetchedIndexes']);
+        static::assertNotEmpty($collector->getIndexes()['data']['deletedIndexes']);
+        static::assertSame(1, $collector->getQueries()['count']);
+    }
+
+    public function testCollectorCanCollectQueries(): void
+    {
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
+
+        $indexSettingsOrchestrator = $this->createMock(IndexSettingsOrchestratorInterface::class);
+        $traceableIndexSettingsOrchestrator = new TraceableIndexSettingsOrchestrator($indexSettingsOrchestrator);
+
+        $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
+
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
+        $traceableSearchEntryPoint->search('foo', 'bar');
+
+        $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
+        $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
+
+        $collector = new MeiliSearchBundleDataCollector(
+            $traceableIndexOrchestrator,
+            $traceableIndexSettingsOrchestrator,
+            $traceableDocumentOrchestrator,
+            $traceableSearchEntryPoint,
+            $traceableSynonymsOrchestrator
+        );
+        $collector->lateCollect();
+
+        static::assertSame(1, $collector->getQueries()['count']);
+    }
+
+    public function testCollectorCanCollectDocuments(): void
+    {
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
+
+        $indexSettingsOrchestrator = $this->createMock(IndexSettingsOrchestratorInterface::class);
+        $traceableIndexSettingsOrchestrator = new TraceableIndexSettingsOrchestrator($indexSettingsOrchestrator);
+
+        $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $documentOrchestrator->expects(self::once())->method('getDocuments')->willReturn([
+            'id' => 25684,
+            'title' => "American Ninja 5",
+            'poster' => "https://image.tmdb.org/t/p/w1280/iuAQVI4mvjI83wnirpD8GVNRVuY.jpg",
+            'overview' => "When a scientists daughter is kidnapped, American Ninja, attempts to find her, but this time he teams up with a youngster he has trained in the ways of the ninja.",
+            'release_date' => "1993-01-01",
+        ]);
+        $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
+        $traceableDocumentOrchestrator->getDocuments('foo');
+
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+        $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
+
+        $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
+
+        $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
+        $traceableSynonymsOrchestrator->getSynonyms('foo');
+
+        $collector = new MeiliSearchBundleDataCollector(
+            $traceableIndexOrchestrator,
+            $traceableIndexSettingsOrchestrator,
+            $traceableDocumentOrchestrator,
+            $traceableSearchEntryPoint,
+            $traceableSynonymsOrchestrator
+        );
+        $collector->lateCollect();
+
+        static::assertNotEmpty($collector->getDocuments());
+        static::assertArrayHasKey('retrievedDocuments', $collector->getDocuments());
     }
 
     public function testCollectorCanCollectAndReset(): void
@@ -107,7 +177,15 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $traceableIndexSettingsOrchestrator->resetSettings('foo');
 
         $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $documentOrchestrator->expects(self::once())->method('getDocuments')->willReturn([
+            'id' => 25684,
+            'title' => "American Ninja 5",
+            'poster' => "https://image.tmdb.org/t/p/w1280/iuAQVI4mvjI83wnirpD8GVNRVuY.jpg",
+            'overview' => "When a scientists daughter is kidnapped, American Ninja, attempts to find her, but this time he teams up with a youngster he has trained in the ways of the ninja.",
+            'release_date' => "1993-01-01",
+        ]);
         $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
+        $traceableDocumentOrchestrator->getDocuments('foo');
 
         $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
         $traceableSearchEntryPoint = new TraceableSearchEntryPoint($searchEntryPoint);
@@ -130,21 +208,22 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         );
         $collector->lateCollect();
 
-        static::assertNotEmpty($collector->getCreatedIndexes());
-        static::assertNotEmpty($collector->getDeletedIndexes());
-        static::assertNotEmpty($collector->getFetchedIndexes());
+        static::assertNotEmpty($collector->getIndexes()['data']['createdIndexes']);
+        static::assertNotEmpty($collector->getIndexes()['data']['fetchedIndexes']);
+        static::assertNotEmpty($collector->getIndexes()['data']['deletedIndexes']);
         static::assertNotEmpty($collector->getQueries());
-        static::assertSame(1, $collector->getQueriesCount());
+        static::assertSame(1, $collector->getQueries()['count']);
+        static::assertNotEmpty($collector->getDocuments());
         static::assertNotEmpty($collector->getSynonyms());
         static::assertNotEmpty($collector->getSettings());
 
         $collector->reset();
 
-        static::assertEmpty($collector->getCreatedIndexes());
-        static::assertEmpty($collector->getDeletedIndexes());
-        static::assertEmpty($collector->getFetchedIndexes());
-        static::assertEmpty($collector->getQueries());
-        static::assertSame(0, $collector->getQueriesCount());
+        static::assertEmpty($collector->getIndexes()['data']);
+        static::assertSame(0, $collector->getIndexes()['count']);
+        static::assertEmpty($collector->getQueries()['data']);
+        static::assertSame(0, $collector->getQueries()['count']);
+        static::assertEmpty($collector->getDocuments());
         static::assertEmpty($collector->getSynonyms());
         static::assertEmpty($collector->getSettings());
     }

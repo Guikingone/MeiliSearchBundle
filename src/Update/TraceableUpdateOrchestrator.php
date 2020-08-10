@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Update;
 
 use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface, TraceableDataCollectorInterface
 {
-    private const INDEX_LOG_KEY = 'index';
+    private const UPDATE_DATA_KEY = 'retrievedUpdates';
 
     /**
      * @var UpdateOrchestratorInterface
@@ -21,23 +19,15 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface, 
     private $updateOrchestrator;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @var array<string,array>
      */
     private $data = [
-        'retrievedUpdates' => [],
+        self::UPDATE_DATA_KEY => [],
     ];
 
-    public function __construct(
-        UpdateOrchestratorInterface $updateOrchestrator,
-        ?LoggerInterface $logger = null
-    ) {
+    public function __construct(UpdateOrchestratorInterface $updateOrchestrator)
+    {
         $this->updateOrchestrator = $updateOrchestrator;
-        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
@@ -47,12 +37,7 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface, 
     {
         $update = $this->updateOrchestrator->getUpdate($index, $updateId);
 
-        $this->logger->info('An update as been retrieved', [
-            self::INDEX_LOG_KEY => $index,
-            'update' => $update,
-        ]);
-
-        $this->data['retrievedUpdates'][$index][] = $update;
+        $this->data[self::UPDATE_DATA_KEY][$index][] = $update;
 
         return $update;
     }
@@ -64,11 +49,7 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface, 
     {
         $updates = $this->updateOrchestrator->getUpdates($index);
 
-        $this->logger->info('A set of updates has been retrieved', [
-            self::INDEX_LOG_KEY => $index,
-        ]);
-
-        $this->data['retrievedUpdates'][$index] = $updates;
+        $this->data[self::UPDATE_DATA_KEY][$index] = $updates;
 
         return $updates;
     }
@@ -87,7 +68,7 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface, 
     public function reset(): void
     {
         $this->data = [
-            'retrievedUpdates' => [],
+            self::UPDATE_DATA_KEY => [],
         ];
     }
 }

@@ -1,6 +1,14 @@
 # Commands
 
-This bundle defines a set of command used to interact with the MeiliSearch API. 
+This bundle defines a set of command used to interact with the MeiliSearch API.
+
+## Warm indexes
+
+```bash
+bin/console meili:warm-indexes
+```
+
+Warm indexes in MeiliSearch
 
 ## List indexes
 
@@ -10,13 +18,21 @@ bin/console meili:list-indexes test
 
 List every index stored in MeiliSearch
 
-## Delete indexes
+## Delete index
 
 ```bash
 bin/console meili:delete-index foo
 ```
 
 Allow to delete an index.
+
+## Delete indexes
+
+```bash
+bin/console meili:delete-indexes
+```
+
+Allow to delete all the indexes.
 
 ## Load documents
 

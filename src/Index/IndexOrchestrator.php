@@ -26,6 +26,11 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
     private const UID = 'uid';
     private const DISTINCT_ATTRIBUTE = 'distinctAttribute';
     private const FACETED_ATTRIBUTES = 'facetedAttributes';
+    private const DISPLAYED_ATTRIBUTES = 'displayedAttributes';
+    private const RANKING_RULES_ATTRIBUTES = 'rankingRulesAttributes';
+    private const SEARCHABLE_ATTRIBUTES = 'searchableAttributes';
+    private const STOP_WORDS_ATTRIBUTES = 'stopWords';
+    private const SYNONYMS_ATTRIBUTES = 'synonyms';
 
     /**
      * @var Client
@@ -48,8 +53,8 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         ?LoggerInterface $logger = null
     ) {
         $this->client = $client;
-        $this->logger = $logger ?: new NullLogger();
         $this->eventDispatcher = $eventDispatcher;
+        $this->logger = $logger ?: new NullLogger();
     }
 
     /**
@@ -63,6 +68,10 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
             ]);
 
             if (!empty($configuration)) {
+                if (array_key_exists(self::DISPLAYED_ATTRIBUTES, $configuration)) {
+                    $index->updateDisplayedAttributes($configuration[self::DISPLAYED_ATTRIBUTES]);
+                }
+
                 if (array_key_exists(self::DISTINCT_ATTRIBUTE, $configuration)) {
                     $index->updateDistinctAttribute($configuration[self::DISTINCT_ATTRIBUTE]);
                 }
@@ -71,12 +80,20 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
                     $index->updateAttributesForFaceting($configuration[self::FACETED_ATTRIBUTES]);
                 }
 
-                if (array_key_exists('searchableAttributes', $configuration)) {
-                    $index->updateSearchableAttributes($configuration['searchableAttributes']);
+                if (array_key_exists(self::RANKING_RULES_ATTRIBUTES, $configuration)) {
+                    $index->updateStopWords($configuration[self::RANKING_RULES_ATTRIBUTES]);
                 }
 
-                if (array_key_exists('displayedAttributes', $configuration)) {
-                    $index->updateDisplayedAttributes($configuration['displayedAttributes']);
+                if (array_key_exists(self::SEARCHABLE_ATTRIBUTES, $configuration)) {
+                    $index->updateSearchableAttributes($configuration[self::SEARCHABLE_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::STOP_WORDS_ATTRIBUTES, $configuration)) {
+                    $index->updateStopWords($configuration[self::STOP_WORDS_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::SYNONYMS_ATTRIBUTES, $configuration)) {
+                    $index->updateSynonyms($configuration[self::SYNONYMS_ATTRIBUTES]);
                 }
             }
         } catch (Throwable $exception) {
@@ -88,13 +105,6 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
             self::UID => $uid,
             self::PRIMARY_KEY => $primaryKey,
         ], $index));
-
-        $this->logger->info('An index has been created.', [
-            'configuration' => [
-                self::UID => $uid,
-                self::PRIMARY_KEY => $primaryKey,
-            ]
-        ]);
     }
 
     /**

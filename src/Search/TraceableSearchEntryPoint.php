@@ -46,7 +46,7 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface, Trac
     /**
      * @return array<string,array>
      */
-    public function getSearch(): array
+    public function getData(): array
     {
         return $this->data;
     }
