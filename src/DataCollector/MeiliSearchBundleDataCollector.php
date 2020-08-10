@@ -25,9 +25,6 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
 {
     private const NAME = 'meilisearch';
     private const INDEXES = 'indexes';
-    private const CREATED_INDEXES = 'created_indexes';
-    private const DELETED_INDEXES = 'deleted_indexes';
-    private const FETCHED_INDEXES = 'fetched_indexes';
     private const QUERIES = 'queries';
     private const SETTINGS = 'settings';
     private const SYNONYMS = 'synonyms';
@@ -83,11 +80,11 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
      */
     public function lateCollect(): void
     {
-        $this->data[self::INDEXES] = $this->indexOrchestrator->getIndexes();
+        $this->data[self::INDEXES] = [
+            'count' => count($this->indexOrchestrator->getIndexes()),
+            'data' => $this->indexOrchestrator->getData(),
+        ];
         $this->data[self::SETTINGS] = $this->indexSettingsOrchestrator->getData();
-        $this->data[self::CREATED_INDEXES] = $this->indexOrchestrator->getCreatedIndexes();
-        $this->data[self::DELETED_INDEXES] = $this->indexOrchestrator->getDeletedIndexes();
-        $this->data[self::FETCHED_INDEXES] = $this->indexOrchestrator->getFetchedIndexes();
         $this->data[self::QUERIES] = $this->searchEntryPoint->getSearch();
         $this->data[self::SYNONYMS] = $this->synonymsOrchestrator->getData();
     }
@@ -96,9 +93,6 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     {
         $this->data[self::INDEXES] = [];
         $this->data[self::SETTINGS] = [];
-        $this->data[self::CREATED_INDEXES] = [];
-        $this->data[self::DELETED_INDEXES] = [];
-        $this->data[self::FETCHED_INDEXES] = [];
         $this->data[self::QUERIES] = [];
         $this->data[self::SYNONYMS] = [];
     }
@@ -114,21 +108,6 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function getIndexes(): array
     {
         return $this->data[self::INDEXES];
-    }
-
-    public function getCreatedIndexes(): array
-    {
-        return $this->data[self::CREATED_INDEXES];
-    }
-
-    public function getDeletedIndexes(): array
-    {
-        return $this->data[self::DELETED_INDEXES];
-    }
-
-    public function getFetchedIndexes(): array
-    {
-        return $this->data[self::FETCHED_INDEXES];
     }
 
     /**

@@ -11,10 +11,13 @@ use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidNormalizer;
 use MeiliSearchBundle\Cache\SearchResultCacheOrchestrator;
 use MeiliSearchBundle\Command\ClearSearchResultCacheCommand;
 use MeiliSearchBundle\Command\WarmIndexesCommand;
+use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
 use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
+use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\IndexEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SearchEventSubscriber;
@@ -30,6 +33,9 @@ use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
+use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
+use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
+use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Loader\LoaderInterface;
 use MeiliSearchBundle\Messenger\Handler\AddIndexMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\DeleteIndexMessageHandler;
@@ -42,7 +48,9 @@ use MeiliSearchBundle\EventSubscriber\ExceptionSubscriber;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
+use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\Twig\SearchExtension;
+use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
 use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
 use MeiliSearchBundle\Search\SearchEntryPoint;
@@ -77,6 +85,8 @@ final class MeiliSearchExtension extends Extension
         'document' => 'meili_search.document_loader',
         'index' => 'meili_search.index_loader',
     ];
+    private const DEBUG = '.debug.';
+    private const INNER = '.inner';
 
     /**
      * {@inheritdoc}
@@ -100,8 +110,19 @@ final class MeiliSearchExtension extends Extension
         $this->registerSubscribers($container);
         $this->registerCommands($container, $config);
 
+        $this->registerTraceableIndexOrchestrator($container);
+        $this->registerTraceableIndexSettingsOrchestrator($container);
+        $this->registerTraceableDocumentOrchestrator($container);
+        $this->registerTraceableSearchEntryPoint($container);
+        $this->registerTraceableSynonymsOrchestrator($container);
+        $this->registerTraceableUpdateOrchestrator($container);
+        $this->registerDataCollector($container);
+
         $container->registerForAutoconfiguration(DocumentDataProviderInterface::class)
             ->addTag(self::DOCUMENT_PROVIDER_IDENTIFIER)
+        ;
+        $container->registerForAutoconfiguration(TraceableDataCollectorInterface::class)
+            ->addTag('meili_search.data_collector.traceable')
         ;
     }
 
@@ -580,6 +601,114 @@ final class MeiliSearchExtension extends Extension
             ->addTag('console.command')
             ->addTag('container.preload', [
                 'class' => WarmIndexesCommand::class,
+            ])
+        ;
+    }
+
+    private function registerTraceableIndexOrchestrator(ContainerBuilder $container): void
+    {
+        if (!$container->hasAlias(IndexOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableIndexOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(IndexOrchestratorInterface::class)
+            ->setPublic(false)
+        ;
+    }
+
+    private function registerTraceableIndexSettingsOrchestrator(ContainerBuilder $container): void
+    {
+        if (!$container->hasAlias(IndexSettingsOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableIndexSettingsOrchestrator::class, TraceableIndexSettingsOrchestrator::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableIndexSettingsOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(IndexSettingsOrchestratorInterface::class)
+            ->setPublic(false)
+        ;
+    }
+
+    private function registerTraceableDocumentOrchestrator(ContainerBuilder $container): void
+    {
+        if (!$container->hasAlias(DocumentEntryPointInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableDocumentEntryPoint::class, TraceableDocumentEntryPoint::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(DocumentEntryPointInterface::class)
+            ->setPublic(false)
+        ;
+    }
+
+    private function registerTraceableSearchEntryPoint(ContainerBuilder $container): void
+    {
+        if (!$container->hasAlias(SearchEntryPointInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableSearchEntryPoint::class, TraceableSearchEntryPoint::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableSearchEntryPoint::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(SearchEntryPointInterface::class)
+            ->setPublic(false)
+        ;
+    }
+
+    private function registerTraceableSynonymsOrchestrator(ContainerBuilder $container): void
+    {
+        if (!$container->hasAlias(SynonymsOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableSynonymsOrchestrator::class, TraceableSynonymsOrchestrator::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(SynonymsOrchestratorInterface::class)
+            ->setPublic(false)
+        ;
+    }
+
+    private function registerTraceableUpdateOrchestrator(ContainerBuilder $container): void
+    {
+        if (!$container->hasAlias(UpdateOrchestratorInterface::class)) {
+            return;
+        }
+
+        $container->register(self::DEBUG.TraceableUpdateOrchestrator::class, TraceableUpdateOrchestrator::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableUpdateOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setDecoratedService(UpdateOrchestratorInterface::class)
+            ->setPublic(false)
+        ;
+    }
+
+    public function registerDataCollector(ContainerBuilder $container): void
+    {
+        $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
+            ->setArguments([
+                new Reference(self::DEBUG.TraceableIndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableIndexSettingsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('data_collector', [
+                'template' => '@MeiliSearch/Collector/data_collector.html.twig',
+                'id'       => 'meilisearch',
             ])
         ;
     }

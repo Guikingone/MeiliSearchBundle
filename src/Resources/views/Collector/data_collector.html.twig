@@ -1,5 +1,7 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
+{% import _self as helper %}
+
 {% block toolbar %}
     {% set indexes, queriesCount = collector.getIndexes(), collector.queriesCount() %}
 
@@ -11,12 +13,12 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             <b>{{- 'Indexes' -}}</b>
-            <span>{{- indexes|length is not same as(0) ? indexes|length : 'No index found' -}}</span>
+            <span>{{- indexes['count'] is same as(0) ? 'No index found' : indexes['count'] -}}</span>
         </div>
 
         <div class="sf-toolbar-info-piece">
             <b>{{ 'Queries count' }}</b>
-            <span>{{- queriesCount is not same as(0) ? queriesCount : 'No query made' -}}</span>
+            <span>{{- queriesCount is same as(0) ? 'No query made' : queriesCount -}}</span>
         </div>
     {% endset %}
 
@@ -24,23 +26,83 @@
 {% endblock %}
 
 {% block menu %}
-    <span class="label {{- collector.queriesCount() is not same as(0) ? '' : 'disabled' -}}">
-        <span class="icon"><img src="{{ include('@MeiliSearch/Collector/logo.svg') }}" alt=""/></span>
+    <span class="label {{- collector.indexes|length is same as(0) ? 'disabled' : '' -}}">
+        <span class="icon">{{ include('@MeiliSearch/Collector/logo.svg') }}</span>
         <strong>{{- 'MeiliSearch' -}}</strong>
     </span>
 {% endblock %}
 
 {% block panel %}
     <h2>{{- 'MeiliSearch' -}}</h2>
-    {% if collector.getQueriesCount is same as(0) %}
+
+    <h4>{{ 'Indexes' }}</h4>
+    {% if collector.indexes.count is same as(0) %}
         <div class="empty">
-            <p>{{ 'No queries has been made' }}</p>
+            <p>{{ 'No index found' }}</p>
         </div>
     {% else %}
         <div class="sf-tabs">
             <div class="tab">
-                {% set queries = collector.getQueries() %}
+                <h3 class="tab-title">{{- 'Indexes' -}}</h3>
+                <div class="tab-content">
+                    {% set indexes = collector.indexes %}
+
+                    <h3>{{ 'Created indexes' }}</h3>
+                    {{ helper.index_table(indexes, 'createdIndexes') }}
+
+                    <h3>{{ 'Fetched indexes' }}</h3>
+                    {{ helper.index_table(indexes, 'fetchedIndexes') }}
+
+                    <h3>{{ 'Deleted indexes' }}</h3>
+                    {{ helper.index_table(indexes, 'deletedIndexes') }}
+                </div>
+            </div>
+            <div class="tab">
+                <h3 class="tab-title">{{- 'Queries' -}}</h3>
+                <div class="tab-content">
+                    {% if collector.queriesCount() is same as(0) %}
+                        <div class="empty">
+                            <p>{{ 'No queries have been made' }}</p>
+                        </div>
+                    {% else %}
+                        {% set queries = collector.queries %}
+
+                    {% endif %}
+                </div>
             </div>
         </div>
     {% endif %}
 {% endblock %}
+
+{% macro index_table(array, key) %}
+    <table class="{{ class|default('') }}">
+        <thead>
+        <tr>
+            <th scope="col" class="key">
+                {{- 'Index' -}}
+            </th>
+            <th scope="col">
+                {{ 'Primary Key' }}
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for index in array['data'][key]|sort %}
+                <tr>
+                    <th>{{- index['uid'] -}}</th>
+                    <td>{{- index['primaryKey'] ?? 'Undefined' -}}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2">
+                        {{ 'No indexes' }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
+
+{% macro search_table() %}
+
+{% endmacro %}
