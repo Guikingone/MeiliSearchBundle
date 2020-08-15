@@ -78,7 +78,18 @@
                     {{- 'Documents' -}}
                 </h3>
                 <div class="tab-content">
-                    {% set documents = collector.getDocuments() %}
+{#                    {% set documents = collector.getDocuments() %}#}
+{#                    <h3>{{ 'Added documents' }}</h3>#}
+{#                    {{ helper.documents_table(indexes, 'addedDocuments') }}#}
+
+{#                    <h3>{{ 'Removed documents' }}</h3>#}
+{#                    {{ helper.documents_table(indexes, 'removedDocuments') }}#}
+
+{#                    <h3>{{ 'Retrieved documents' }}</h3>#}
+{#                    {{ helper.documents_table(indexes, 'retrievedDocuments') }}#}
+
+{#                    <h3>{{ 'Updated documents' }}</h3>#}
+{#                    {{ helper.documents_table(indexes, 'updatedDocuments') }}#}
                 </div>
             </div>
         </div>
@@ -106,7 +117,7 @@
             {% else %}
                 <tr>
                     <td colspan="2">
-                        {{ 'No indexes' }}
+                        {{- 'No indexes' -}}
                     </td>
                 </tr>
             {% endfor %}
@@ -115,5 +126,53 @@
 {% endmacro %}
 
 {% macro search_table(queries) %}
+    <table class="{{ class|default('') }}">
+        <thead>
+            <tr>
+                <th scope="col" class="key">
+                    {{- 'Index' -}}
+                </th>
+                <th scope="col">
+                    {{- 'Queries count' -}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, queries in queries %}
+                <tr>
+                    <th>{{- index -}}</th>
+                    <th>{{- queries|length -}}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
 
+{% macro documents_table(documents, key) %}
+    <table class="{{ class|default('') }}">
+        <thead>
+        <tr>
+            <th scope="col" class="key">
+                {{- 'Index' -}}
+            </th>
+            <th scope="col">
+                {{ 'Primary Key' }}
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for index in array['data'][key]|sort %}
+            <tr>
+                <th>{{- index['uid'] -}}</th>
+                <td>{{- index['primaryKey'] ?? 'Undefined' -}}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="2">
+                    {{ 'No indexes' }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endmacro %}
