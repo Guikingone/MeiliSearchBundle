@@ -8,6 +8,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use MeiliSearch\Client;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReader;
 use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
+use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
+use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidNormalizer;
 use MeiliSearchBundle\Cache\SearchResultCacheOrchestrator;
 use MeiliSearchBundle\Command\ClearSearchResultCacheCommand;
 use MeiliSearchBundle\Command\DeleteIndexCommand;
@@ -16,6 +18,7 @@ use MeiliSearchBundle\Command\ListIndexesCommand;
 use MeiliSearchBundle\Command\WarmDocumentsCommand;
 use MeiliSearchBundle\Command\WarmIndexesCommand;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
+use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
 use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
@@ -47,6 +50,7 @@ use MeiliSearchBundle\Messenger\Handler\Document\DeleteDocumentMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\Document\UpdateDocumentMessageHandler;
 use MeiliSearchBundle\Result\ResultBuilder;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
+use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
@@ -144,6 +148,7 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentEntryPoint::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentEntryPoint::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentEntryPoint::class)->getArgument(2));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentEntryPoint::class)->getArgument(3));
         static::assertTrue($container->getDefinition(DocumentEntryPoint::class)->hasTag('container.preload'));
         static::assertNotEmpty($container->getDefinition(DocumentEntryPoint::class)->getArguments());
         static::assertArrayHasKey('class', $container->getDefinition(DocumentEntryPoint::class)->getTag('container.preload')[0]);
@@ -195,6 +200,7 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertArrayHasKey(LoaderInterface::class, $container->getAutoconfiguredInstanceof());
         static::assertArrayHasKey(DocumentDataProviderInterface::class, $container->getAutoconfiguredInstanceof());
+        static::assertArrayHasKey(TraceableDataCollectorInterface::class, $container->getAutoconfiguredInstanceof());
     }
 
     public function testFormCanBeConfigured(): void
@@ -276,6 +282,17 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(SearchResultCacheOrchestrator::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(SearchResultCacheOrchestrator::class)->getTag('container.preload')[0]);
         static::assertSame(SearchResultCacheOrchestrator::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(CachedSearchEntryPoint::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(CachedSearchEntryPoint::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(CachedSearchEntryPoint::class)->getArgument(1));
+        static::assertFalse($container->getDefinition(CachedSearchEntryPoint::class)->isPublic());
+        static::assertTrue($container->getDefinition(CachedSearchEntryPoint::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(CachedSearchEntryPoint::class)->getTag('container.preload')[0]);
+        static::assertSame(CachedSearchEntryPoint::class, $container->getDefinition(CachedSearchEntryPoint::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
+        static::assertArrayHasKey(SearchEntryPointInterface::class, $container->getAutoconfiguredInstanceof());
 
         static::assertTrue($container->hasDefinition(ClearSearchResultCacheCommand::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(ClearSearchResultCacheCommand::class)->getArgument(0));
@@ -359,10 +376,25 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentNormalizer::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentNormalizer::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentNormalizer::class)->getArgument(2));
+        static::assertFalse($container->getDefinition(DocumentNormalizer::class)->isPublic());
         static::assertTrue($container->getDefinition(DocumentNormalizer::class)->hasTag('serializer.normalizer'));
         static::assertTrue($container->getDefinition(DocumentNormalizer::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(DocumentNormalizer::class)->getTag('container.preload')[0]);
         static::assertSame(DocumentNormalizer::class, $container->getDefinition(DocumentNormalizer::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(UuidNormalizer::class));
+        static::assertFalse($container->getDefinition(UuidNormalizer::class)->isPublic());
+        static::assertTrue($container->getDefinition(UuidNormalizer::class)->hasTag('serializer.normalizer'));
+        static::assertTrue($container->getDefinition(UuidNormalizer::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(UuidNormalizer::class)->getTag('container.preload')[0]);
+        static::assertSame(UuidNormalizer::class, $container->getDefinition(UuidNormalizer::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(UuidDenormalizer::class));
+        static::assertFalse($container->getDefinition(UuidDenormalizer::class)->isPublic());
+        static::assertTrue($container->getDefinition(UuidDenormalizer::class)->hasTag('serializer.normalizer'));
+        static::assertTrue($container->getDefinition(UuidDenormalizer::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(UuidDenormalizer::class)->getTag('container.preload')[0]);
+        static::assertSame(UuidDenormalizer::class, $container->getDefinition(UuidDenormalizer::class)->getTag('container.preload')[0]['class']);
     }
 
     public function testMessengerHandlersAreConfigured(): void
@@ -432,26 +464,6 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertSame(SearchExtension::class, $container->getDefinition(SearchExtension::class)->getTag('container.preload')[0]['class']);
     }
 
-    public function testSearchEntryPointIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition(SearchEntryPoint::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(0));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(1));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(2));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(3));
-        static::assertFalse($container->getDefinition(SearchEntryPoint::class)->isPublic());
-        static::assertTrue($container->getDefinition(SearchEntryPoint::class)->hasTag('container.preload'));
-        static::assertArrayHasKey('class', $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]);
-        static::assertSame(SearchEntryPoint::class, $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]['class']);
-        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
-        static::assertArrayHasKey(SearchEntryPointInterface::class, $container->getAutoconfiguredInstanceof());
-    }
-
     public function testSubscribersAreConfigured(): void
     {
         $extension = new MeiliSearchExtension();
@@ -506,6 +518,26 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(SynonymsEventSubscriber::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(SynonymsEventSubscriber::class)->getTag('container.preload')[0]);
         static::assertSame(SynonymsEventSubscriber::class, $container->getDefinition(SynonymsEventSubscriber::class)->getTag('container.preload')[0]['class']);
+    }
+
+    public function testSearchEntryPointIsConfigured(): void
+    {
+        $extension = new MeiliSearchExtension();
+
+        $container = new ContainerBuilder();
+        $extension->load([], $container);
+
+        static::assertTrue($container->hasDefinition(SearchEntryPoint::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(1));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(2));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(3));
+        static::assertFalse($container->getDefinition(SearchEntryPoint::class)->isPublic());
+        static::assertTrue($container->getDefinition(SearchEntryPoint::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]);
+        static::assertSame(SearchEntryPoint::class, $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]['class']);
+        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
+        static::assertArrayHasKey(SearchEntryPointInterface::class, $container->getAutoconfiguredInstanceof());
     }
 
     public function testTraceableIndexOrchestratorIsConfigured(): void

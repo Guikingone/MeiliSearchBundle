@@ -542,7 +542,7 @@ final class MeiliSearchExtension extends Extension
                     new Reference(sprintf('cache.%s', $configuration['cache']['pool'])),
                     new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 ])
-            ->setPublic(false)
+                ->setPublic(false)
                 ->addTag('container.preload', [
                     'class' => SearchResultCacheOrchestrator::class,
                 ])

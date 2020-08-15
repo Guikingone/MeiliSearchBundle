@@ -7,6 +7,7 @@ namespace Tests\MeiliSearchBundle\Command;
 use Exception;
 use MeiliSearchBundle\Command\DeleteIndexesCommand;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -59,15 +60,19 @@ final class DeleteIndexesCommandTest extends TestCase
 
     public function testCommandCanClear(): void
     {
+        $registry = new IndexMetadataRegistry();
+        $registry->add('foo', new IndexMetadata('foo'));
+
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::once())->method('removeIndexes');
 
-        $command = new DeleteIndexesCommand($orchestrator, new IndexMetadataRegistry());
+        $command = new DeleteIndexesCommand($orchestrator, $registry);
 
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
         $tester->execute([]);
 
+        static::assertEmpty($registry->toArray());
         static::assertSame(0, $tester->getStatusCode());
         static::assertStringContainsString('All the indexes have been removed', $tester->getDisplay());
     }

@@ -20,7 +20,7 @@ final class MeiliSearchBundlePass implements CompilerPassInterface
         $this->registerTraceableDataCollector($container);
     }
 
-    public function registerTraceableDataCollector(ContainerBuilder $container): void
+    private function registerTraceableDataCollector(ContainerBuilder $container): void
     {
         foreach ($container->findTaggedServiceIds('meili_search.data_collector.traceable') as $id => $service) {
             $container->getDefinition($id)->addTag('kernel.reset', [

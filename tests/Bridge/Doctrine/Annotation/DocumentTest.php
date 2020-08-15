@@ -54,6 +54,7 @@ final class DocumentTest extends TestCase
     public function testDocumentCanBeConfiguredWithInvalidConfigurationOnModel(): void
     {
         static::expectException(InvalidDocumentConfigurationException::class);
+        static::expectExceptionMessage('The model key must be a bool, given "string"');
         new Document([
             'index' => 'foo',
             'primaryKey' => 'id',
