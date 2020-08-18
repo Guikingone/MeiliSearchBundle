@@ -15,6 +15,8 @@ use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
 use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
+use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
+use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -39,12 +41,16 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
         $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
 
+        $updateOrchestrator = $this->createMock(UpdateOrchestratorInterface::class);
+        $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
+
         $collector = new MeiliSearchBundleDataCollector(
             $traceableIndexOrchestrator,
             $traceableIndexSettingsOrchestrator,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
-            $traceableSynonymsOrchestrator
+            $traceableSynonymsOrchestrator,
+            $traceableUpdateOrchestrator
         );
 
         static::assertSame('meilisearch', $collector->getName());
@@ -78,12 +84,16 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
         $traceableSynonymsOrchestrator->getSynonyms('foo');
 
+        $updateOrchestrator = $this->createMock(UpdateOrchestratorInterface::class);
+        $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
+
         $collector = new MeiliSearchBundleDataCollector(
             $traceableIndexOrchestrator,
             $traceableIndexSettingsOrchestrator,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
-            $traceableSynonymsOrchestrator
+            $traceableSynonymsOrchestrator,
+            $traceableUpdateOrchestrator
         );
         $collector->lateCollect();
 
@@ -111,12 +121,16 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $synonymsOrchestrator = $this->createMock(SynonymsOrchestratorInterface::class);
         $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
 
+        $updateOrchestrator = $this->createMock(UpdateOrchestratorInterface::class);
+        $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
+
         $collector = new MeiliSearchBundleDataCollector(
             $traceableIndexOrchestrator,
             $traceableIndexSettingsOrchestrator,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
-            $traceableSynonymsOrchestrator
+            $traceableSynonymsOrchestrator,
+            $traceableUpdateOrchestrator
         );
         $collector->lateCollect();
 
@@ -150,12 +164,16 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
         $traceableSynonymsOrchestrator->getSynonyms('foo');
 
+        $updateOrchestrator = $this->createMock(UpdateOrchestratorInterface::class);
+        $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
+
         $collector = new MeiliSearchBundleDataCollector(
             $traceableIndexOrchestrator,
             $traceableIndexSettingsOrchestrator,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
-            $traceableSynonymsOrchestrator
+            $traceableSynonymsOrchestrator,
+            $traceableUpdateOrchestrator
         );
         $collector->lateCollect();
 
@@ -199,12 +217,16 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $traceableSynonymsOrchestrator = new TraceableSynonymsOrchestrator($synonymsOrchestrator);
         $traceableSynonymsOrchestrator->getSynonyms('foo');
 
+        $updateOrchestrator = $this->createMock(UpdateOrchestratorInterface::class);
+        $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
+
         $collector = new MeiliSearchBundleDataCollector(
             $traceableIndexOrchestrator,
             $traceableIndexSettingsOrchestrator,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
-            $traceableSynonymsOrchestrator
+            $traceableSynonymsOrchestrator,
+            $traceableUpdateOrchestrator
         );
         $collector->lateCollect();
 

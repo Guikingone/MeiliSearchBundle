@@ -30,7 +30,6 @@ final class TraceableUpdateOrchestratorTest extends TestCase
         static::assertNotEmpty($traceableOrchestrator->getData()['retrievedUpdates']['foo']);
     }
 
-
     public function testOrchestratorCanGetUpdates(): void
     {
         $logger = $this->createMock(LoggerInterface::class);

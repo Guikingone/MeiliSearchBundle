@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EventSubscriber;
+namespace Tests\MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\PostSettingsUpdateEvent;

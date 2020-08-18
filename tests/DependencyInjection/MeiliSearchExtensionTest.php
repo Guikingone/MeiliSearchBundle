@@ -631,6 +631,7 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(2));
         static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(3));
         static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(4));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(5));
         static::assertFalse($container->getDefinition(MeiliSearchBundleDataCollector::class)->isPublic());
         static::assertTrue($container->getDefinition(MeiliSearchBundleDataCollector::class)->hasTag('data_collector'));
         static::assertSame('@MeiliSearch/Collector/data_collector.html.twig', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]['template']);

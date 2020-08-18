@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bridge\RamseyUuid\Serializer;
+namespace Tests\MeiliSearchBundle\Bridge\RamseyUuid\Serializer;
 
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
 use PHPUnit\Framework\TestCase;

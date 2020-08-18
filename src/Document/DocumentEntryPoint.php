@@ -23,6 +23,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use function array_key_exists;
 use function array_merge;
+use function array_walk;
 use function in_array;
 use function sprintf;
 use function implode;
@@ -33,6 +34,7 @@ use function implode;
 final class DocumentEntryPoint implements DocumentEntryPointInterface
 {
     private const UPDATE_ID = 'updateId';
+    private const MODEL = 'model';
 
     /**
      * @var Client
@@ -76,7 +78,7 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
 
             if (null !== $model) {
                 $document = array_merge($document, [
-                    'model' => $model,
+                    self::MODEL => $model,
                 ]);
             }
 
@@ -98,7 +100,7 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             $document = $index->getDocument($id);
             $this->dispatch(new PostDocumentRetrievedEvent($index, $document));
 
-            return array_key_exists('model', $document) ? $this->resultBuilder->build($document) : $document;
+            return array_key_exists(self::MODEL, $document) ? $this->resultBuilder->build($document) : $document;
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The document cannot be retrieved, error: "%s"', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
@@ -125,7 +127,7 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
 
             $data = [];
             array_walk($documents, function (array $document) use (&$data): void {
-                $data[] = array_key_exists('model', $document) ? $this->resultBuilder->build($document) : $document;
+                $data[] = array_key_exists(self::MODEL, $document) ? $this->resultBuilder->build($document) : $document;
             });
 
             return $data;

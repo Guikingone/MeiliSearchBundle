@@ -73,6 +73,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function array_key_exists;
 use function interface_exists;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -88,6 +89,7 @@ final class MeiliSearchExtension extends Extension
     ];
     private const DEBUG = '.debug.';
     private const INNER = '.inner';
+    private const CACHE = 'cache';
 
     /**
      * {@inheritdoc}
@@ -357,7 +359,7 @@ final class MeiliSearchExtension extends Extension
         ;
         $container->setAlias(SearchEntryPointInterface::class, SearchEntryPoint::class);
 
-        if (array_key_exists('cache', $configuration) && $configuration['cache']['enabled'] && interface_exists(CacheItemPoolInterface::class)) {
+        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && interface_exists(CacheItemPoolInterface::class)) {
             $container->register(SearchResultCacheOrchestrator::class, SearchResultCacheOrchestrator::class)
                 ->setArguments([
                     new Reference(CacheItemPoolInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
@@ -536,10 +538,10 @@ final class MeiliSearchExtension extends Extension
 
     private function registerCommands(ContainerBuilder $container, array $configuration): void
     {
-        if (array_key_exists('cache', $configuration) && $configuration['cache']['enabled'] && interface_exists(CacheItemPoolInterface::class)) {
+        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && interface_exists(CacheItemPoolInterface::class)) {
             $container->register(SearchResultCacheOrchestrator::class, SearchResultCacheOrchestrator::class)
                 ->setArguments([
-                    new Reference(sprintf('cache.%s', $configuration['cache']['pool'])),
+                    new Reference(sprintf('cache.%s', $configuration[self::CACHE]['pool'])),
                     new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 ])
                 ->setPublic(false)
@@ -719,6 +721,7 @@ final class MeiliSearchExtension extends Extension
                 new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('data_collector', [

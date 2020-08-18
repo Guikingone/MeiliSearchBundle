@@ -23,6 +23,10 @@ use function sprintf;
  */
 final class WarmIndexesCommand extends Command
 {
+    private const ASYNC = 'async';
+    private const PRIMARY_KEY = 'primaryKey';
+    private const SYNONYMS = 'synonyms';
+
     /**
      * @var array<string,array>
      */
@@ -97,7 +101,7 @@ final class WarmIndexesCommand extends Command
         }
 
         $asyncIndexes = $asyncIndexes = array_filter($this->indexes, function (array $index): bool {
-            return array_key_exists('async', $index);
+            return array_key_exists(self::ASYNC, $index);
         });
         if (!empty($asyncIndexes) && null === $this->messageBus) {
             $io->error([
@@ -111,12 +115,12 @@ final class WarmIndexesCommand extends Command
         try {
             foreach ($this->indexes as $indexName => $configuration) {
                 $indexName = null !== $this->prefix ? sprintf('%s_%s', $this->prefix, $indexName) : $indexName;
-                $primaryKey = $configuration['primaryKey'];
-                $configuration['synonyms'] = $this->handleSynonyms($configuration['synonyms']);
+                $primaryKey = $configuration[self::PRIMARY_KEY];
+                $configuration[self::SYNONYMS] = $this->handleSynonyms($configuration[self::SYNONYMS]);
 
                 $this->indexMetadataRegistry->add($indexName, new IndexMetadata(
                     $indexName,
-                    $configuration['async'],
+                    $configuration[self::ASYNC],
                     $primaryKey,
                     $configuration['rankingRules'],
                     $configuration['stopWords'],
@@ -124,18 +128,18 @@ final class WarmIndexesCommand extends Command
                     $configuration['facetedAttributes'],
                     $configuration['searchableAttributes'],
                     $configuration['displayedAttributes'],
-                    $configuration['synonyms']
+                    $configuration[self::SYNONYMS]
                 ));
 
-                if ($configuration['async']) {
-                    unset($configuration['async'], $configuration['primaryKey']);
+                if ($configuration[self::ASYNC]) {
+                    unset($configuration[self::ASYNC], $configuration[self::PRIMARY_KEY]);
 
                     $this->messageBus->dispatch(new AddIndexMessage($indexName, $primaryKey, $configuration));
 
                     continue;
                 }
 
-                $this->indexOrchestrator->addIndex($indexName, $configuration['primaryKey'], $configuration);
+                $this->indexOrchestrator->addIndex($indexName, $configuration[self::PRIMARY_KEY], $configuration);
             }
         } catch (Throwable $throwable) {
             $io->error([
