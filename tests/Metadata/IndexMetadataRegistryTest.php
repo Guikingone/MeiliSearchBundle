@@ -8,6 +8,8 @@ use MeiliSearchBundle\Exception\InvalidArgumentException;
 use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use PHPUnit\Framework\TestCase;
+use function get_class;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

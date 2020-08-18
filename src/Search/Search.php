@@ -13,6 +13,7 @@ use function is_string;
 use function gettype;
 use function preg_match;
 use function sprintf;
+use function strpos;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

@@ -11,6 +11,7 @@ use MeiliSearchBundle\Event\Synonyms\PreUpdateSynonymsEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

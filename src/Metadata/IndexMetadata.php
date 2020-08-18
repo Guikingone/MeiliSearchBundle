@@ -17,7 +17,7 @@ final class IndexMetadata
     /**
      * @var bool
      */
-    private $async;
+    private $async = false;
 
     /**
      * @var string|null

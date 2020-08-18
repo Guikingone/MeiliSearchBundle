@@ -19,6 +19,7 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use function implode;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

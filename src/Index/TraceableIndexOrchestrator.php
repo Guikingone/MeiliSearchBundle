@@ -6,6 +6,7 @@ namespace MeiliSearchBundle\Index;
 
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
+use function array_walk;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
