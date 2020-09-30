@@ -89,7 +89,7 @@
   "require": {
     "php": ">=7.2",
     "ext-json": "*",
-    "meilisearch/meilisearch-php": "^0.13",
+    "meilisearch/meilisearch-php": "^0.14",
     "psr/log": "^1.1",
     "symfony/config": "^4.4|^5.0",
     "symfony/console": "^4.4|^5.0",
