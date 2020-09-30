@@ -8,7 +8,9 @@ use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 use function sprintf;
@@ -42,6 +44,7 @@ final class DeleteIndexCommand extends Command
         $this
             ->setDefinition([
                 new InputArgument(self::INDEX, InputArgument::REQUIRED, 'The index to delete'),
+                new InputOption('force', 'f', InputOption::VALUE_OPTIONAL|InputOption::VALUE_NONE, 'Allow to force the deletion'),
             ])
             ->setDescription('Allow to delete an index')
         ;
@@ -54,21 +57,26 @@ final class DeleteIndexCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $index = $input->getArgument(self::INDEX);
+        if ($io->askQuestion(new ConfirmationQuestion('Are you sure that you want to delete this index?', false)) || $input->getOption('force')) {
+            $index = $input->getArgument(self::INDEX);
 
-        try {
-            $this->indexOrchestrator->removeIndex($index);
-        } catch (Throwable $throwable) {
-            $io->error([
-                'An error occurred when trying to delete the index',
-                sprintf('Error: %s', $throwable->getMessage()),
-            ]);
+            try {
+                $this->indexOrchestrator->removeIndex($index);
+                $io->success(sprintf('The index "foo" has been removed', $index));
 
-            return 1;
+                return Command::SUCCESS;
+            } catch (Throwable $throwable) {
+                $io->error([
+                    'An error occurred when trying to delete the index',
+                    sprintf('Error: %s', $throwable->getMessage()),
+                ]);
+
+                return Command::FAILURE;
+            }
+        } else {
+            $io->warning('The index has not been deleted');
+
+            return Command::FAILURE;
         }
-
-        $io->success(sprintf('The index "%s" has been deleted', $index));
-
-        return 0;
     }
 }

@@ -27,6 +27,20 @@ final class DeleteIndexesCommandTest extends TestCase
         static::assertSame('Delete every indexes stored in MeiliSearch', $command->getDescription());
     }
 
+    public function testCommandCannotClearWithoutConfirmationAnswer(): void
+    {
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::never())->method('removeIndexes');
+
+        $command = new DeleteIndexesCommand($orchestrator, new IndexMetadataRegistry());
+
+        $tester = new CommandTester($command);
+        $tester->execute([]);
+
+        static::assertSame(0, $tester->getStatusCode());
+        static::assertStringContainsString('The action has been discarded', $tester->getDisplay());
+    }
+
     public function testCommandCannotClearWithoutConfirmation(): void
     {
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);

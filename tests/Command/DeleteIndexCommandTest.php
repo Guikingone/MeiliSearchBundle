@@ -25,6 +25,7 @@ final class DeleteIndexCommandTest extends TestCase
 
         static::assertSame('meili:delete-index', $command->getName());
         static::assertTrue($command->getDefinition()->hasArgument('index'));
+        static::assertTrue($command->getDefinition()->getArgument('index')->isRequired());
         static::assertSame('Allow to delete an index', $command->getDescription());
     }
 
@@ -39,6 +40,7 @@ final class DeleteIndexCommandTest extends TestCase
         $command = new DeleteIndexCommand($orchestrator);
 
         $tester = new CommandTester($command);
+        $tester->setInputs(['yes']);
         $tester->execute([
             'index' => $index,
         ]);
@@ -62,12 +64,13 @@ final class DeleteIndexCommandTest extends TestCase
         $command = new DeleteIndexCommand($orchestrator);
 
         $tester = new CommandTester($command);
+        $tester->setInputs(['yes']);
         $tester->execute([
             'index' => $index,
         ]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString(sprintf('The index "%s" has been deleted', $index), $tester->getDisplay());
+        static::assertStringContainsString(sprintf('The index "%s" has been removed', $index), $tester->getDisplay());
     }
 
     public function provideIndexes(): Generator
