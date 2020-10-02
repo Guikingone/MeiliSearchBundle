@@ -56,6 +56,25 @@ final class DeleteIndexCommandTest extends TestCase
     /**
      * @dataProvider provideIndexes
      */
+    public function testCommandCanDeleteValidIndexWithoutConfirmation(string $index): void
+    {
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::never())->method('removeIndex');
+
+        $command = new DeleteIndexCommand($orchestrator);
+
+        $tester = new CommandTester($command);
+        $tester->execute([
+            'index' => $index,
+        ]);
+
+        static::assertSame(1, $tester->getStatusCode());
+        static::assertStringContainsString('The index has not been deleted', $tester->getDisplay());
+    }
+
+    /**
+     * @dataProvider provideIndexes
+     */
     public function testCommandCanDeleteValidIndex(string $index): void
     {
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
@@ -67,6 +86,26 @@ final class DeleteIndexCommandTest extends TestCase
         $tester->setInputs(['yes']);
         $tester->execute([
             'index' => $index,
+        ]);
+
+        static::assertSame(0, $tester->getStatusCode());
+        static::assertStringContainsString(sprintf('The index "%s" has been removed', $index), $tester->getDisplay());
+    }
+
+    /**
+     * @dataProvider provideIndexes
+     */
+    public function testCommandCanDeleteValidIndexWithForceOption(string $index): void
+    {
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::once())->method('removeIndex')->with(self::equalTo($index));
+
+        $command = new DeleteIndexCommand($orchestrator);
+
+        $tester = new CommandTester($command);
+        $tester->execute([
+            'index' => $index,
+            '--force' => true,
         ]);
 
         static::assertSame(0, $tester->getStatusCode());

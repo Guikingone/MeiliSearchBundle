@@ -36,7 +36,7 @@ The important options are `index`, `query` and `attribute_to_display`, here's th
 
 - **AttributeToDisplay**: Define the attribute that should be displayed
 
-_Note: 
+_Note_: 
 
 - There's a fourth attribute `attributes_to_retrieve` that allow to filter the retrieved fields of each document
 
