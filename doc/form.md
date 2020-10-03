@@ -30,11 +30,11 @@ final class FooType extends AbstractType
 
 The important options are `index`, `query` and `attribute_to_display`, here's the role of each:
 
-- **Index**: Define the index where the document should be searched
+- **index**: Define the index where the document should be searched
 
-- **Query**: Define the search that should be performed
+- **query**: Define the search that should be performed
 
-- **AttributeToDisplay**: Define the attribute that should be displayed
+- **attribute_to_display**: Define the attribute that should be displayed
 
 _Note_: 
 

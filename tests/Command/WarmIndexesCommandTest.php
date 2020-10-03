@@ -62,7 +62,9 @@ final class WarmIndexesCommandTest extends TestCase
 
     public function testCommandCanWarmAsyncIndexWithMessageBus(): void
     {
-        $messageBus = new IndexesMessageBus();
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects(self::once())->method('dispatch')->willReturn(Envelope::wrap(new \stdClass()));
+
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
 
         $command = new WarmIndexesCommand([
