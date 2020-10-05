@@ -275,6 +275,9 @@ final class MeiliSearchExtensionTest extends TestCase
             ],
         ], $container);
 
+        static::assertTrue($container->has(SearchResultCacheOrchestrator::class));
+        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
+        static::assertSame(CachedSearchEntryPoint::class, (string) $container->getAlias(SearchEntryPointInterface::class));
         static::assertTrue($container->hasDefinition(SearchResultCacheOrchestrator::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getArgument(1));
