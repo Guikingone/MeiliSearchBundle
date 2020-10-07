@@ -103,6 +103,7 @@ final class WarmIndexesCommand extends Command
         $asyncIndexes = $asyncIndexes = array_filter($this->indexes, function (array $index): bool {
             return array_key_exists(self::ASYNC, $index);
         });
+
         if (!empty($asyncIndexes) && null === $this->messageBus) {
             $io->error([
                 'The "async" attribute cannot be used when Messenger is not installed',
