@@ -11,6 +11,7 @@ use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -56,7 +57,7 @@ final class WarmIndexesCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        static::assertSame(1, $tester->getStatusCode());
+        static::assertSame(Command::FAILURE, $tester->getStatusCode());
         static::assertStringContainsString('The "async" attribute cannot be used when Messenger is not installed', $tester->getDisplay());
         static::assertStringContainsString('Consider using "composer require symfony/messenger"', $tester->getDisplay());
     }
@@ -78,7 +79,7 @@ final class WarmIndexesCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        static::assertSame(0, $tester->getStatusCode());
+        static::assertSame(Command::SUCCESS, $tester->getStatusCode());
         static::assertStringContainsString('The indexes has been warmed, feel free to query them!', $tester->getDisplay());
     }
 
@@ -96,7 +97,7 @@ final class WarmIndexesCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        static::assertSame(1, $tester->getStatusCode());
+        static::assertSame(Command::FAILURE, $tester->getStatusCode());
         static::assertStringContainsString('The indexes cannot be warmed!', $tester->getDisplay());
         static::assertStringContainsString('Error: "An error occurred"', $tester->getDisplay());
     }
@@ -117,7 +118,7 @@ final class WarmIndexesCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        static::assertSame(0, $tester->getStatusCode());
+        static::assertSame(Command::SUCCESS, $tester->getStatusCode());
         static::assertStringContainsString('The indexes has been warmed, feel free to query them!', $tester->getDisplay());
         static::assertNotEmpty($registry->toArray());
         static::assertInstanceOf(IndexMetadata::class, $registry->get('foo_foo'));
@@ -139,7 +140,7 @@ final class WarmIndexesCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        static::assertSame(0, $tester->getStatusCode());
+        static::assertSame(Command::SUCCESS, $tester->getStatusCode());
         static::assertStringContainsString('The indexes has been warmed, feel free to query them!', $tester->getDisplay());
         static::assertNotEmpty($registry->toArray());
         static::assertInstanceOf(IndexMetadata::class, $registry->get('foo'));

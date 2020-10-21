@@ -124,18 +124,18 @@ final class WarmIndexesCommand extends Command
 
                 $this->indexMetadataRegistry->add($indexName, new IndexMetadata(
                     $indexName,
-                    $configuration[self::ASYNC],
-                    $primaryKey,
-                    $configuration['rankingRules'],
-                    $configuration['stopWords'],
-                    $configuration['distinctAttribute'],
-                    $configuration['facetedAttributes'],
-                    $configuration['searchableAttributes'],
-                    $configuration['displayedAttributes'],
-                    $configuration[self::SYNONYMS]
+                    $configuration[self::ASYNC] ?? false,
+                    $primaryKey ?? null,
+                    $configuration['rankingRules'] ?? [],
+                    $configuration['stopWords'] ?? [],
+                    $configuration['distinctAttribute'] ?? null,
+                    $configuration['facetedAttributes'] ?? [],
+                    $configuration['searchableAttributes'] ?? [],
+                    $configuration['displayedAttributes'] ?? [],
+                    $configuration[self::SYNONYMS] ?? []
                 ));
 
-                if ($configuration[self::ASYNC]) {
+                if (\array_key_exists(self::ASYNC, $configuration)) {
                     unset($configuration[self::ASYNC], $configuration[self::PRIMARY_KEY]);
 
                     $this->messageBus->dispatch(new AddIndexMessage($indexName, $primaryKey, $configuration));

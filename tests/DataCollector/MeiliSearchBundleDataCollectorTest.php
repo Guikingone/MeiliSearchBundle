@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\DataCollector;
 
+use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
@@ -58,7 +59,17 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
 
     public function testCollectorCanCollect(): void
     {
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('show')->willReturn([
+            "uid" => "movies",
+            "primaryKey" => "movie_id",
+            "createdAt" => "2019-11-20T09:40:33.711324Z",
+            "updatedAt" => "2019-11-20T10:16:42.761858Z",
+        ]);
+
         $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $indexOrchestrator->expects(self::once())->method('getIndex')->with(self::equalTo('bar'))->willReturn($index);
+
         $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
         $traceableIndexOrchestrator->addIndex('foo', 'id');
         $traceableIndexOrchestrator->removeIndex('bar');
@@ -183,7 +194,17 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
 
     public function testCollectorCanCollectAndReset(): void
     {
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('show')->willReturn([
+            "uid" => "movies",
+            "primaryKey" => "movie_id",
+            "createdAt" => "2019-11-20T09:40:33.711324Z",
+            "updatedAt" => "2019-11-20T10:16:42.761858Z",
+        ]);
+
         $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $indexOrchestrator->expects(self::once())->method('getIndex')->with(self::equalTo('bar'))->willReturn($index);
+
         $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
         $traceableIndexOrchestrator->addIndex('foo', 'id');
         $traceableIndexOrchestrator->removeIndex('bar');

@@ -58,6 +58,12 @@ final class TraceableIndexOrchestratorTest extends TestCase
     public function testSingleIndexCanBeRetrieved(): void
     {
         $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('show')->willReturn([
+            "uid" => "movies",
+            "primaryKey" => "movie_id",
+            "createdAt" => "2019-11-20T09:40:33.711324Z",
+            "updatedAt" => "2019-11-20T10:16:42.761858Z",
+        ]);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::once())->method('getIndex')->willReturn($index);
