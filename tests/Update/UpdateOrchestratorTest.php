@@ -187,7 +187,7 @@ final class UpdateOrchestratorTest extends TestCase
         $logger->expects(self::never())->method('error');
         $logger->expects(self::once())->method('info')->with(
             self::equalTo('A set of updates has been retrieved'),
-            ['index' => 'foo']
+            self::equalTo(['index' => 'foo'])
         );
 
         $index = $this->createMock(Indexes::class);
