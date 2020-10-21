@@ -18,7 +18,7 @@ final class UuidDenormalizer implements DenormalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function denormalize($data, $type, string $format = null, array $context = []): UuidInterface
+    public function denormalize($data, $type, $format = null, array $context = []): UuidInterface
     {
         return Uuid::fromString($data);
     }
@@ -26,7 +26,7 @@ final class UuidDenormalizer implements DenormalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function supportsDenormalization($data, $type, string $format = null): bool
+    public function supportsDenormalization($data, $type, $format = null): bool
     {
         return (is_string($data) && Uuid::isValid($data)) && is_a($type, UuidInterface::class, true);
     }
