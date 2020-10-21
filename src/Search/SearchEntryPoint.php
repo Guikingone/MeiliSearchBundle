@@ -38,7 +38,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     private $indexOrchestrator;
 
     /**
-     * @var LoggerInterface|null
+     * @var LoggerInterface
      */
     private $logger;
 

@@ -29,7 +29,7 @@ final class DumpOrchestrator implements DumpOrchestratorInterface
     private $eventDispatcher;
 
     /**
-     * @var LoggerInterface|null
+     * @var LoggerInterface
      */
     private $logger;
 

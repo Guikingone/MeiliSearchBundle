@@ -17,7 +17,7 @@ final class TraceableSearchEntryPoint implements SearchEntryPointInterface, Trac
     private $searchEntryPoint;
 
     /**
-     * @var array<string,array>
+     * @var array<string, array>
      */
     private $data = [];
 

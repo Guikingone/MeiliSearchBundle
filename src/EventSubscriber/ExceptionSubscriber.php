@@ -28,7 +28,7 @@ final class ExceptionSubscriber implements EventSubscriberInterface, MeiliSearch
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, string>
      */
     public static function getSubscribedEvents(): array
     {

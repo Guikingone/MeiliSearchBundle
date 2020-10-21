@@ -7,6 +7,7 @@ namespace MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\ConfigurationAnnotationInterface;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\Document;
+use MeiliSearchBundle\Exception\RuntimeException;
 use ReflectionClass;
 use ReflectionException;
 use function get_class;
@@ -47,6 +48,11 @@ final class DocumentReader implements DocumentReaderInterface
     {
         $reflectionClass = new ReflectionClass(get_class($object));
 
-        return $this->reader->getClassAnnotation($reflectionClass, Document::class);
+        $annotation = $this->reader->getClassAnnotation($reflectionClass, Document::class);
+        if (!$annotation instanceof ConfigurationAnnotationInterface) {
+            throw new RuntimeException('The current object is not a document');
+        }
+
+        return $annotation;
     }
 }

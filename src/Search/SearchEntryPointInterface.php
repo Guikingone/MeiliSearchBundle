@@ -14,7 +14,7 @@ interface SearchEntryPointInterface
      * @param string              $query
      * @param array<string,mixed> $options
      *
-     * @return SearchResultInterface
+     * @return SearchResultInterface<string, mixed>
      */
     public function search(string $index, string $query, array $options = []): SearchResultInterface;
 }

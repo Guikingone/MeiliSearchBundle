@@ -61,9 +61,9 @@ rector: rector.php
 .PHONY: tests infection
 
 tests: ## Launch the PHPUnit tests
-tests: phpunit.xml.dist tests
+tests: phpunit.xml.dist
 	$(PHP) vendor/bin/phpunit tests
 
 infection: ## Launch Infection
-infection: infection.json.dist tests
+infection: infection.json.dist
 	$(PHP) vendor/bin/infection

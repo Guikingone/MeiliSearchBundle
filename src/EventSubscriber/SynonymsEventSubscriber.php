@@ -29,7 +29,7 @@ final class SynonymsEventSubscriber implements EventSubscriberInterface, MeiliSe
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, string>
      */
     public static function getSubscribedEvents(): array
     {

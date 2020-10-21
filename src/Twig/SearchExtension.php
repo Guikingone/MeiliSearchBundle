@@ -40,7 +40,7 @@ final class SearchExtension extends AbstractExtension implements RuntimeExtensio
      * @param string               $query
      * @param array<string,mixed>  $options
      *
-     * @return SearchResultInterface
+     * @return SearchResultInterface<string, mixed>
      *
      * {@see SearchEntryPointInterface::search()}
      */
