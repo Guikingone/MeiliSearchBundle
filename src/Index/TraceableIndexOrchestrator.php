@@ -55,7 +55,7 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, Tr
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, Indexes>
      */
     public function getIndexes(): array
     {

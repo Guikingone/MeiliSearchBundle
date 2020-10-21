@@ -52,6 +52,9 @@ final class WarmIndexesCommand extends Command
      */
     private $prefix;
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $defaultName = 'meili:warm-indexes';
 
     /**
@@ -97,7 +100,7 @@ final class WarmIndexesCommand extends Command
         if (empty($this->indexes)) {
             $io->warning('No indexes found, please define at least a single index');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $asyncIndexes = $asyncIndexes = array_filter($this->indexes, function (array $index): bool {
@@ -110,7 +113,7 @@ final class WarmIndexesCommand extends Command
                 'Consider using "composer require symfony/messenger"'
             ]);
 
-            return 1;
+            return Command::FAILURE;
         }
 
         try {
@@ -148,12 +151,12 @@ final class WarmIndexesCommand extends Command
                 sprintf('Error: "%s"', $throwable->getMessage())
             ]);
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $io->success('The indexes has been warmed, feel free to query them!');
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function handleSynonyms(array $synonyms): array

@@ -25,6 +25,9 @@ final class ListIndexesCommand extends Command
      */
     private $indexOrchestrator;
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $defaultName = 'meili:list-indexes';
 
     public function __construct(IndexOrchestratorInterface $indexOrchestrator)
@@ -56,7 +59,7 @@ final class ListIndexesCommand extends Command
             if (empty($indexes)) {
                 $io->warning('No indexes found, please ensure that indexes have been created');
 
-                return 0;
+                return Command::SUCCESS;
             }
 
             $table = new Table($output);
@@ -71,14 +74,14 @@ final class ListIndexesCommand extends Command
             $io->note('The following indexes have been found:');
             $table->render();
 
-            return 0;
+            return Command::SUCCESS;
         } catch (Throwable $throwable) {
             $io->error([
                 'The list cannot be retrieved as an error occurred',
                 sprintf('Error: %s', $throwable->getMessage()),
             ]);
 
-            return 1;
+            return Command::FAILURE;
         }
     }
 }

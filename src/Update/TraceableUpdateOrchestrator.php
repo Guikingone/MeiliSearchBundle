@@ -43,7 +43,7 @@ final class TraceableUpdateOrchestrator implements UpdateOrchestratorInterface, 
     }
 
     /**
-     * {@inheritdoc}
+     * @return UpdateInterface[]
      */
     public function getUpdates(string $index): array
     {

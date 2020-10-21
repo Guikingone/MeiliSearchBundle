@@ -10,6 +10,7 @@ use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -63,7 +64,7 @@ final class WarmIndexesCommandTest extends TestCase
     public function testCommandCanWarmAsyncIndexWithMessageBus(): void
     {
         $messageBus = $this->createMock(MessageBusInterface::class);
-        $messageBus->expects(self::once())->method('dispatch')->willReturn(Envelope::wrap(new \stdClass()));
+        $messageBus->expects(self::once())->method('dispatch')->willReturn(Envelope::wrap(new stdClass()));
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
 

@@ -26,8 +26,10 @@
       "MeiliSearchBundle\\DataProvider\\": "src/DataProvider/",
       "MeiliSearchBundle\\DependencyInjection\\": "src/DependencyInjection/",
       "MeiliSearchBundle\\Document\\": "src/Document/",
+      "MeiliSearchBundle\\Dump\\": "src/Dump/",
       "MeiliSearchBundle\\Event\\": "src/Event/",
       "MeiliSearchBundle\\Event\\Document\\": "src/Event/Document/",
+      "MeiliSearchBundle\\Event\\Dump\\": "src/Event/Dump/",
       "MeiliSearchBundle\\Event\\Index\\": "src/Event/Index/",
       "MeiliSearchBundle\\EventSubscriber\\": "src/EventSubscriber/",
       "MeiliSearchBundle\\Exception\\": "src/Exception/",
@@ -62,8 +64,10 @@
       "Tests\\MeiliSearchBundle\\DataCollector\\": "tests/DataCollector/",
       "Tests\\MeiliSearchBundle\\DependencyInjection\\": "tests/DependencyInjection/",
       "Tests\\MeiliSearchBundle\\Document\\": "tests/Document/",
+      "Tests\\MeiliSearchBundle\\Dump\\": "tests/Dump/",
       "Tests\\MeiliSearchBundle\\Event\\": "tests/Event/",
       "Tests\\MeiliSearchBundle\\Event\\Document\\": "tests/Event/Document/",
+      "Tests\\MeiliSearchBundle\\Event\\Dump\\": "tests/Event/Dump/",
       "Tests\\MeiliSearchBundle\\Event\\Index\\": "tests/Event/Index/",
       "Tests\\MeiliSearchBundle\\EventSubscriber\\": "tests/EventSubscriber/",
       "Tests\\MeiliSearchBundle\\Form\\": "tests/Form/",
@@ -89,7 +93,7 @@
   "require": {
     "php": ">=7.2",
     "ext-json": "*",
-    "meilisearch/meilisearch-php": "^0.14",
+    "meilisearch/meilisearch-php": "^0.15",
     "psr/log": "^1.1",
     "symfony/config": "^4.4|^5.0",
     "symfony/console": "^4.4|^5.0",
@@ -114,7 +118,8 @@
     "symfony/http-client": "^4.4|^5.0",
     "symfony/messenger": "^4.4|^5.0",
     "twig/twig": ">=2.7",
-    "twig/extensions": ">=1.5"
+    "twig/extensions": ">=1.5",
+    "rector/rector": "^0.8.40"
   },
   "suggest": {
     "doctrine/common": "Allow to use the Document annotation",

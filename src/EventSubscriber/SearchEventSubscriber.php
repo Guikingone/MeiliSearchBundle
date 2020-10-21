@@ -27,7 +27,7 @@ final class SearchEventSubscriber implements EventSubscriberInterface, MeiliSear
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, string>
      */
     public static function getSubscribedEvents(): array
     {

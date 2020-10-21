@@ -31,6 +31,9 @@ final class FooDataProvider implements DocumentDataProviderInterface
         return 'foo';
     }
 
+    /**
+     * @return array<string, int|string>
+     */
     public function getDocument(): array
     {
         return [

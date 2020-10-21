@@ -70,9 +70,9 @@ final class DocumentSubscriber implements EventSubscriber
     }
 
     /**
-     * {@inheritdoc}
+     * @return string[]
      */
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [
             Events::postPersist,

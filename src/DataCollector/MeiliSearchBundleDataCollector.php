@@ -81,7 +81,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     /**
      * {@inheritdoc}
      */
-    public function collect(Request $request, Response $response, Throwable $exception = null)
+    public function collect(Request $request, Response $response, Throwable $exception = null): void
     {
     }
 

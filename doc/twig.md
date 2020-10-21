@@ -13,4 +13,4 @@ allows you to trigger search directly in your templates.
 ```
 
 _Note: The `SearchExtension` is lazy-loaded so the impact on performances should be minimal,
-keep in mind that fetch the MeiliSearch API is done via HTTP so a small latency can occurs_
+keep in mind that fetching the MeiliSearch API is done via HTTP so a small latency can occurs_

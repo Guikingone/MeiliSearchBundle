@@ -15,6 +15,9 @@ use Symfony\Component\Form\Test\TypeTestCase;
  */
 final class MeiliSearchChoiceTypeTest extends TypeTestCase
 {
+    /**
+     * @return PreloadedExtension[]
+     */
     protected function getExtensions(): array
     {
         $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);

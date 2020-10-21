@@ -26,7 +26,7 @@ final class SearchExtension extends AbstractExtension implements RuntimeExtensio
     }
 
     /**
-     * {@inheritdoc}
+     * @return TwigFunction[]
      */
     public function getFunctions(): array
     {

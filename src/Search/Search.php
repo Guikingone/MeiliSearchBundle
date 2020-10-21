@@ -68,7 +68,7 @@ final class Search
      */
     private $facetFilters;
 
-    public static function within(string $index): Search
+    public static function within(string $index): self
     {
         $self = new self();
 
@@ -77,28 +77,28 @@ final class Search
         return $self;
     }
 
-    public function in(string $index): Search
+    public function in(string $index): self
     {
         $this->index = $index;
 
         return $this;
     }
 
-    public function max(int $limit): Search
+    public function max(int $limit): self
     {
         $this->limit = $limit;
 
         return $this;
     }
 
-    public function offset(int $offset): Search
+    public function offset(int $offset): self
     {
         $this->offset = $offset;
 
         return $this;
     }
 
-    public function query(string $query): Search
+    public function query(string $query): self
     {
         if (preg_match('#\s#', $query) && false === strpos('"', $query)) {
             throw new InvalidSearchConfigurationException('A compound query must be enclosed via double-quotes');
@@ -109,7 +109,7 @@ final class Search
         return $this;
     }
 
-    public function where(string $field, string $operator, $value): Search
+    public function where(string $field, string $operator, $value): self
     {
         if (!in_array($operator, self::FILTERS_OPERATORS)) {
             throw new InvalidSearchConfigurationException('The given operator is not supported');
@@ -130,35 +130,35 @@ final class Search
         return $this;
     }
 
-    public function andWhere(string $field, string $operator, $value): Search
+    public function andWhere(string $field, string $operator, $value): self
     {
         $this->where(sprintf(' AND %s', $field), $operator, $value);
 
         return $this;
     }
 
-    public function orWhere(string $field, string $operator, $value): Search
+    public function orWhere(string $field, string $operator, $value): self
     {
         $this->where(sprintf(' OR %s', $field), $operator, $value);
 
         return $this;
     }
 
-    public function not(string $field, string $operator, $value): Search
+    public function not(string $field, string $operator, $value): self
     {
         $this->where(sprintf('NOT %s', $field), $operator, $value);
 
         return $this;
     }
 
-    public function match(bool $match = false): Search
+    public function match(bool $match = false): self
     {
         $this->match = $match;
 
         return $this;
     }
 
-    public function shouldRetrieve(array $retrievedAttributes = []): Search
+    public function shouldRetrieve(array $retrievedAttributes = []): self
     {
         $this->retrievedAttributes = empty($retrievedAttributes)
             ? $this->retrievedAttributes
@@ -173,7 +173,7 @@ final class Search
      *
      * @return $this
      */
-    public function shouldHighlight($attributesToHighlight): Search
+    public function shouldHighlight($attributesToHighlight): self
     {
         if (empty($attributesToHighlight)) {
             return $this;
@@ -190,28 +190,28 @@ final class Search
         return $this;
     }
 
-    public function addFacetFilter(string $key, string $value): Search
+    public function addFacetFilter(string $key, string $value): self
     {
         $this->facetFilters[] = [sprintf('%s:%s', $key, $value)];
 
         return $this;
     }
 
-    public function addOrFacetFilter(string $key, string $value, string $secondKey, string $secondValue): Search
+    public function addOrFacetFilter(string $key, string $value, string $secondKey, string $secondValue): self
     {
         $this->facetFilters[] = [[sprintf('%s:%s', $key, $value), sprintf('%s:%s', $secondKey, $secondValue)]];
 
         return $this;
     }
 
-    public function addAndFacetFilter(string $key, string $value, string $secondKey, string $secondValue): Search
+    public function addAndFacetFilter(string $key, string $value, string $secondKey, string $secondValue): self
     {
         $this->facetFilters[] = [sprintf('%s:%s', $key, $value), sprintf('%s:%s', $secondKey, $secondValue)];
 
         return $this;
     }
 
-    public function paginate(string $field, string $operator, $value, int $limit): Search
+    public function paginate(string $field, string $operator, $value, int $limit): self
     {
         empty($this->where) ? $this->where($field, $operator, $value) : $this->andWhere($field, $operator, $value);
 

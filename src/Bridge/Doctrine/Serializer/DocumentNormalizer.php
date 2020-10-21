@@ -44,7 +44,7 @@ final class DocumentNormalizer implements NormalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function normalize($object, $format = null, array $context = [])
+    public function normalize($object, string $format = null, array $context = [])
     {
         $configuration = $this->documentReader->getConfiguration($object);
         $primaryKey = $configuration->getPrimaryKey();
@@ -62,7 +62,7 @@ final class DocumentNormalizer implements NormalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function supportsNormalization($data, $format = null)
+    public function supportsNormalization($data, string $format = null): bool
     {
         return $this->documentReader->isDocument($data);
     }

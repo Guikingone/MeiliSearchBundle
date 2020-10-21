@@ -27,6 +27,9 @@ final class DeleteIndexCommand extends Command
      */
     private $indexOrchestrator;
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $defaultName = 'meili:delete-index';
 
     public function __construct(IndexOrchestratorInterface $indexOrchestrator)

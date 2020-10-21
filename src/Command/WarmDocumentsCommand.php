@@ -22,6 +22,9 @@ final class WarmDocumentsCommand extends Command
      */
     private $loader;
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $defaultName = 'meili:warm-documents';
 
     public function __construct(LoaderInterface $loader)
@@ -56,11 +59,11 @@ final class WarmDocumentsCommand extends Command
                 sprintf('Error: %s', $throwable->getMessage()),
             ]);
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $io->success('The documents have been imported, feel free to search them!');
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

@@ -29,6 +29,9 @@ final class DeleteIndexesCommand extends Command
      */
     private $indexMetadataRegistry;
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $defaultName = 'meili:delete-indexes';
 
     public function __construct(
@@ -68,16 +71,16 @@ final class DeleteIndexesCommand extends Command
                     sprintf('Error: "%s"', $throwable->getMessage()),
                 ]);
 
-                return 1;
+                return Command::FAILURE;
             }
 
             $io->success('All the indexes have been removed');
 
-            return 0;
+            return Command::SUCCESS;
         }
 
         $io->note('The action has been discarded');
 
-        return 0;
+        return Command::SUCCESS;
     }
 }
