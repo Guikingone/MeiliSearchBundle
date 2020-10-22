@@ -6,6 +6,7 @@ namespace Tests\MeiliSearchBundle\Dump;
 
 use MeiliSearch\Client;
 use MeiliSearchBundle\Dump\DumpOrchestrator;
+use MeiliSearchBundle\Event\Dump\DumpCreatedEvent;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -39,7 +40,7 @@ final class DumpOrchestratorTest extends TestCase
     public function testDumpCanBeCreated(): void
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $eventDispatcher->expects(self::once())->method('dispatch');
+        $eventDispatcher->expects(self::once())->method('dispatch')->with(new DumpCreatedEvent('1'));
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('critical');

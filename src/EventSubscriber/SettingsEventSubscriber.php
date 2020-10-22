@@ -27,7 +27,7 @@ final class SettingsEventSubscriber implements EventSubscriberInterface, MeiliSe
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, string>
      */
     public static function getSubscribedEvents(): array
     {

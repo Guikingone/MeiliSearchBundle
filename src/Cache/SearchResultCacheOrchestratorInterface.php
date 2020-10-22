@@ -24,7 +24,7 @@ interface SearchResultCacheOrchestratorInterface
     /**
      * @param string $searchResultIdentifier
      *
-     * @return SearchResultInterface
+     * @return SearchResultInterface<string, mixed>
      *
      * @throws InvalidArgumentException
      */

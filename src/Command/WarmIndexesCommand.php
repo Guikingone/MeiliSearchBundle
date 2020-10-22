@@ -28,7 +28,7 @@ final class WarmIndexesCommand extends Command
     private const SYNONYMS = 'synonyms';
 
     /**
-     * @var array<string,array>
+     * @var array<string, array>
      */
     private $indexes;
 
@@ -104,7 +104,7 @@ final class WarmIndexesCommand extends Command
         }
 
         $asyncIndexes = $asyncIndexes = array_filter($this->indexes, function (array $index): bool {
-            return array_key_exists(self::ASYNC, $index);
+            return array_key_exists(self::ASYNC, $index) && $index['async'];
         });
 
         if (!empty($asyncIndexes) && null === $this->messageBus) {
@@ -135,7 +135,7 @@ final class WarmIndexesCommand extends Command
                     $configuration[self::SYNONYMS] ?? []
                 ));
 
-                if (\array_key_exists(self::ASYNC, $configuration)) {
+                if (\array_key_exists(self::ASYNC, $configuration) && $configuration['async']) {
                     unset($configuration[self::ASYNC], $configuration[self::PRIMARY_KEY]);
 
                     $this->messageBus->dispatch(new AddIndexMessage($indexName, $primaryKey, $configuration));

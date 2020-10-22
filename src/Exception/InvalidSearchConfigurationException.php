@@ -11,7 +11,7 @@ use InvalidArgumentException;
  */
 final class InvalidSearchConfigurationException extends InvalidArgumentException implements ExceptionInterface
 {
-    public function getContext(): ?string
+    public function getContext(): string
     {
         return 'search';
     }

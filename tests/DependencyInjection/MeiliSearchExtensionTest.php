@@ -315,6 +315,7 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(DeleteIndexesCommand::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DeleteIndexesCommand::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DeleteIndexesCommand::class)->getArgument(1));
         static::assertFalse($container->getDefinition(DeleteIndexesCommand::class)->isPublic());
         static::assertTrue($container->getDefinition(DeleteIndexesCommand::class)->hasTag('console.command'));
         static::assertTrue($container->getDefinition(DeleteIndexesCommand::class)->hasTag('container.preload'));

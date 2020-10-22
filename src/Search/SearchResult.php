@@ -17,7 +17,7 @@ use function is_array;
 final class SearchResult implements SearchResultInterface
 {
     /**
-     * @var array<int,array>
+     * @var array<int, array>
      */
     private $hits;
 
@@ -57,7 +57,7 @@ final class SearchResult implements SearchResultInterface
     private $exhaustiveFacetsCount;
 
     /**
-     * @var array<string,mixed>
+     * @var array<string, mixed>
      */
     private $facetsDistribution;
 

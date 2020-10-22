@@ -28,7 +28,7 @@ final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearc
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, string>
      */
     public static function getSubscribedEvents(): array
     {

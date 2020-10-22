@@ -576,6 +576,7 @@ final class MeiliSearchExtension extends Extension
         $container->register(DeleteIndexesCommand::class, DeleteIndexesCommand::class)
             ->setArguments([
                 new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexMetadataRegistry::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('console.command')
