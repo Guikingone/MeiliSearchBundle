@@ -100,7 +100,7 @@ final class WarmIndexesCommand extends Command
         if (empty($this->indexes)) {
             $io->warning('No indexes found, please define at least a single index');
 
-            return Command::FAILURE;
+            return 1;
         }
 
         $asyncIndexes = $asyncIndexes = array_filter($this->indexes, function (array $index): bool {
@@ -113,7 +113,7 @@ final class WarmIndexesCommand extends Command
                 'Consider using "composer require symfony/messenger"'
             ]);
 
-            return Command::FAILURE;
+            return 1;
         }
 
         try {
@@ -151,12 +151,12 @@ final class WarmIndexesCommand extends Command
                 sprintf('Error: "%s"', $throwable->getMessage())
             ]);
 
-            return Command::FAILURE;
+            return 1;
         }
 
         $io->success('The indexes has been warmed, feel free to query them!');
 
-        return Command::SUCCESS;
+        return 0;
     }
 
     private function handleSynonyms(array $synonyms): array

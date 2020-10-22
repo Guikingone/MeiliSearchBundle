@@ -71,16 +71,16 @@ final class DeleteIndexesCommand extends Command
                     sprintf('Error: "%s"', $throwable->getMessage()),
                 ]);
 
-                return Command::FAILURE;
+                return 1;
             }
 
             $io->success('All the indexes have been removed');
 
-            return Command::SUCCESS;
+            return 0;
         }
 
         $io->note('The action has been discarded');
 
-        return Command::SUCCESS;
+        return 0;
     }
 }

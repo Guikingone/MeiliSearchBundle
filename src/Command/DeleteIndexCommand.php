@@ -67,19 +67,19 @@ final class DeleteIndexCommand extends Command
                 $this->indexOrchestrator->removeIndex($index);
                 $io->success(sprintf('The index "%s" has been removed', $index));
 
-                return Command::SUCCESS;
+                return 0;
             } catch (Throwable $throwable) {
                 $io->error([
                     'An error occurred when trying to delete the index',
                     sprintf('Error: %s', $throwable->getMessage()),
                 ]);
 
-                return Command::FAILURE;
+                return 1;
             }
         } else {
             $io->warning('The index has not been deleted');
 
-            return Command::FAILURE;
+            return 1;
         }
     }
 }

@@ -59,11 +59,11 @@ final class WarmDocumentsCommand extends Command
                 sprintf('Error: %s', $throwable->getMessage()),
             ]);
 
-            return Command::FAILURE;
+            return 1;
         }
 
         $io->success('The documents have been imported, feel free to search them!');
 
-        return Command::SUCCESS;
+        return 0;
     }
 }

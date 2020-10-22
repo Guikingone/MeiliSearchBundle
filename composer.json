@@ -105,8 +105,8 @@
     "symfony/serializer": "^4.4|^5.0"
   },
   "require-dev": {
-    "doctrine/common": "^2.10.0",
-    "doctrine/orm": "^2.6",
+    "doctrine/common": "^2.13",
+    "doctrine/orm": "^2.7",
     "friendsofphp/php-cs-fixer": "^2.16",
     "infection/infection": "0.15",
     "phpstan/phpstan": "^0.12",
