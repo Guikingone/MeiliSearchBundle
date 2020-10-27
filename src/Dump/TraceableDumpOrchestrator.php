@@ -39,7 +39,7 @@ final class TraceableDumpOrchestrator implements DumpOrchestratorInterface, Trac
     {
         $dump = $this->orchestrator->create();
 
-        $this->data[self::CREATED_DUMP][][$dump['uid']] = $dump['status'];
+        $this->data[self::CREATED_DUMP][] = $dump;
 
         return $dump;
     }
@@ -51,7 +51,7 @@ final class TraceableDumpOrchestrator implements DumpOrchestratorInterface, Trac
     {
         $retrievedDump = $this->orchestrator->getStatus($dump);
 
-        $this->data[self::RETRIEVED_DUMP][$retrievedDump['uid']] = $retrievedDump;
+        $this->data[self::RETRIEVED_DUMP][] = $retrievedDump;
 
         return $retrievedDump;
     }
