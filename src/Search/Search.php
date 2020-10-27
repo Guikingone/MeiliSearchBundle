@@ -44,7 +44,7 @@ final class Search
     private $query;
 
     /**
-     * @var array<string,array>
+     * @var array<string, array>
      */
     private $where = [];
 
@@ -64,7 +64,7 @@ final class Search
     private $highLightedAttributes;
 
     /**
-     * @var array<int,array>
+     * @var array<int, array>
      */
     private $facetFilters;
 
@@ -169,7 +169,7 @@ final class Search
     }
 
     /**
-     * @param string|array<int,string> $attributesToHighlight
+     * @param string|array<int, string> $attributesToHighlight
      *
      * @return $this
      */

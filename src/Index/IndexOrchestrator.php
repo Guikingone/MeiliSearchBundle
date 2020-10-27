@@ -43,7 +43,7 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
     private $eventDispatcher;
 
     /**
-     * @var LoggerInterface|null
+     * @var LoggerInterface
      */
     private $logger;
 

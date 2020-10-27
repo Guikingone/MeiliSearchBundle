@@ -1,3 +1,7 @@
 [Makefile]
 indent_size = tab
 indent_style = tab
+
+[composer.json]
+indent_size = tab
+indent_style = tab

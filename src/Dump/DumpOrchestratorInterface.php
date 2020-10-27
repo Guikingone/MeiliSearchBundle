@@ -12,9 +12,11 @@ use Throwable;
 interface DumpOrchestratorInterface
 {
     /**
+     * @return array<string, string>
+     *
      * @throws Throwable
      */
-    public function create(): void;
+    public function create(): array;
 
     /**
      * @return array<string, string>

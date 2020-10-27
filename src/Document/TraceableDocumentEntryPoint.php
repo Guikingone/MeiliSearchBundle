@@ -31,7 +31,7 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     private $documentOrchestrator;
 
     /**
-     * @var LoggerInterface|null
+     * @var LoggerInterface
      */
     private $logger;
 
@@ -139,7 +139,7 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
     }
 
     /**
-     * @return array<string,array>
+     * @return array<string, array>
      */
     public function getData(): array
     {

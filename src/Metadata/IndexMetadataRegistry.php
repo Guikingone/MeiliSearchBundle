@@ -6,7 +6,6 @@ namespace MeiliSearchBundle\Metadata;
 
 use MeiliSearchBundle\Exception\InvalidArgumentException;
 use function array_key_exists;
-use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -14,17 +13,16 @@ use function sprintf;
 final class IndexMetadataRegistry
 {
     /**
-     * @var array<string,IndexMetadata>
+     * @var array<string, IndexMetadata>
      */
     private $indexes = [];
 
     public function add(string $index, IndexMetadata $configuration): void
     {
         if ($this->has($index)) {
-            throw new InvalidArgumentException(sprintf(
-                'This index is already configured, please consider using "%s::override()"',
-                self::class
-            ));
+            $this->override($index, $configuration);
+
+            return;
         }
 
         $this->indexes[$index] = $configuration;
@@ -69,7 +67,7 @@ final class IndexMetadataRegistry
     }
 
     /**
-     * @return array<string,IndexMetadata>
+     * @return array<string, IndexMetadata>
      */
     public function toArray(): array
     {

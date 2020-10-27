@@ -91,6 +91,9 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getDocument(string $uid, $id)
     {
         try {

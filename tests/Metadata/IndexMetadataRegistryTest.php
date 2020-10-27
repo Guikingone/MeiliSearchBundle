@@ -8,15 +8,13 @@ use MeiliSearchBundle\Exception\InvalidArgumentException;
 use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use PHPUnit\Framework\TestCase;
-use function get_class;
-use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class IndexMetadataRegistryTest extends TestCase
 {
-    public function testConfigurationCannotBeAddedWhenExisting(): void
+    public function testConfigurationCannotBeAddedThenUpdated(): void
     {
         $registry = new IndexMetadataRegistry();
         $registry->add('foo', new IndexMetadata('foo'));
@@ -24,9 +22,9 @@ final class IndexMetadataRegistryTest extends TestCase
         static::assertSame('foo', $registry->get('foo')->getUid());
         static::assertArrayHasKey('foo', $registry->toArray());
 
-        static::expectException(InvalidArgumentException::class);
-        static::expectExceptionMessage(sprintf('This index is already configured, please consider using "%s::override()"', get_class($registry)));
-        $registry->add('foo', new IndexMetadata('foo'));
+        $registry->add('foo', new IndexMetadata('bar'));
+
+        static::assertSame('bar', $registry->get('foo')->getUid());
     }
 
     public function testConfigurationCanBeAdded(): void

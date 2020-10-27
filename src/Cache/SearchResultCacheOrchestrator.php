@@ -103,10 +103,6 @@ final class SearchResultCacheOrchestrator implements SearchResultCacheOrchestrat
     }
 
     /**
-     * @param string $searchResultIdentifier
-     *
-     * @return bool
-     *
      * @throws InvalidArgumentException
      */
     private function has(string $searchResultIdentifier): bool

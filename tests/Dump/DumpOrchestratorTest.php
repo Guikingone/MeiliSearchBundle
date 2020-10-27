@@ -48,10 +48,18 @@ final class DumpOrchestratorTest extends TestCase
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('createDump')->willReturn([
             'uid' => '1',
+            'status' => 'done',
         ]);
 
         $orchestrator = new DumpOrchestrator($client, $eventDispatcher, $logger);
-        $orchestrator->create();
+        $dump = $orchestrator->create();
+
+        static::assertArrayHasKey('uid', $dump);
+        static::assertArrayHasKey('status', $dump);
+        static::assertSame([
+            'uid' => '1',
+            'status' => 'done',
+        ], $dump);
     }
 
     public function testDumpStatusCannotBeRetrieved(): void

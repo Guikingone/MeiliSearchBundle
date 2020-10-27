@@ -17,7 +17,7 @@ final class IndexMetadata
     /**
      * @var bool
      */
-    private $async = false;
+    private $async;
 
     /**
      * @var string|null
@@ -25,12 +25,12 @@ final class IndexMetadata
     private $primaryKey;
 
     /**
-     * @var array<int,string>
+     * @var array<int, string>
      */
     private $rankingRules;
 
     /**
-     * @var array<int,string>
+     * @var array<int, string>
      */
     private $stopWords;
 
@@ -40,22 +40,22 @@ final class IndexMetadata
     private $distinctAttribute;
 
     /**
-     * @var array<int,string>
+     * @var array<int, string>
      */
     private $facetedAttributes;
 
     /**
-     * @var array<int,string>
+     * @var array<int, string>
      */
     private $searchableAttributes;
 
     /**
-     * @var array<int,string>
+     * @var array<int, string>
      */
     private $displayedAttributes;
 
     /**
-     * @var array<string,array>
+     * @var array<string, array>
      */
     private $synonyms;
 
@@ -99,7 +99,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int,string>
+     * @return array<int, string>
      */
     public function getRankingRules(): array
     {
@@ -107,7 +107,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int,string>
+     * @return array<int, string>
      */
     public function getStopWords(): array
     {
@@ -128,7 +128,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int,string>
+     * @return array<int, string>
      */
     public function getSearchableAttributes(): array
     {
@@ -136,7 +136,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int,string>
+     * @return array<int, string>
      */
     public function getDisplayedAttributes(): array
     {
@@ -144,7 +144,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<string,array>
+     * @return array<string, array>
      */
     public function getSynonyms(): array
     {

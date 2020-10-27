@@ -46,12 +46,14 @@ final class DumpOrchestrator implements DumpOrchestratorInterface
     /**
      * {@inheritdoc}
      */
-    public function create(): void
+    public function create(): array
     {
         try {
-            $response = $this->client->createDump();
+            $dump = $this->client->createDump();
 
-            $this->dispatch(new DumpCreatedEvent($response['uid']));
+            $this->dispatch(new DumpCreatedEvent($dump['uid']));
+
+            return $dump;
         } catch (Throwable $throwable) {
             $this->logger->critical(sprintf('An error occurred when trying to create a new dump'), [
                 'error' => $throwable->getMessage(),

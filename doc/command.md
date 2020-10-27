@@ -8,12 +8,12 @@ This bundle defines a set of command used to interact with the MeiliSearch API.
 bin/console meili:warm-indexes
 ```
 
-Warm indexes in MeiliSearch
+Warm indexes in MeiliSearch (existing indexes are updated).
 
 ## List indexes
 
 ```bash
-bin/console meili:list-indexes test
+bin/console meili:list-indexes
 ```
 
 List every index stored in MeiliSearch
@@ -48,4 +48,4 @@ This command allow to load documents into a specific index thanks to `DataProvid
 bin/console meili:clear-search-cache
 ```
 
-This command allow to clear the search result cache.
+This command allow to clear the search result cache (if the cache on search is enabled).

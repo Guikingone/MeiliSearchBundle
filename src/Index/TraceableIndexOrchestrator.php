@@ -28,7 +28,7 @@ final class TraceableIndexOrchestrator implements IndexOrchestratorInterface, Tr
     private $orchestrator;
 
     /**
-     * @var array<string,array>
+     * @var array<string, array>
      */
     private $data = [
         self::CREATED_INDEXES => [],
