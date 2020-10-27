@@ -9,7 +9,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class IndexRemovedEvent extends Event
+final class IndexRemovedEvent extends Event implements IndexEventInterface
 {
     /**
      * @var string

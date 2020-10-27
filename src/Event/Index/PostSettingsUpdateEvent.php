@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PostSettingsUpdateEvent extends Event
+final class PostSettingsUpdateEvent extends Event implements IndexEventInterface
 {
     /**
      * @var Indexes

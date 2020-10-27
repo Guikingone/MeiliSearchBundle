@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class IndexCreatedEvent extends Event
+final class IndexCreatedEvent extends Event implements IndexEventInterface
 {
     /**
      * @var array<string, mixed>
