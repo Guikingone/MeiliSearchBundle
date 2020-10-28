@@ -5,9 +5,25 @@ Data providers aims to allow you to submit data when you cannot use annotations.
 
 The main role of a data provider is to return an array that contain the data stored as a document in MeiliSearch.
 
-## Defining a data provider
+This bundle defines 2 type of data provider:
 
-In order to see how to use it, let's use a data provider which receive data from an external REST API:
+- [DocumentDataProvider](../src/DataProvider/DocumentDataProviderInterface.php)
+- [EmbeddedDocumentDataProvider](../src/DataProvider/EmbeddedDocumentDataProviderInterface.php)
+
+Each data provider comes with a dedicated behaviour.
+
+## Defining a document data provider
+
+In order to see how to use it, let's use a data provider which receive data from an external REST API,
+let's admit that the API return a body similar to this one:
+
+```json
+{
+    "id": 1,
+    "title": "random title",
+    "tags": ["foo", "title"]
+}
+```
 
 _In this example, we use `Symfony/HttpClient` but feel free to use the one which fit your needs_
 
@@ -31,21 +47,87 @@ final class PostDataProvider implements DocumentDataProviderInterface
     public function getDocument() : array
     {
         $response = $this->httpClient->request('GET', 'https://api.com/posts');
-        if (0 === \count($response->toArray())) {
+        if (empty($response->toArray())) {
             return [];
         }
-        
-        // TODO
+
+        return $response->toArray();
     }
 }
 ``` 
 
-The idea here is pretty simple, every post is a sub-array of `$collection`, this way,
-when you submit the `getDocument()` return value in MS, you link every post to the `foo` index.
-
 Keep in mind that a provider can return data from any source, as long as the array is valid, you're good to go.
 
 Once defined, the data provider is automatically configured and injected both in the DIC and the related command.
+
+## Defining an embedded document data provider
+
+In order to see how to use it, let's use an embedded data provider which defines hardcoded data:
+
+```php
+<?php
+
+use MeiliSearchBundle\DataProvider\EmbeddedDocumentDataProviderInterface;
+
+final class PostDataProvider implements EmbeddedDocumentDataProviderInterface
+{
+    public function support() : string
+    {
+        return 'foo';
+    }
+
+    public function getDocument() : array
+    {
+        return [
+            [
+                'id' => 1,
+                'title' => 'random title',
+                'tags' => ['foo', 'title'],
+            ],
+            [
+                'id' => 2,
+                'title' => 'second random title',
+                'tags' => ['foo', 'second', 'title'],
+            ],
+        ];
+    }
+}
+``` 
+
+**_Note:_** This type of data provider SHOULD define the returned model (if desired) IN the document body:
+
+
+```php
+<?php
+
+use MeiliSearchBundle\DataProvider\EmbeddedDocumentDataProviderInterface;
+
+final class PostDataProvider implements EmbeddedDocumentDataProviderInterface
+{
+    public function support() : string
+    {
+        return 'foo';
+    }
+
+    public function getDocument() : array
+    {
+        return [
+            [
+                'id' => 1,
+                'title' => 'random title',
+                'tags' => ['foo', 'title'],
+                'model' => \stdClass::class,
+            ],
+            [
+                'id' => 2,
+                'title' => 'second random title',
+                'tags' => ['foo', 'second', 'title'],
+                'model' => \stdClass::class,
+            ],
+        ];
+    }
+}
+``` 
 
 ## Overriding primary keys
 
@@ -150,4 +232,4 @@ final class PostDataProvider implements DocumentDataProviderInterface, ModelData
 Sometimes, a provider must be loader before another one, 
 this bundle provides a [PriorityDataProviderInterface](../src/DataProvider/PriorityDataProviderInterface.php)
 that allows to define a priority individually, during the loading process, 
-the `DocumentLoader` takes this integer and compare every provider in order to load in the desired order.
+the [DocumentLoader](../src/Document/DocumentLoader.php) takes this integer and compare every provider in order to load in the desired order.

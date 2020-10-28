@@ -103,7 +103,7 @@ final class SearchResultCacheOrchestrator implements SearchResultCacheOrchestrat
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException {@see CacheItemPoolInterface::hasItem()}
      */
     private function has(string $searchResultIdentifier): bool
     {

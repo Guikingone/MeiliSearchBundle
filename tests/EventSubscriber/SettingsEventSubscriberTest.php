@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\Index\PostSettingsUpdateEvent;
 use MeiliSearchBundle\Event\Index\PreSettingsUpdateEvent;
 use MeiliSearchBundle\EventSubscriber\SettingsEventSubscriber;
@@ -38,7 +39,10 @@ final class SettingsEventSubscriberTest extends TestCase
 
         $event = new PostSettingsUpdateEvent($index, 1);
 
-        $subscriber = new SettingsEventSubscriber($logger);
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new SettingsEventSubscriber($list, $logger);
         $subscriber->onPostSettingsUpdateEvent($event);
     }
 
@@ -57,7 +61,10 @@ final class SettingsEventSubscriberTest extends TestCase
             'rankingRules' => [],
         ]);
 
-        $subscriber = new SettingsEventSubscriber($logger);
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new SettingsEventSubscriber($list, $logger);
         $subscriber->onPreSettingsUpdateEvent($event);
     }
 }

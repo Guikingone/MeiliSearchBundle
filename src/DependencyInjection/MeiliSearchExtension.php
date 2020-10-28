@@ -531,6 +531,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(SettingsEventSubscriber::class, SettingsEventSubscriber::class)
             ->setArguments([
+                new Reference(IndexEventListInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
@@ -731,20 +732,19 @@ final class MeiliSearchExtension extends Extension
 
     private function registerDataCollector(ContainerBuilder $container): void
     {
-        $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
-            ->setArguments([
-                new Reference(self::DEBUG.TraceableIndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableIndexSettingsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ])
-            ->setPublic(false)
-            ->addTag('data_collector', [
-                'template' => '@MeiliSearch/Collector/data_collector.html.twig',
-                'id'       => 'meilisearch',
-            ])
-        ;
+//        $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
+//            ->setArguments([
+//                new Reference(IndexEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+//                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+//                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+//                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+//                new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+//            ])
+//            ->setPublic(false)
+//            ->addTag('data_collector', [
+//                'template' => '@MeiliSearch/Collector/data_collector.html.twig',
+//                'id'       => 'meilisearch',
+//            ])
+//        ;
     }
 }

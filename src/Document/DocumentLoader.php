@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Document;
 
 use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\DataProvider\EmbeddedDocumentDataProviderInterface;
 use MeiliSearchBundle\DataProvider\ModelDataProviderInterface;
 use MeiliSearchBundle\DataProvider\PrimaryKeyOverrideDataProviderInterface;
 use MeiliSearchBundle\DataProvider\PriorityDataProviderInterface;
@@ -29,12 +30,12 @@ final class DocumentLoader implements LoaderInterface
     private $orchestrator;
 
     /**
-     * @var iterable|DocumentDataProviderInterface[]|PrimaryKeyOverrideDataProviderInterface[]
+     * @var iterable|DocumentDataProviderInterface[]|EmbeddedDocumentDataProviderInterface[]|PrimaryKeyOverrideDataProviderInterface[]
      */
     private $documentProviders;
 
     /**
-     * @var LoggerInterface|null
+     * @var LoggerInterface
      */
     private $logger;
 
@@ -57,10 +58,20 @@ final class DocumentLoader implements LoaderInterface
             throw new RuntimeException('No providers found');
         }
 
-        $providers = array_replace($this->documentProviders, $this->filterOnPriority());
+        //$providers = array_replace($this->documentProviders, $this->filterOnPriority());
 
-        foreach ($providers as $provider) {
+        foreach ($this->documentProviders as $provider) {
             try {
+                if ($provider instanceof EmbeddedDocumentDataProviderInterface) {
+                    $this->orchestrator->addDocuments(
+                        $provider->support(),
+                        $provider->getDocument(),
+                        $provider instanceof PrimaryKeyOverrideDataProviderInterface ? $provider->getPrimaryKey() : null
+                    );
+
+                    continue;
+                }
+
                 $this->orchestrator->addDocument(
                     $provider->support(),
                     $provider->getDocument(),
@@ -79,7 +90,7 @@ final class DocumentLoader implements LoaderInterface
     }
 
     /**
-     * @return array<int,DocumentDataProviderInterface>
+     * @return array<int, DocumentDataProviderInterface>
      */
     private function filterOnPriority(): array
     {

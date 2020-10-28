@@ -10,14 +10,22 @@ namespace MeiliSearchBundle\DataProvider;
 interface DocumentDataProviderInterface
 {
     /**
-     * Return the index name which is used to link the document.
-     *
-     * @return string
+     * Return the index name used to link the document.
      */
     public function support(): string;
 
     /**
      * The returned array MUST respect the following structure:
+     *
+     * ```php
+     * return [
+     *     'key' => value,
+     *     'key' => value,
+     *     // ...
+     * ];
+     * ```
+     *
+     * In the case of an {@see EmbeddedDocumentDataProviderInterface}, the following structure must be set:
      *
      * ```php
      * return [
@@ -32,9 +40,9 @@ interface DocumentDataProviderInterface
      * The inner arrays can have multiple attributs but they MUST have at least a primary key field, this primary key
      * CAN be overridden when loading the document into an index.
      *
-     * The returned array CAN contain multiple documents.
+     * The returned array CAN contain multiple documents (only if {@see EmbeddedDocumentDataProviderInterface}).
      *
-     * @return array<string,mixed>
+     * @return array<int, array>
      */
     public function getDocument(): array;
 }

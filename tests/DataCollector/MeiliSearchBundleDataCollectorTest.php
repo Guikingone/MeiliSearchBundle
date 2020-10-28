@@ -6,6 +6,7 @@ namespace Tests\MeiliSearchBundle\DataCollector;
 
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
+use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
@@ -27,11 +28,7 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
 {
     public function testCollectorIsConfigured(): void
     {
-        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
-
-        $indexSettingsOrchestrator = $this->createMock(IndexSettingsOrchestratorInterface::class);
-        $traceableIndexSettingsOrchestrator = new TraceableIndexSettingsOrchestrator($indexSettingsOrchestrator);
+        $list = $this->createMock(IndexEventListInterface::class);
 
         $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
         $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
@@ -46,8 +43,7 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
 
         $collector = new MeiliSearchBundleDataCollector(
-            $traceableIndexOrchestrator,
-            $traceableIndexSettingsOrchestrator,
+            $list,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
             $traceableSynonymsOrchestrator,
@@ -116,11 +112,7 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
 
     public function testCollectorCanCollectQueries(): void
     {
-        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $traceableIndexOrchestrator = new TraceableIndexOrchestrator($indexOrchestrator);
-
-        $indexSettingsOrchestrator = $this->createMock(IndexSettingsOrchestratorInterface::class);
-        $traceableIndexSettingsOrchestrator = new TraceableIndexSettingsOrchestrator($indexSettingsOrchestrator);
+        $list = $this->createMock(IndexEventListInterface::class);
 
         $documentOrchestrator = $this->createMock(DocumentEntryPointInterface::class);
         $traceableDocumentOrchestrator = new TraceableDocumentEntryPoint($documentOrchestrator);
@@ -136,13 +128,13 @@ final class MeiliSearchBundleDataCollectorTest extends TestCase
         $traceableUpdateOrchestrator = new TraceableUpdateOrchestrator($updateOrchestrator);
 
         $collector = new MeiliSearchBundleDataCollector(
-            $traceableIndexOrchestrator,
-            $traceableIndexSettingsOrchestrator,
+            $list,
             $traceableDocumentOrchestrator,
             $traceableSearchEntryPoint,
             $traceableSynonymsOrchestrator,
             $traceableUpdateOrchestrator
         );
+
         $collector->lateCollect();
 
         static::assertSame(1, $collector->getQueries()['count']);

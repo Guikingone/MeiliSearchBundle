@@ -67,6 +67,11 @@ final class TraceableDocumentEntryPoint implements DocumentEntryPointInterface, 
         ];
     }
 
+    public function addDocuments(string $uid, array $documents, string $primaryKey = null): void
+    {
+        $this->documentOrchestrator->addDocuments($uid, $documents, $primaryKey);
+    }
+
     public function getDocument(string $uid, $id)
     {
         $document = $this->documentOrchestrator->getDocument($uid, $id);

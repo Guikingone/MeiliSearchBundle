@@ -104,6 +104,21 @@ final class DocumentEntryPointTest extends TestCase
         ]);
     }
 
+    public function testDocumentsCannotBeAddedWithInvalidIndex(): void
+    {
+
+    }
+
+    public function testDocumentsCannotBeAddedWithInvalidBody(): void
+    {
+
+    }
+
+    public function testDocumentsCanBeAdded(): void
+    {
+
+    }
+
     public function testDocumentCannotBeReturnedWithInvalidIndex(): void
     {
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);

@@ -94,6 +94,23 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
     /**
      * {@inheritdoc}
      */
+    public function addDocuments(string $uid, array $documents, string $primaryKey = null): void
+    {
+        try {
+            $index = $this->client->getIndex($uid);
+
+            $this->dispatch(new PreDocumentCreationEvent($index, $documents));
+            $update = $index->addDocuments($documents, $primaryKey);
+            $this->dispatch(new PostDocumentCreationEvent($index, $update[self::UPDATE_ID]));
+        } catch (Throwable $exception) {
+            $this->logger->error(sprintf('The document cannot be created, error: "%s"', $exception->getMessage()));
+            throw new RuntimeException($exception->getMessage());
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getDocument(string $uid, $id)
     {
         try {

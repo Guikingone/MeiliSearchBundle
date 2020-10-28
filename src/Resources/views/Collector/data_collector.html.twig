@@ -3,7 +3,7 @@
 {% import _self as helper %}
 
 {% block toolbar %}
-    {% set indexes, queries = collector.getIndexes(), collector.getQueries() %}
+    {% set indexes, queries = collector.getIndexes().getIndexCreatedEvents(), collector.getQueries() %}
 
     {% set icon %}
         {{ include('@MeiliSearch/Collector/logo.svg') }}
@@ -13,11 +13,11 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             <b>{{- 'Indexes' -}}</b>
-            <span>{{- indexes['count'] is same as(0) ? 'No index found' : indexes['count'] -}}</span>
+            <span>{{- indexes|length is same as(0) ? 'No index found' : indexes|length -}}</span>
         </div>
 
         <div class="sf-toolbar-info-piece">
-            <b>{{ 'Queries count' }}</b>
+            <b>{{- 'Queries count' -}}</b>
             <span>{{- queries['count'] is same as(0) ? 'No query made' : queries['count'] -}}</span>
         </div>
     {% endset %}
@@ -33,14 +33,14 @@
 {% endblock %}
 
 {% block panel %}
-    {% set indexes, queries = collector.getIndexes(), collector.getQueries() %}
+    {% set indexes, queries = collector.getIndexes().getIndexCreatedEvents(), collector.getQueries() %}
 
     <h2>{{- 'MeiliSearch' -}}</h2>
 
-    <h4>{{ 'Indexes' }}</h4>
-    {% if indexes['count'] is same as(0) %}
+    <h4>{{- 'Indexes' -}}</h4>
+    {% if indexes|length is same as(0) %}
         <div class="empty">
-            <p>{{ 'No index found' }}</p>
+            <p>{{- 'No index found' -}}</p>
         </div>
     {% else %}
         <div class="sf-tabs">
@@ -49,8 +49,8 @@
                     {{- 'Indexes' -}}
                 </h3>
                 <div class="tab-content">
-                    <h3>{{ 'Created indexes' }}</h3>
-                    {{ helper.index_table(indexes, 'createdIndexes') }}
+                    <h3>{{- 'Created indexes' -}}</h3>
+                    {{ helper.index_table(indexes.getIndexCreatedEvents(), 'createdIndexes') }}
 
                     <h3>{{ 'Fetched indexes' }}</h3>
                     {{ helper.index_table(indexes, 'fetchedIndexes') }}
