@@ -47,7 +47,7 @@ final class FooService
 
 #### Extra configuration
 
-The `AddIndexMessage` allows you to configure extra informations thanks to the third `$configuration` attribute:
+The `AddIndexMessage` allows you to configure extra information thanks to the third `$configuration` attribute:
 
 - **searchableAttributes**: An array of fields that can be used to trigger a search,
 by default, every attribute found in the document is "searchable".
@@ -186,4 +186,16 @@ framework:
 
         routing:
             'MeiliSearchBundle\Messenger\MessageInterface':  async
+``` 
+
+**Note**: Of course, you can decide to route a specific message to specific transport:
+
+```yaml
+framework:
+    messenger:
+        transports:
+            async: "%env(MESSENGER_TRANSPORT_DSN)%"
+
+        routing:
+            'MeiliSearchBundle\Messenger\AddIndexMessage':  async
 ``` 

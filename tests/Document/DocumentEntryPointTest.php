@@ -34,7 +34,7 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error');
+        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::never())->method('addDocuments');
@@ -44,7 +44,8 @@ final class DocumentEntryPointTest extends TestCase
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
-        static::expectException(Exception::class);
+        static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
         $orchestrator->addDocument('test', [
             'id' => 1,
             'title' => 'foo',
@@ -59,7 +60,7 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error');
+        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('addDocuments')->willThrowException(new Exception('An error occurred'));
@@ -106,17 +107,91 @@ final class DocumentEntryPointTest extends TestCase
 
     public function testDocumentsCannotBeAddedWithInvalidIndex(): void
     {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::never())->method('dispatch');
 
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::never())->method('addDocuments');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
+
+        static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        $orchestrator->addDocuments('test', [
+            'id' => 1,
+            'title' => 'foo',
+        ]);
     }
 
     public function testDocumentsCannotBeAddedWithInvalidBody(): void
     {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(1))->method('dispatch');
 
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('addDocuments')->with([
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ])->willThrowException(new Exception('An error occurred'));
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
+
+        static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        $orchestrator->addDocuments('test', [
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]);
     }
 
     public function testDocumentsCanBeAdded(): void
     {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch');
 
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('addDocuments')->with([
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ], null)->willReturn(['updateId' => 1]);
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
+        $orchestrator->addDocuments('test', [
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]);
     }
 
     public function testDocumentCannotBeReturnedWithInvalidIndex(): void

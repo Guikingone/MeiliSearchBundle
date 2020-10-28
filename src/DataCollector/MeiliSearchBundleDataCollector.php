@@ -22,7 +22,7 @@ use function count;
  */
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private const NAME = 'meilisearch';
+    public const NAME = 'meilisearch';
     private const DOCUMENTS = 'documents';
     private const INDEXES = 'indexes';
     private const QUERIES = 'queries';

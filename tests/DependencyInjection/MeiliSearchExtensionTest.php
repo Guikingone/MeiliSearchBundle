@@ -26,6 +26,8 @@ use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
+use MeiliSearchBundle\EventSubscriber\ClearDocumentOnNewSubscriber;
+use MeiliSearchBundle\EventSubscriber\ClearDocumentOnUpdateSubscriber;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\ExceptionSubscriber;
 use MeiliSearchBundle\EventSubscriber\IndexEventSubscriber;
@@ -38,7 +40,6 @@ use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
-use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
 use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Loader\LoaderInterface;
@@ -268,6 +269,8 @@ final class MeiliSearchExtensionTest extends TestCase
                 'cache' => [
                     'enabled' => true,
                     'pool' => 'app',
+                    'clear_on_new_document' => true,
+                    'clear_on_document_update' => true,
                 ],
                 'indexes' => [
                     'foo' => [
@@ -306,6 +309,20 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(ClearSearchResultCacheCommand::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(ClearSearchResultCacheCommand::class)->getTag('container.preload')[0]);
         static::assertSame(ClearSearchResultCacheCommand::class, $container->getDefinition(ClearSearchResultCacheCommand::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->has(ClearDocumentOnNewSubscriber::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(ClearDocumentOnNewSubscriber::class)->getArgument(0));
+        static::assertFalse($container->getDefinition(ClearDocumentOnNewSubscriber::class)->isPublic());
+        static::assertTrue($container->getDefinition(ClearDocumentOnNewSubscriber::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(ClearDocumentOnNewSubscriber::class)->getTag('container.preload')[0]);
+        static::assertSame(ClearDocumentOnNewSubscriber::class, $container->getDefinition(ClearDocumentOnNewSubscriber::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->has(ClearDocumentOnUpdateSubscriber::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(ClearDocumentOnUpdateSubscriber::class)->getArgument(0));
+        static::assertFalse($container->getDefinition(ClearDocumentOnUpdateSubscriber::class)->isPublic());
+        static::assertTrue($container->getDefinition(ClearDocumentOnUpdateSubscriber::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(ClearDocumentOnUpdateSubscriber::class)->getTag('container.preload')[0]);
+        static::assertSame(ClearDocumentOnUpdateSubscriber::class, $container->getDefinition(ClearDocumentOnUpdateSubscriber::class)->getTag('container.preload')[0]['class']);
 
         static::assertTrue($container->hasDefinition(DeleteIndexCommand::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DeleteIndexCommand::class)->getArgument(0));
@@ -561,19 +578,6 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertSame(SearchEntryPoint::class, $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]['class']);
         static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
         static::assertArrayHasKey(SearchEntryPointInterface::class, $container->getAutoconfiguredInstanceof());
-    }
-
-    public function testTraceableIndexOrchestratorIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition('.debug.'.TraceableIndexOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->getArgument(0));
-        static::assertSame(IndexOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->getDecoratedService()[0]);
-        static::assertFalse($container->getDefinition('.debug.'.TraceableIndexOrchestrator::class)->isPublic());
     }
 
     public function testTraceableIndexSettingsOrchestratorIsConfigured(): void

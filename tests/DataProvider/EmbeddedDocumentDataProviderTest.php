@@ -22,9 +22,9 @@ final class EmbeddedDocumentDataProviderTest extends TestCase
         static::assertArrayHasKey('key', $provider->getDocument()[0]);
         static::assertSame('bar', $provider->getDocument()[0]['key']);
         static::assertArrayHasKey('id', $provider->getDocument()[1]);
-        static::assertSame(1, $provider->getDocument()[1]['id']);
+        static::assertSame(2, $provider->getDocument()[1]['id']);
         static::assertArrayHasKey('key', $provider->getDocument()[1]);
-        static::assertSame('bar', $provider->getDocument()[1]['key']);
+        static::assertSame('foo', $provider->getDocument()[1]['key']);
     }
 }
 

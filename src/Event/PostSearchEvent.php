@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PostSearchEvent extends Event
+final class PostSearchEvent extends Event implements SearchEventInterface
 {
     /**
      * @var SearchResultInterface

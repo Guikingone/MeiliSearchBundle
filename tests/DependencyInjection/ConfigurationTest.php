@@ -125,7 +125,10 @@ final class ConfigurationTest extends TestCase
                     ],
                     'bar' => [
                         'primaryKey' => 'title',
-                        'displayedAttributes' => ['id', 'title'],
+                        'displayedAttributes' => [
+                            'id',
+                            'title',
+                        ],
                     ],
                 ],
             ],
@@ -138,6 +141,38 @@ final class ConfigurationTest extends TestCase
         static::assertSame('system', $configuration['cache']['pool']);
     }
 
+    public function testConfigurationCanDefineClearPolicies(): void
+    {
+        $configuration = (new Processor())->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'cache' => [
+                    'enabled' => true,
+                    'clear_on_new_document' => true,
+                    'clear_on_document_update' => true,
+                ],
+                'indexes' => [
+                    'foo' => [
+                        'primaryKey' => 'id',
+                    ],
+                    'bar' => [
+                        'primaryKey' => 'title',
+                        'displayedAttributes' => [
+                            'id',
+                            'title',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        static::assertArrayHasKey('cache', $configuration);
+        static::assertArrayHasKey('enabled', $configuration['cache']);
+        static::assertTrue($configuration['cache']['enabled']);
+        static::assertTrue($configuration['cache']['clear_on_new_document']);
+        static::assertTrue($configuration['cache']['clear_on_document_update']);
+    }
+
     public function testConfigurationCanDefineSynonyms(): void
     {
         $configuration = (new Processor())->processConfiguration(new Configuration(), [
@@ -148,7 +183,10 @@ final class ConfigurationTest extends TestCase
                         'primaryKey' => 'id',
                         'synonyms' => [
                             'bar' => [
-                                'values' => ['id', 'title']
+                                'values' => [
+                                    'id',
+                                    'title',
+                                ],
                             ],
                         ],
                     ],

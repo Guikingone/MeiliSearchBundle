@@ -9,7 +9,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PreSearchEvent extends Event
+final class PreSearchEvent extends Event implements SearchEventInterface
 {
     /**
      * @var array<string,mixed>

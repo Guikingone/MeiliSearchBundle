@@ -9,6 +9,7 @@ use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReader;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidNormalizer;
 use MeiliSearchBundle\Cache\SearchResultCacheOrchestrator;
+use MeiliSearchBundle\Cache\SearchResultCacheOrchestratorInterface;
 use MeiliSearchBundle\Command\ClearSearchResultCacheCommand;
 use MeiliSearchBundle\Command\DeleteIndexesCommand;
 use MeiliSearchBundle\Command\WarmIndexesCommand;
@@ -21,6 +22,8 @@ use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
+use MeiliSearchBundle\EventSubscriber\ClearDocumentOnNewSubscriber;
+use MeiliSearchBundle\EventSubscriber\ClearDocumentOnUpdateSubscriber;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\IndexEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SearchEventSubscriber;
@@ -36,7 +39,6 @@ use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
-use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
 use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Loader\LoaderInterface;
@@ -103,6 +105,7 @@ final class MeiliSearchExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $this->registerClientAndMetadataRegistry($container, $config);
+        $this->handleCacheConfiguration($container, $config);
         $this->registerResultBuilder($container);
         $this->registerOrchestrator($container);
         $this->registerLoaders($container);
@@ -116,7 +119,6 @@ final class MeiliSearchExtension extends Extension
         $this->registerSubscribers($container);
         $this->registerCommands($container, $config);
 
-        $this->registerTraceableIndexOrchestrator($container);
         $this->registerTraceableIndexSettingsOrchestrator($container);
         $this->registerTraceableDocumentOrchestrator($container);
         $this->registerTraceableSearchEntryPoint($container);
@@ -152,6 +154,39 @@ final class MeiliSearchExtension extends Extension
                 'class' => IndexMetadataRegistry::class,
             ])
         ;
+    }
+
+    public function handleCacheConfiguration(ContainerBuilder $container, array $configuration): void
+    {
+        if (!array_key_exists(self::CACHE, $configuration) || !$configuration[self::CACHE]['enabled']) {
+            return;
+        }
+
+        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && $configuration[self::CACHE]['clear_on_new_document']) {
+            $container->register(ClearDocumentOnNewSubscriber::class, ClearDocumentOnNewSubscriber::class)
+                ->setArguments([
+                    new Reference(SearchResultCacheOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                ])
+                ->setPublic(false)
+                ->addTag('kernel.event_subscriber')
+                ->addTag('container.preload', [
+                    'class' => ClearDocumentOnNewSubscriber::class,
+                ])
+            ;
+        }
+
+        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && $configuration[self::CACHE]['clear_on_document_update']) {
+            $container->register(ClearDocumentOnUpdateSubscriber::class, ClearDocumentOnUpdateSubscriber::class)
+                ->setArguments([
+                    new Reference(SearchResultCacheOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                ])
+                ->setPublic(false)
+                ->addTag('kernel.event_subscriber')
+                ->addTag('container.preload', [
+                    'class' => ClearDocumentOnUpdateSubscriber::class,
+                ])
+            ;
+        }
     }
 
     private function registerResultBuilder(ContainerBuilder $container): void
@@ -360,6 +395,7 @@ final class MeiliSearchExtension extends Extension
                 'class' => SearchEntryPoint::class,
             ])
         ;
+
         $container->setAlias(SearchEntryPointInterface::class, SearchEntryPoint::class);
 
         if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && interface_exists(CacheItemPoolInterface::class)) {
@@ -571,7 +607,7 @@ final class MeiliSearchExtension extends Extension
                 ->setArguments([
                     new Reference(SearchResultCacheOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 ])
-            ->setPublic(false)
+                ->setPublic(false)
                 ->addTag('console.command')
                 ->addTag('container.preload', [
                     'class' => ClearSearchResultCacheCommand::class,
@@ -637,21 +673,6 @@ final class MeiliSearchExtension extends Extension
             ->addTag('container.preload', [
                 'class' => WarmIndexesCommand::class,
             ])
-        ;
-    }
-
-    private function registerTraceableIndexOrchestrator(ContainerBuilder $container): void
-    {
-        if (!$container->hasAlias(IndexOrchestratorInterface::class)) {
-            return;
-        }
-
-        $container->register(self::DEBUG.TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
-            ->setArguments([
-                new Reference(self::DEBUG.TraceableIndexOrchestrator::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ])
-            ->setDecoratedService(IndexOrchestratorInterface::class)
-            ->setPublic(false)
         ;
     }
 
@@ -732,19 +753,22 @@ final class MeiliSearchExtension extends Extension
 
     private function registerDataCollector(ContainerBuilder $container): void
     {
-//        $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
-//            ->setArguments([
-//                new Reference(IndexEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-//                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-//                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-//                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-//                new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-//            ])
-//            ->setPublic(false)
-//            ->addTag('data_collector', [
-//                'template' => '@MeiliSearch/Collector/data_collector.html.twig',
-//                'id'       => 'meilisearch',
-//            ])
-//        ;
+        $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
+            ->setArguments([
+                new Reference(IndexEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('data_collector', [
+                'template' => '@MeiliSearch/Collector/data_collector.html.twig',
+                'id'       => MeiliSearchBundleDataCollector::NAME,
+            ])
+            ->addTag('container.preload', [
+                'class' => MeiliSearchBundleDataCollector::class,
+            ])
+        ;
     }
 }

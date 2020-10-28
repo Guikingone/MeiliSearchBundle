@@ -174,6 +174,9 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeDocument(string $uid, $id): void
     {
         try {
