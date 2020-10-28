@@ -6,6 +6,7 @@ namespace Tests\MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
+use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexRemovedEvent;
 use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use MeiliSearchBundle\EventSubscriber\IndexEventSubscriber;
@@ -33,7 +34,10 @@ final class IndexEventSubscriberTest extends TestCase
 
         $event = new IndexCreatedEvent([], $index);
 
-        $subscriber = new IndexEventSubscriber();
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new IndexEventSubscriber($list);
         $subscriber->onIndexCreatedEvent($event);
     }
 
@@ -46,7 +50,10 @@ final class IndexEventSubscriberTest extends TestCase
 
         $event = new IndexCreatedEvent([], $index);
 
-        $subscriber = new IndexEventSubscriber($logger);
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new IndexEventSubscriber($list, $logger);
         $subscriber->onIndexCreatedEvent($event);
     }
 
@@ -57,7 +64,10 @@ final class IndexEventSubscriberTest extends TestCase
 
         $event = new IndexRemovedEvent('foo');
 
-        $subscriber = new IndexEventSubscriber();
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new IndexEventSubscriber($list);
         $subscriber->onIndexRemovedEvent($event);
     }
 
@@ -68,7 +78,10 @@ final class IndexEventSubscriberTest extends TestCase
 
         $event = new IndexRemovedEvent('foo');
 
-        $subscriber = new IndexEventSubscriber($logger);
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new IndexEventSubscriber($list, $logger);
         $subscriber->onIndexRemovedEvent($event);
     }
 
@@ -82,7 +95,10 @@ final class IndexEventSubscriberTest extends TestCase
 
         $event = new IndexRetrievedEvent($index);
 
-        $subscriber = new IndexEventSubscriber();
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new IndexEventSubscriber($list);
         $subscriber->onIndexRetrievedEvent($event);
     }
 
@@ -96,7 +112,10 @@ final class IndexEventSubscriberTest extends TestCase
 
         $event = new IndexRetrievedEvent($index);
 
-        $subscriber = new IndexEventSubscriber($logger);
+        $list = $this->createMock(IndexEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new IndexEventSubscriber($list, $logger);
         $subscriber->onIndexRetrievedEvent($event);
     }
 }

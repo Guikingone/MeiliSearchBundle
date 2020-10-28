@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
+use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexRemovedEvent;
 use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use Psr\Log\LoggerInterface;
@@ -18,12 +19,20 @@ use function sprintf;
 final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearchEventSubscriberInterface
 {
     /**
+     * @var IndexEventListInterface
+     */
+    private $eventList;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(?LoggerInterface $logger = null)
-    {
+    public function __construct(
+        IndexEventListInterface $eventList,
+        ?LoggerInterface $logger = null
+    ) {
+        $this->eventList = $eventList;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -41,6 +50,8 @@ final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearc
 
     public function onIndexCreatedEvent(IndexCreatedEvent $event): void
     {
+        $this->eventList->add($event);
+
         $this->logger->info(sprintf(self::LOG_MASK, 'An index has been created'), [
             self::INDEX_LOG_KEY => $event->getIndex(),
             'configuration' => $event->getConfig(),
@@ -49,6 +60,8 @@ final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearc
 
     public function onIndexRemovedEvent(IndexRemovedEvent $event): void
     {
+        $this->eventList->add($event);
+
         $this->logger->info(sprintf(self::LOG_MASK, 'An index has been removed'), [
             self::INDEX_LOG_KEY => $event->getUid(),
         ]);
@@ -56,6 +69,8 @@ final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearc
 
     public function onIndexRetrievedEvent(IndexRetrievedEvent $event): void
     {
+        $this->eventList->add($event);
+
         $this->logger->info(sprintf(self::LOG_MASK, 'An index has been retrieved'), [
             self::INDEX_LOG_KEY => $event->getIndex()->getUid(),
         ]);

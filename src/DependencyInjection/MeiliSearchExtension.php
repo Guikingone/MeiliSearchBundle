@@ -19,6 +19,8 @@ use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Event\Index\IndexEventList;
+use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\IndexEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SearchEventSubscriber;
@@ -110,6 +112,7 @@ final class MeiliSearchExtension extends Extension
         $this->registerMessengerHandler($container);
         $this->registerTwig($container);
         $this->registerSearchEntryPoint($container, $config);
+        $this->registerEventList($container);
         $this->registerSubscribers($container);
         $this->registerCommands($container, $config);
 
@@ -467,6 +470,18 @@ final class MeiliSearchExtension extends Extension
         ;
     }
 
+    private function registerEventList(ContainerBuilder $container): void
+    {
+        $container->register(IndexEventList::class, IndexEventList::class)
+            ->setPublic(false)
+            ->addTag('container.preload', [
+                'class' => IndexEventList::class,
+            ])
+        ;
+
+        $container->setAlias(IndexEventListInterface::class, IndexEventList::class);
+    }
+
     private function registerSubscribers(ContainerBuilder $container): void
     {
         $container->register(DocumentEventSubscriber::class, DocumentEventSubscriber::class)
@@ -493,6 +508,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(IndexEventSubscriber::class, IndexEventSubscriber::class)
             ->setArguments([
+                new Reference(IndexEventListInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)

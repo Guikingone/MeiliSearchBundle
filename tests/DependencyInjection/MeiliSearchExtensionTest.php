@@ -24,6 +24,8 @@ use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Event\Index\IndexEventList;
+use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\ExceptionSubscriber;
 use MeiliSearchBundle\EventSubscriber\IndexEventSubscriber;
@@ -468,6 +470,21 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertSame(SearchExtension::class, $container->getDefinition(SearchExtension::class)->getTag('container.preload')[0]['class']);
     }
 
+    public function testEventListAreConfigured(): void
+    {
+        $extension = new MeiliSearchExtension();
+
+        $container = new ContainerBuilder();
+        $extension->load([], $container);
+
+        static::assertTrue($container->hasAlias(IndexEventListInterface::class));
+        static::assertTrue($container->hasDefinition(IndexEventList::class));
+        static::assertFalse($container->getDefinition(IndexEventList::class)->isPublic());
+        static::assertTrue($container->getDefinition(IndexEventList::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(IndexEventList::class)->getTag('container.preload')[0]);
+        static::assertSame(IndexEventList::class, $container->getDefinition(IndexEventList::class)->getTag('container.preload')[0]['class']);
+    }
+
     public function testSubscribersAreConfigured(): void
     {
         $extension = new MeiliSearchExtension();
@@ -493,6 +510,7 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(IndexEventSubscriber::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(IndexEventSubscriber::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexEventSubscriber::class)->getArgument(1));
         static::assertFalse($container->getDefinition(IndexEventSubscriber::class)->isPublic());
         static::assertTrue($container->getDefinition(IndexEventSubscriber::class)->hasTag('kernel.event_subscriber'));
         static::assertTrue($container->getDefinition(IndexEventSubscriber::class)->hasTag('container.preload'));
