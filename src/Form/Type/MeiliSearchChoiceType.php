@@ -41,37 +41,41 @@ final class MeiliSearchChoiceType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefined([self::INDEX, self::ATTRIBUTE_TO_DISPLAY, self::ATTRIBUTES_TO_RETRIEVE, self::QUERY]);
+        $resolver->setDefined([
+            self::INDEX,
+            self::ATTRIBUTE_TO_DISPLAY,
+            self::ATTRIBUTES_TO_RETRIEVE,
+            self::QUERY,
+        ]);
+
+        $resolver->setRequired([
+            self::INDEX,
+            self::ATTRIBUTE_TO_DISPLAY,
+            self::QUERY,
+        ]);
 
         $resolver->setDefaults([
             'choice_loader' => function (Options $options): ChoiceLoaderInterface {
                 return new CallbackChoiceLoader(function () use ($options): array {
                     $result = $this->searchEntryPoint->search($options[self::INDEX], $options[self::QUERY], [
-                        'attributesToRetrieve' => is_array($options[self::ATTRIBUTES_TO_RETRIEVE]) ? implode(',', $options[self::ATTRIBUTES_TO_RETRIEVE]) : $options[self::ATTRIBUTES_TO_RETRIEVE],
+                        'attributesToRetrieve' => is_array($options[self::ATTRIBUTES_TO_RETRIEVE]) ? $options[self::ATTRIBUTES_TO_RETRIEVE] : [],
                     ]);
 
                     $values = [];
-                    foreach ($result->getHits() as $hit) {
-                        if (!array_key_exists($options[self::ATTRIBUTE_TO_DISPLAY], $hit) || null === $hit[$options[self::ATTRIBUTE_TO_DISPLAY]]) {
-                            continue;
-                        }
-
+                    foreach ($result->getHits() as $_ => $hit) {
                         $values[$hit[$options[self::ATTRIBUTE_TO_DISPLAY]]] = $hit[$options[self::ATTRIBUTE_TO_DISPLAY]];
                     }
 
                     return $values;
                 });
             },
+            self::ATTRIBUTES_TO_RETRIEVE => '*',
         ]);
 
         $resolver->setAllowedTypes(self::INDEX, [self::STRING]);
         $resolver->setAllowedTypes(self::ATTRIBUTES_TO_RETRIEVE, [self::STRING, 'array']);
         $resolver->setAllowedTypes(self::ATTRIBUTE_TO_DISPLAY, [self::STRING]);
         $resolver->setAllowedTypes(self::QUERY, [self::STRING]);
-
-        $resolver->setDefaults([
-            self::ATTRIBUTES_TO_RETRIEVE => '*',
-        ]);
     }
 
     /**

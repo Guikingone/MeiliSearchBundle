@@ -7,6 +7,7 @@ namespace MeiliSearchBundle\Test;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\SearchEventListInterface;
 use MeiliSearchBundle\Test\Constraint\Index\IndexCreated;
+use MeiliSearchBundle\Test\Constraint\Index\IndexRemoved;
 use MeiliSearchBundle\Test\Constraint\Search;
 
 /**
@@ -17,6 +18,11 @@ trait MeiliSearchBundleAssertionTrait
     public static function assertIndexCreatedCount(int $count, string $message = ''): void
     {
         self::assertThat(self::getIndexEventList(), new IndexCreated($count), $message);
+    }
+
+    public static function assertIndexRemovedCount(int $count, string $message = ''): void
+    {
+        self::assertThat(self::getIndexEventList(), new IndexRemoved($count), $message);
     }
 
     public static function assertSearchCount(int $count, string $message = ''): void

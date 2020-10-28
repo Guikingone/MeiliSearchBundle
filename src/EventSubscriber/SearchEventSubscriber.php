@@ -6,6 +6,7 @@ namespace MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearchBundle\Event\PostSearchEvent;
 use MeiliSearchBundle\Event\PreSearchEvent;
+use MeiliSearchBundle\Event\SearchEventListInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -17,13 +18,39 @@ use function sprintf;
 final class SearchEventSubscriber implements EventSubscriberInterface, MeiliSearchEventSubscriberInterface
 {
     /**
+     * @var SearchEventListInterface
+     */
+    private $searchEventList;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(?LoggerInterface $logger = null)
-    {
+    public function __construct(
+        SearchEventListInterface $searchEventList,
+        ?LoggerInterface $logger = null
+    ) {
+        $this->searchEventList = $searchEventList;
         $this->logger = $logger ?: new NullLogger();
+    }
+
+    public function onPostSearchEvent(PostSearchEvent $event): void
+    {
+        $this->searchEventList->add($event);
+
+        $this->logger->info(sprintf(self::LOG_MASK, 'A search has been made'), [
+            'results' => $event->getResult()->toArray(),
+        ]);
+    }
+
+    public function onPreSearchEvent(PreSearchEvent $event): void
+    {
+        $this->searchEventList->add($event);
+
+        $this->logger->info(sprintf(self::LOG_MASK, 'A search is about to be made'), [
+            'configuration' => $event->getConfiguration(),
+        ]);
     }
 
     /**
@@ -35,19 +62,5 @@ final class SearchEventSubscriber implements EventSubscriberInterface, MeiliSear
             PostSearchEvent::class => 'onPostSearchEvent',
             PreSearchEvent::class => 'onPreSearchEvent',
         ];
-    }
-
-    public function onPostSearchEvent(PostSearchEvent $event): void
-    {
-        $this->logger->info(sprintf(self::LOG_MASK, 'A search has been made'), [
-            'results' => $event->getResult()->toArray(),
-        ]);
-    }
-
-    public function onPreSearchEvent(PreSearchEvent $event): void
-    {
-        $this->logger->info(sprintf(self::LOG_MASK, 'A search is about to be made'), [
-            'configuration' => $event->getConfiguration(),
-        ]);
     }
 }

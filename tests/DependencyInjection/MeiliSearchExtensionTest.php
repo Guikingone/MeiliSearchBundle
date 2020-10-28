@@ -26,6 +26,8 @@ use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
+use MeiliSearchBundle\Event\SearchEventList;
+use MeiliSearchBundle\Event\SearchEventListInterface;
 use MeiliSearchBundle\EventSubscriber\ClearDocumentOnNewSubscriber;
 use MeiliSearchBundle\EventSubscriber\ClearDocumentOnUpdateSubscriber;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
@@ -500,6 +502,13 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(IndexEventList::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(IndexEventList::class)->getTag('container.preload')[0]);
         static::assertSame(IndexEventList::class, $container->getDefinition(IndexEventList::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasAlias(SearchEventListInterface::class));
+        static::assertTrue($container->hasDefinition(SearchEventList::class));
+        static::assertFalse($container->getDefinition(SearchEventList::class)->isPublic());
+        static::assertTrue($container->getDefinition(SearchEventList::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(SearchEventList::class)->getTag('container.preload')[0]);
+        static::assertSame(SearchEventList::class, $container->getDefinition(SearchEventList::class)->getTag('container.preload')[0]['class']);
     }
 
     public function testSubscribersAreConfigured(): void
@@ -536,6 +545,7 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(SearchEventSubscriber::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEventSubscriber::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEventSubscriber::class)->getArgument(1));
         static::assertFalse($container->getDefinition(SearchEventSubscriber::class)->isPublic());
         static::assertTrue($container->getDefinition(SearchEventSubscriber::class)->hasTag('kernel.event_subscriber'));
         static::assertTrue($container->getDefinition(SearchEventSubscriber::class)->hasTag('container.preload'));
@@ -604,19 +614,6 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getArgument(0));
         static::assertSame(DocumentEntryPointInterface::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getDecoratedService()[0]);
         static::assertFalse($container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->isPublic());
-    }
-
-    public function testTraceableSearchEntryPointIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition('.debug.'.TraceableSearchEntryPoint::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableSearchEntryPoint::class)->getArgument(0));
-        static::assertSame(SearchEntryPointInterface::class, $container->getDefinition('.debug.'.TraceableSearchEntryPoint::class)->getDecoratedService()[0]);
-        static::assertFalse($container->getDefinition('.debug.'.TraceableSearchEntryPoint::class)->isPublic());
     }
 
     public function testTraceableSynonymsOrchestratorIsConfigured(): void

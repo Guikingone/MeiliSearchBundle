@@ -17,6 +17,9 @@ final class SearchEventList implements SearchEventListInterface, Countable
      */
     private $events;
 
+    /**
+     * {@inheritdoc}
+     */
     public function add(SearchEventInterface $event): void
     {
         $this->events[] = $event;

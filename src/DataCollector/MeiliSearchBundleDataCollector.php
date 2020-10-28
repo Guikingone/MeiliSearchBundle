@@ -7,15 +7,15 @@ namespace MeiliSearchBundle\DataCollector;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
+use MeiliSearchBundle\Event\SearchEventList;
+use MeiliSearchBundle\Event\SearchEventListInterface;
 use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
-use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 use Throwable;
-use function count;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -29,8 +29,6 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     private const SETTINGS = 'settings';
     private const SYNONYMS = 'synonyms';
     private const UPDATES = 'updates';
-    private const COUNT = 'count';
-    private const DATA = 'data';
 
     /**
      * @var IndexEventListInterface
@@ -43,9 +41,9 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     private $documentOrchestrator;
 
     /**
-     * @var TraceableSearchEntryPoint
+     * @var SearchEventListInterface
      */
-    private $searchEntryPoint;
+    private $searchEventList;
 
     /**
      * @var TraceableSynonymsOrchestrator
@@ -60,13 +58,13 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function __construct(
         IndexEventListInterface $indexEventList,
         TraceableDocumentEntryPoint $documentOrchestrator,
-        TraceableSearchEntryPoint $searchEntryPoint,
+        SearchEventListInterface $searchEventList,
         TraceableSynonymsOrchestrator $synonymsOrchestrator,
         TraceableUpdateOrchestrator $updateOrchestrator
     ) {
         $this->indexEventList = $indexEventList;
         $this->documentOrchestrator = $documentOrchestrator;
-        $this->searchEntryPoint = $searchEntryPoint;
+        $this->searchEventList = $searchEventList;
         $this->synonymsOrchestrator = $synonymsOrchestrator;
         $this->updateOrchestrator = $updateOrchestrator;
     }
@@ -84,23 +82,20 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     public function lateCollect(): void
     {
         $this->data[self::INDEXES] = $this->indexEventList;
-        $this->data[self::QUERIES] = [
-            self::COUNT => count($this->searchEntryPoint->getData()),
-            self::DATA => $this->searchEntryPoint->getData(),
-        ];
+        $this->data[self::QUERIES] = $this->searchEventList;
         $this->data[self::DOCUMENTS] = $this->documentOrchestrator->getData();
         $this->data[self::SETTINGS] = array_merge($this->indexEventList->getPreSettingsUpdateEvents(), $this->indexEventList->getPostSettingsUpdateEvents());
         $this->data[self::SYNONYMS] = $this->synonymsOrchestrator->getData();
         $this->data[self::UPDATES] = $this->updateOrchestrator->getData();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function reset(): void
     {
         $this->data[self::INDEXES] = new IndexEventList();
-        $this->data[self::QUERIES] = [
-            self::COUNT => 0,
-            self::DATA => [],
-        ];
+        $this->data[self::QUERIES] = new SearchEventList();
         $this->data[self::DOCUMENTS] = [];
         $this->data[self::SETTINGS] = [];
         $this->data[self::SYNONYMS] = new IndexEventList();
@@ -128,10 +123,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
         return $this->data[self::INDEXES];
     }
 
-    /**
-     * @return array<string, array|int>
-     */
-    public function getQueries(): array
+    public function getSearches(): SearchEventListInterface
     {
         return $this->data[self::QUERIES];
     }

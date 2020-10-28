@@ -6,6 +6,8 @@ namespace Tests\MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearchBundle\Event\PostSearchEvent;
 use MeiliSearchBundle\Event\PreSearchEvent;
+use MeiliSearchBundle\Event\SearchEventList;
+use MeiliSearchBundle\Event\SearchEventListInterface;
 use MeiliSearchBundle\EventSubscriber\MeiliSearchEventSubscriberInterface;
 use MeiliSearchBundle\EventSubscriber\SearchEventSubscriber;
 use MeiliSearchBundle\Search\SearchResultInterface;
@@ -21,7 +23,7 @@ final class SearchEventSubscriberTest extends TestCase
     {
         static::assertArrayHasKey(PostSearchEvent::class, SearchEventSubscriber::getSubscribedEvents());
         static::assertArrayHasKey(PreSearchEvent::class, SearchEventSubscriber::getSubscribedEvents());
-        static::assertInstanceOf(MeiliSearchEventSubscriberInterface::class, new SearchEventSubscriber());
+        static::assertInstanceOf(MeiliSearchEventSubscriberInterface::class, new SearchEventSubscriber(new SearchEventList()));
     }
 
     public function testSubscriberCanListenPostSearchWithoutLogger(): void
@@ -34,7 +36,10 @@ final class SearchEventSubscriberTest extends TestCase
 
         $event = new PostSearchEvent($searchResult);
 
-        $subscriber = new SearchEventSubscriber();
+        $list = $this->createMock(SearchEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new SearchEventSubscriber($list);
         $subscriber->onPostSearchEvent($event);
     }
 
@@ -48,7 +53,10 @@ final class SearchEventSubscriberTest extends TestCase
 
         $event = new PostSearchEvent($searchResult);
 
-        $subscriber = new SearchEventSubscriber($logger);
+        $list = $this->createMock(SearchEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new SearchEventSubscriber($list, $logger);
         $subscriber->onPostSearchEvent($event);
     }
 
@@ -59,7 +67,10 @@ final class SearchEventSubscriberTest extends TestCase
 
         $event = new PreSearchEvent([]);
 
-        $subscriber = new SearchEventSubscriber();
+        $list = $this->createMock(SearchEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new SearchEventSubscriber($list);
         $subscriber->onPreSearchEvent($event);
     }
 
@@ -70,7 +81,10 @@ final class SearchEventSubscriberTest extends TestCase
 
         $event = new PreSearchEvent([]);
 
-        $subscriber = new SearchEventSubscriber($logger);
+        $list = $this->createMock(SearchEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new SearchEventSubscriber($list, $logger);
         $subscriber->onPreSearchEvent($event);
     }
 }

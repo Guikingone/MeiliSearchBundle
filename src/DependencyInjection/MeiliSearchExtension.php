@@ -22,6 +22,8 @@ use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
+use MeiliSearchBundle\Event\SearchEventList;
+use MeiliSearchBundle\Event\SearchEventListInterface;
 use MeiliSearchBundle\EventSubscriber\ClearDocumentOnNewSubscriber;
 use MeiliSearchBundle\EventSubscriber\ClearDocumentOnUpdateSubscriber;
 use MeiliSearchBundle\EventSubscriber\DocumentEventSubscriber;
@@ -53,7 +55,6 @@ use MeiliSearchBundle\EventSubscriber\ExceptionSubscriber;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
-use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\Twig\SearchExtension;
 use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
 use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
@@ -76,6 +77,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function array_key_exists;
+use function class_exists;
 use function interface_exists;
 use function sprintf;
 
@@ -121,7 +123,6 @@ final class MeiliSearchExtension extends Extension
 
         $this->registerTraceableIndexSettingsOrchestrator($container);
         $this->registerTraceableDocumentOrchestrator($container);
-        $this->registerTraceableSearchEntryPoint($container);
         $this->registerTraceableSynonymsOrchestrator($container);
         $this->registerTraceableUpdateOrchestrator($container);
         $this->registerDataCollector($container);
@@ -292,10 +293,6 @@ final class MeiliSearchExtension extends Extension
 
     private function registerForm(ContainerBuilder $container): void
     {
-        if (!$container->has(FormFactoryInterface::class)) {
-            return;
-        }
-
         $container->register(MeiliSearchChoiceType::class, MeiliSearchChoiceType::class)
             ->setArguments([
                 new Reference(SearchEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
@@ -516,6 +513,15 @@ final class MeiliSearchExtension extends Extension
         ;
 
         $container->setAlias(IndexEventListInterface::class, IndexEventList::class);
+
+        $container->register(SearchEventList::class, SearchEventList::class)
+            ->setPublic(false)
+            ->addTag('container.preload', [
+                'class' => SearchEventList::class,
+            ])
+        ;
+
+        $container->setAlias(SearchEventListInterface::class, SearchEventList::class);
     }
 
     private function registerSubscribers(ContainerBuilder $container): void
@@ -556,6 +562,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(SearchEventSubscriber::class, SearchEventSubscriber::class)
             ->setArguments([
+                new Reference(SearchEventListInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
@@ -706,21 +713,6 @@ final class MeiliSearchExtension extends Extension
         ;
     }
 
-    private function registerTraceableSearchEntryPoint(ContainerBuilder $container): void
-    {
-        if (!$container->hasAlias(SearchEntryPointInterface::class)) {
-            return;
-        }
-
-        $container->register(self::DEBUG.TraceableSearchEntryPoint::class, TraceableSearchEntryPoint::class)
-            ->setArguments([
-                new Reference(self::DEBUG.TraceableSearchEntryPoint::class.self::INNER, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-            ])
-            ->setDecoratedService(SearchEntryPointInterface::class)
-            ->setPublic(false)
-        ;
-    }
-
     private function registerTraceableSynonymsOrchestrator(ContainerBuilder $container): void
     {
         if (!$container->hasAlias(SynonymsOrchestratorInterface::class)) {
@@ -757,7 +749,7 @@ final class MeiliSearchExtension extends Extension
             ->setArguments([
                 new Reference(IndexEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(SearchEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])

@@ -74,4 +74,4 @@ jobs:
 
       # —— Infection —————————————————————————————————————————————————————
       - name: Infection
-        run: php vendor/bin/infection --min-covered-msi=95
+        run: php vendor/bin/infection --min-covered-msi=90

@@ -9,6 +9,8 @@ namespace MeiliSearchBundle\Event;
  */
 interface SearchEventListInterface
 {
+    public function add(SearchEventInterface $event): void;
+
     /**
      * @return array<int, PostSearchEvent>
      */

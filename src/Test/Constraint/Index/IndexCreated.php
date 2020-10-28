@@ -26,7 +26,7 @@ final class IndexCreated extends Constraint
      */
     public function toString(): string
     {
-        return sprintf('%s %s been created', $this->expectedCount, $this->expectedCount > 1 ? 'have' : 'has');
+        return sprintf('%s index%s %s been created', $this->expectedCount, $this->expectedCount > 1 ? 'es' : '', $this->expectedCount > 1 ? 'have' : 'has');
     }
 
     /**
