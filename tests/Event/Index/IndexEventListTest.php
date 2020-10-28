@@ -13,6 +13,7 @@ use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use MeiliSearchBundle\Event\Index\PostSettingsUpdateEvent;
 use MeiliSearchBundle\Event\Index\PreSettingsUpdateEvent;
 use PHPUnit\Framework\TestCase;
+use function count;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -36,12 +37,17 @@ final class IndexEventListTest extends TestCase
         $index = $this->createMock(Indexes::class);
 
         $event = new IndexCreatedEvent([], $index);
+        $indexRemovedEvent = new IndexRemovedEvent('1');
 
         $list = new IndexEventList();
 
         $list->add($event);
+        $list->add($indexRemovedEvent);
 
         static::assertNotEmpty($list->getIndexCreatedEvents());
+        static::assertSame(1, count($list->getIndexCreatedEvents()));
+        static::assertNotContains($indexRemovedEvent, $list->getIndexCreatedEvents());
+        static::assertSame([$event], $list->getIndexCreatedEvents());
     }
 
     public function testIndexRemovedEventCanBeRetrieved(): void
