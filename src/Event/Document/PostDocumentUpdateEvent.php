@@ -9,7 +9,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PostDocumentUpdateEvent extends Event
+final class PostDocumentUpdateEvent extends Event implements DocumentEventInterface
 {
     /**
      * @var int

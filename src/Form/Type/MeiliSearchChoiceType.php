@@ -24,7 +24,6 @@ final class MeiliSearchChoiceType extends AbstractType
     private const QUERY = 'query';
     private const ATTRIBUTES_TO_RETRIEVE = 'attributes_to_retrieve';
     private const ATTRIBUTE_TO_DISPLAY = 'attribute_to_display';
-    private const STRING = 'string';
 
     /**
      * @var SearchEntryPointInterface
@@ -72,10 +71,10 @@ final class MeiliSearchChoiceType extends AbstractType
             self::ATTRIBUTES_TO_RETRIEVE => '*',
         ]);
 
-        $resolver->setAllowedTypes(self::INDEX, [self::STRING]);
-        $resolver->setAllowedTypes(self::ATTRIBUTES_TO_RETRIEVE, [self::STRING, 'array']);
-        $resolver->setAllowedTypes(self::ATTRIBUTE_TO_DISPLAY, [self::STRING]);
-        $resolver->setAllowedTypes(self::QUERY, [self::STRING]);
+        $resolver->setAllowedTypes(self::INDEX, ['string']);
+        $resolver->setAllowedTypes(self::ATTRIBUTES_TO_RETRIEVE, ['string', 'array']);
+        $resolver->setAllowedTypes(self::ATTRIBUTE_TO_DISPLAY, ['string']);
+        $resolver->setAllowedTypes(self::QUERY, ['string']);
     }
 
     /**

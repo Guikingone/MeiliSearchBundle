@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PostDocumentCreationEvent extends Event
+final class PostDocumentCreationEvent extends Event implements DocumentEventInterface
 {
     /**
      * @var Indexes

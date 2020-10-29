@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\EventSubscriber;
 
 use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Document\PostDocumentCreationEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentRetrievedEvent;
@@ -32,20 +33,6 @@ final class DocumentEventSubscriberTest extends TestCase
         static::assertArrayHasKey(PreDocumentUpdateEvent::class, DocumentEventSubscriber::getSubscribedEvents());
     }
 
-    public function testSubscriberCanListenOnPostDocumentCreationWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUid')->willReturn('foo');
-
-        $event = new PostDocumentCreationEvent($index, 1);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPostDocumentCreation($event);
-    }
-
     public function testSubscriberCanListenOnPostDocumentCreation(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
@@ -56,19 +43,11 @@ final class DocumentEventSubscriberTest extends TestCase
 
         $event = new PostDocumentCreationEvent($index, 1);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPostDocumentCreation($event);
-    }
-
-    public function testSubscriberCanListenOnPostDocumentDeletionWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $event = new PostDocumentDeletionEvent(1);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPostDocumentDeletion($event);
     }
 
     public function testSubscriberCanListenOnPostDocumentDeletion(): void
@@ -78,25 +57,11 @@ final class DocumentEventSubscriberTest extends TestCase
 
         $event = new PostDocumentDeletionEvent(1);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPostDocumentDeletion($event);
-    }
-
-    public function testSubscriberCanListenOnPostDocumentRetrieveWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUid')->willReturn('foo');
-
-        $event = new PostDocumentRetrievedEvent($index, [
-            'id' => 1,
-            'title' => 'foo',
-        ]);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPostDocumentRetrieved($event);
     }
 
     public function testSubscriberCanListenOnPostDocumentRetrieve(): void
@@ -112,19 +77,11 @@ final class DocumentEventSubscriberTest extends TestCase
             'title' => 'foo',
         ]);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPostDocumentRetrieved($event);
-    }
-
-    public function testSubscriberCanListenOnPostDocumentUpdateWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $event = new PostDocumentUpdateEvent(1);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPostDocumentUpdate($event);
     }
 
     public function testSubscriberCanListenOnPostDocumentUpdate(): void
@@ -134,25 +91,11 @@ final class DocumentEventSubscriberTest extends TestCase
 
         $event = new PostDocumentUpdateEvent(1);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+        $list->expects(self::once())->method('add')->with($event);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPostDocumentUpdate($event);
-    }
-
-    public function testSubscriberCanListenOnPreDocumentCreationWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUid')->willReturn('bar');
-
-        $event = new PreDocumentCreationEvent($index, [
-            'id' => 1,
-            'title' => 'foo',
-        ]);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPreDocumentCreation($event);
     }
 
     public function testSubscriberCanListenOnPreDocumentCreation(): void
@@ -168,25 +111,10 @@ final class DocumentEventSubscriberTest extends TestCase
             'title' => 'foo',
         ]);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPreDocumentCreation($event);
-    }
-
-    public function testSubscriberCanListenOnPreDocumentDeletionWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUid')->willReturn('bar');
-
-        $event = new PreDocumentDeletionEvent($index, [
-            'id' => 1,
-            'title' => 'foo',
-        ]);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPreDocumentDeletion($event);
     }
 
     public function testSubscriberCanListenOnPreDocumentDeletion(): void
@@ -202,22 +130,10 @@ final class DocumentEventSubscriberTest extends TestCase
             'title' => 'foo',
         ]);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPreDocumentDeletion($event);
-    }
-
-    public function testSubscriberCanListenOnPreDocumentRetrieveWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUid')->willReturn('foo');
-
-        $event = new PreDocumentRetrievedEvent($index, 1);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPreDocumentRetrieved($event);
     }
 
     public function testSubscriberCanListenOnPreDocumentRetrieve(): void
@@ -230,25 +146,10 @@ final class DocumentEventSubscriberTest extends TestCase
 
         $event = new PreDocumentRetrievedEvent($index, 1);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPreDocumentRetrieved($event);
-    }
-
-    public function testSubscriberCanListenOnPreDocumentUpdateWithoutLogger(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('info');
-
-        $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUid')->willReturn('bar');
-
-        $event = new PreDocumentUpdateEvent($index, [
-            'id' => 1,
-            'title' => 'foo',
-        ]);
-
-        $subscriber = new DocumentEventSubscriber();
-        $subscriber->onPreDocumentUpdate($event);
     }
 
     public function testSubscriberCanListenOnPreDocumentUpdate(): void
@@ -264,7 +165,9 @@ final class DocumentEventSubscriberTest extends TestCase
             'title' => 'foo',
         ]);
 
-        $subscriber = new DocumentEventSubscriber($logger);
+        $list = $this->createMock(DocumentEventListInterface::class);
+
+        $subscriber = new DocumentEventSubscriber($list, $logger);
         $subscriber->onPreDocumentUpdate($event);
     }
 }

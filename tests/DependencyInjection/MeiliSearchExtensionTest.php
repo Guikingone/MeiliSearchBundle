@@ -24,6 +24,8 @@ use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Event\Document\DocumentEventList;
+use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\SearchEventList;
@@ -495,6 +497,13 @@ final class MeiliSearchExtensionTest extends TestCase
 
         $container = new ContainerBuilder();
         $extension->load([], $container);
+
+        static::assertTrue($container->hasAlias(DocumentEventListInterface::class));
+        static::assertTrue($container->hasDefinition(DocumentEventList::class));
+        static::assertFalse($container->getDefinition(DocumentEventList::class)->isPublic());
+        static::assertTrue($container->getDefinition(DocumentEventList::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(DocumentEventList::class)->getTag('container.preload')[0]);
+        static::assertSame(DocumentEventList::class, $container->getDefinition(DocumentEventList::class)->getTag('container.preload')[0]['class']);
 
         static::assertTrue($container->hasAlias(IndexEventListInterface::class));
         static::assertTrue($container->hasDefinition(IndexEventList::class));

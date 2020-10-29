@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DataCollector;
 
-use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Event\Document\DocumentEventList;
+use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\SearchEventList;
@@ -36,9 +37,9 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     private $indexEventList;
 
     /**
-     * @var TraceableDocumentEntryPoint
+     * @var DocumentEventListInterface
      */
-    private $documentOrchestrator;
+    private $documentEventList;
 
     /**
      * @var SearchEventListInterface
@@ -57,13 +58,13 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
 
     public function __construct(
         IndexEventListInterface $indexEventList,
-        TraceableDocumentEntryPoint $documentOrchestrator,
+        DocumentEventListInterface $documentEventList,
         SearchEventListInterface $searchEventList,
         TraceableSynonymsOrchestrator $synonymsOrchestrator,
         TraceableUpdateOrchestrator $updateOrchestrator
     ) {
         $this->indexEventList = $indexEventList;
-        $this->documentOrchestrator = $documentOrchestrator;
+        $this->documentEventList = $documentEventList;
         $this->searchEventList = $searchEventList;
         $this->synonymsOrchestrator = $synonymsOrchestrator;
         $this->updateOrchestrator = $updateOrchestrator;
@@ -83,7 +84,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     {
         $this->data[self::INDEXES] = $this->indexEventList;
         $this->data[self::QUERIES] = $this->searchEventList;
-        $this->data[self::DOCUMENTS] = $this->documentOrchestrator->getData();
+        $this->data[self::DOCUMENTS] = $this->documentEventList;
         $this->data[self::SETTINGS] = array_merge($this->indexEventList->getPreSettingsUpdateEvents(), $this->indexEventList->getPostSettingsUpdateEvents());
         $this->data[self::SYNONYMS] = $this->synonymsOrchestrator->getData();
         $this->data[self::UPDATES] = $this->updateOrchestrator->getData();
@@ -96,7 +97,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
     {
         $this->data[self::INDEXES] = new IndexEventList();
         $this->data[self::QUERIES] = new SearchEventList();
-        $this->data[self::DOCUMENTS] = [];
+        $this->data[self::DOCUMENTS] = new DocumentEventList();
         $this->data[self::SETTINGS] = [];
         $this->data[self::SYNONYMS] = new IndexEventList();
         $this->data[self::UPDATES] = [];
@@ -110,10 +111,7 @@ final class MeiliSearchBundleDataCollector extends DataCollector implements Late
         return self::NAME;
     }
 
-    /**
-     * @return array<string, array>
-     */
-    public function getDocuments(): array
+    public function getDocuments(): DocumentEventListInterface
     {
         return $this->data[self::DOCUMENTS];
     }

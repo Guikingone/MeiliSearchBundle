@@ -22,8 +22,10 @@ final class PostUpdateSynonymsEvent extends Event
      */
     private $update;
 
-    public function __construct(Indexes $index, int $update)
-    {
+    public function __construct(
+        Indexes $index,
+        int $update
+    ) {
         $this->index = $index;
         $this->update = $update;
     }

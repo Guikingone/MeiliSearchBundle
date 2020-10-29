@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\EventSubscriber;
 
+use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Document\PostDocumentCreationEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentRetrievedEvent;
@@ -26,34 +27,27 @@ final class DocumentEventSubscriber implements EventSubscriberInterface
     private const UPDATE_LOG_KEY = 'update';
 
     /**
+     * @var DocumentEventListInterface
+     */
+    private $documentEventList;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(?LoggerInterface $logger = null)
-    {
+    public function __construct(
+        DocumentEventListInterface $documentEventList,
+        ?LoggerInterface $logger = null
+    ) {
+        $this->documentEventList = $documentEventList;
         $this->logger = $logger ?: new NullLogger();
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            PostDocumentCreationEvent::class => 'onPostDocumentCreation',
-            PostDocumentDeletionEvent::class => 'onPostDocumentDeletion',
-            PostDocumentRetrievedEvent::class => 'onPostDocumentRetrieved',
-            PostDocumentUpdateEvent::class => 'onPostDocumentUpdate',
-            PreDocumentCreationEvent::class => 'onPreDocumentCreation',
-            PreDocumentDeletionEvent::class => 'onPreDocumentDeletion',
-            PreDocumentRetrievedEvent::class => 'onPreDocumentRetrieved',
-            PreDocumentUpdateEvent::class => 'onPreDocumentUpdate',
-        ];
     }
 
     public function onPostDocumentCreation(PostDocumentCreationEvent $event): void
     {
+        $this->documentEventList->add($event);
+
         $this->logger->info('A document has been created', [
             self::INDEX_LOG_KEY => $event->getIndex()->getUid(),
             self::UPDATE_LOG_KEY => $event->getUpdate(),
@@ -62,6 +56,8 @@ final class DocumentEventSubscriber implements EventSubscriberInterface
 
     public function onPostDocumentDeletion(PostDocumentDeletionEvent $event): void
     {
+        $this->documentEventList->add($event);
+
         $this->logger->info('A document has been deleted', [
             self::UPDATE_LOG_KEY => $event->getUpdate(),
         ]);
@@ -69,6 +65,8 @@ final class DocumentEventSubscriber implements EventSubscriberInterface
 
     public function onPostDocumentRetrieved(PostDocumentRetrievedEvent $event): void
     {
+        $this->documentEventList->add($event);
+
         $this->logger->info('A document has been retrieved', [
             self::INDEX_LOG_KEY => $event->getIndex()->getUid(),
             self::DOCUMENT_LOG_KEY => $event->getDocument(),
@@ -77,6 +75,8 @@ final class DocumentEventSubscriber implements EventSubscriberInterface
 
     public function onPostDocumentUpdate(PostDocumentUpdateEvent $event): void
     {
+        $this->documentEventList->add($event);
+
         $this->logger->info('A document has been updated', [
             self::UPDATE_LOG_KEY => $event->getUpdate(),
         ]);
@@ -112,5 +112,22 @@ final class DocumentEventSubscriber implements EventSubscriberInterface
             self::INDEX_LOG_KEY => $event->getIndex()->getUid(),
             self::DOCUMENT_LOG_KEY => $event->getDocument(),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            PostDocumentCreationEvent::class => 'onPostDocumentCreation',
+            PostDocumentDeletionEvent::class => 'onPostDocumentDeletion',
+            PostDocumentRetrievedEvent::class => 'onPostDocumentRetrieved',
+            PostDocumentUpdateEvent::class => 'onPostDocumentUpdate',
+            PreDocumentCreationEvent::class => 'onPreDocumentCreation',
+            PreDocumentDeletionEvent::class => 'onPreDocumentDeletion',
+            PreDocumentRetrievedEvent::class => 'onPreDocumentRetrieved',
+            PreDocumentUpdateEvent::class => 'onPreDocumentUpdate',
+        ];
     }
 }

@@ -9,7 +9,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class PostDocumentDeletionEvent extends Event
+final class PostDocumentDeletionEvent extends Event implements DocumentEventInterface
 {
     /**
      * @var int

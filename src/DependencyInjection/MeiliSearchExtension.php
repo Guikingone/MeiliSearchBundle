@@ -20,6 +20,8 @@ use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
 use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
+use MeiliSearchBundle\Event\Document\DocumentEventList;
+use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\SearchEventList;
@@ -505,6 +507,15 @@ final class MeiliSearchExtension extends Extension
 
     private function registerEventList(ContainerBuilder $container): void
     {
+        $container->register(DocumentEventList::class, DocumentEventList::class)
+            ->setPublic(false)
+            ->addTag('container.preload', [
+                'class' => DocumentEventList::class,
+            ])
+        ;
+
+        $container->setAlias(DocumentEventListInterface::class, DocumentEventList::class);
+
         $container->register(IndexEventList::class, IndexEventList::class)
             ->setPublic(false)
             ->addTag('container.preload', [
@@ -748,7 +759,7 @@ final class MeiliSearchExtension extends Extension
         $container->register(MeiliSearchBundleDataCollector::class, MeiliSearchBundleDataCollector::class)
             ->setArguments([
                 new Reference(IndexEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(self::DEBUG.TraceableDocumentEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(DocumentEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(SearchEventListInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableSynonymsOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(self::DEBUG.TraceableUpdateOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),

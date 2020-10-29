@@ -10,6 +10,7 @@ use MeiliSearchBundle\Search\SearchResult;
 use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -38,6 +39,23 @@ final class MeiliSearchChoiceTypeTest extends TypeTestCase
                 new MeiliSearchChoiceType($searchEntryPoint)
             ], []),
         ];
+    }
+
+    public function testTypeCanBeConfigured(): void
+    {
+        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+
+        $type = new MeiliSearchChoiceType($searchEntryPoint);
+
+        $resolver = new OptionsResolver();
+
+        $type->configureOptions($resolver);
+
+        static::assertContains('index', $resolver->getDefinedOptions());
+        static::assertContains('attribute_to_display', $resolver->getDefinedOptions());
+        static::assertContains('attributes_to_retrieve', $resolver->getDefinedOptions());
+        static::assertContains('query', $resolver->getDefinedOptions());
+        static::assertContains('choice_loader', $resolver->getDefinedOptions());
     }
 
     public function testFormCannotBeSubmittedWithUndefinedChoice(): void
