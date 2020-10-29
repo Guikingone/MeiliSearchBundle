@@ -15,7 +15,7 @@ final class SearchEventList implements SearchEventListInterface, Countable
     /**
      * @var array<int, SearchEventInterface>
      */
-    private $events;
+    private $events = [];
 
     /**
      * {@inheritdoc}

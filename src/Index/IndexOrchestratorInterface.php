@@ -12,11 +12,17 @@ use MeiliSearch\Endpoints\Indexes;
 interface IndexOrchestratorInterface
 {
     /**
-     * @param string                        $uid
-     * @param string|null                   $primaryKey
-     * @param array<string,string|int|bool> $config
+     * @param string                         $uid
+     * @param string|null                    $primaryKey
+     * @param array<string, string|int|bool> $config
      */
     public function addIndex(string $uid, ?string $primaryKey = null, array $config = []): void;
+
+    /**
+     * @param string                         $uid
+     * @param array<string, string|int|bool> $configuration
+     */
+    public function update(string $uid, array $configuration = []): void;
 
     /**
      * @return array<string,Indexes>

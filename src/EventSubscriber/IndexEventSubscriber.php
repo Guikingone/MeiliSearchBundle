@@ -36,18 +36,6 @@ final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearc
         $this->logger = $logger ?: new NullLogger();
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            IndexCreatedEvent::class => 'onIndexCreatedEvent',
-            IndexRemovedEvent::class => 'onIndexRemovedEvent',
-            IndexRetrievedEvent::class => 'onIndexRetrievedEvent',
-        ];
-    }
-
     public function onIndexCreatedEvent(IndexCreatedEvent $event): void
     {
         $this->eventList->add($event);
@@ -74,5 +62,17 @@ final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearc
         $this->logger->info(sprintf(self::LOG_MASK, 'An index has been retrieved'), [
             self::INDEX_LOG_KEY => $event->getIndex()->getUid(),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            IndexCreatedEvent::class => 'onIndexCreatedEvent',
+            IndexRemovedEvent::class => 'onIndexRemovedEvent',
+            IndexRetrievedEvent::class => 'onIndexRetrievedEvent',
+        ];
     }
 }

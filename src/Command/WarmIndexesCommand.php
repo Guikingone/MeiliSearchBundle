@@ -122,7 +122,7 @@ final class WarmIndexesCommand extends Command
                 $primaryKey = $configuration[self::PRIMARY_KEY];
                 $configuration[self::SYNONYMS] = $this->handleSynonyms($configuration[self::SYNONYMS]);
 
-                $this->indexMetadataRegistry->add($indexName, new IndexMetadata(
+                $metadata = new IndexMetadata(
                     $indexName,
                     $configuration[self::ASYNC] ?? false,
                     $primaryKey ?? null,
@@ -133,7 +133,16 @@ final class WarmIndexesCommand extends Command
                     $configuration['searchableAttributes'] ?? [],
                     $configuration['displayedAttributes'] ?? [],
                     $configuration[self::SYNONYMS] ?? []
-                ));
+                );
+
+                if ($this->indexMetadataRegistry->has($indexName)) {
+                    $this->indexMetadataRegistry->override($indexName, $metadata);
+                    $this->indexOrchestrator->update($indexName, $metadata->toArray());
+
+                    continue;
+                }
+
+                $this->indexMetadataRegistry->add($indexName, $metadata);
 
                 if (\array_key_exists(self::ASYNC, $configuration) && $configuration['async']) {
                     unset($configuration[self::ASYNC], $configuration[self::PRIMARY_KEY]);

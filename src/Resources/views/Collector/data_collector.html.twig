@@ -3,22 +3,17 @@
 {% import _self as helper %}
 
 {% block toolbar %}
-    {% set indexes, queries = collector.getIndexes().getIndexCreatedEvents(), collector.getQueries() %}
+    {% set searches = collector.searches %}
 
     {% set icon %}
-        {{ include('@MeiliSearch/Collector/logo.svg') }}
+        {{ include('@MeiliSearch/Collector/ms.svg') }}
         <span class="sf-toolbar-value">{{- 'MeiliSearch' -}}</span>
     {% endset %}
 
     {% set text %}
         <div class="sf-toolbar-info-piece">
-            <b>{{- 'Indexes' -}}</b>
-            <span>{{- indexes|length is same as(0) ? 'No index found' : indexes|length -}}</span>
-        </div>
-
-        <div class="sf-toolbar-info-piece">
-            <b>{{- 'Queries count' -}}</b>
-            <span>{{- queries['count'] is same as(0) ? 'No query made' : queries['count'] -}}</span>
+            <b>{{- 'Searches count' -}}</b>
+            <span>{{- searches['count'] is same as(0) ? 'No searches made' : searches['count'] -}}</span>
         </div>
     {% endset %}
 
@@ -26,153 +21,48 @@
 {% endblock %}
 
 {% block menu %}
-    <span class="label {{- collector.indexes|length is same as(0) ? 'disabled' : '' -}}">
-        <span class="icon">{{ include('@MeiliSearch/Collector/logo.svg') }}</span>
+    <span class="label {{ collector.searches['count'] is same as(0) ? 'disabled' : '' }}">
+        <span class="icon">
+            {{ include('@MeiliSearch/Collector/ms.svg') }}
+        </span>
         <strong>{{- 'MeiliSearch' -}}</strong>
     </span>
 {% endblock %}
 
 {% block panel %}
-    {% set indexes, queries = collector.getIndexes().getIndexCreatedEvents(), collector.getQueries() %}
+    {% set searches = collector.searches %}
 
-    <h2>{{- 'MeiliSearch' -}}</h2>
-
-    <h4>{{- 'Indexes' -}}</h4>
-    {% if indexes|length is same as(0) %}
-        <div class="empty">
-            <p>{{- 'No index found' -}}</p>
-        </div>
+    <h4>{{- 'Searches' -}}</h4>
+    {% if searches['count'] is same as(0) %}
+    <div class="empty">
+        <p>{{- 'No searches made' -}}</p>
+    </div>
     {% else %}
         <div class="sf-tabs">
             <div class="tab">
-                <h3 class="tab-title">
-                    {{- 'Indexes' -}}
-                </h3>
                 <div class="tab-content">
-                    <h3>{{- 'Created indexes' -}}</h3>
-                    {{ helper.index_table(indexes.getIndexCreatedEvents(), 'createdIndexes') }}
+                    <table class="{{ class|default('') }}">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="key">{{- 'Query' -}}</th>
+                                <th scope="col" class="key">{{- 'Hits' -}}</th>
+                                <th scope="col" class="key">{{- 'Processing time (ms)' -}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for search in searches['searches'] %}
+                                {% set result = search.getResult() %}
 
-                    <h3>{{ 'Fetched indexes' }}</h3>
-                    {{ helper.index_table(indexes, 'fetchedIndexes') }}
-
-                    <h3>{{ 'Deleted indexes' }}</h3>
-                    {{ helper.index_table(indexes, 'deletedIndexes') }}
-                </div>
-            </div>
-            <div class="tab">
-                <h3 class="tab-title">
-                    {{- 'Queries' -}}
-                </h3>
-                <div class="tab-content">
-                    {% if queries['count'] is same as(0) %}
-                        <div class="empty">
-                            <p>{{ 'No queries have been made' }}</p>
-                        </div>
-                    {% else %}
-                        {{ helper.search_table(queries['data']) }}
-                    {% endif %}
-                </div>
-            </div>
-            <div class="tab">
-                <h3 class="tab-title">
-                    {{- 'Documents' -}}
-                </h3>
-                <div class="tab-content">
-{#                    {% set documents = collector.getDocuments() %}#}
-{#                    <h3>{{ 'Added documents' }}</h3>#}
-{#                    {{ helper.documents_table(indexes, 'addedDocuments') }}#}
-
-{#                    <h3>{{ 'Removed documents' }}</h3>#}
-{#                    {{ helper.documents_table(indexes, 'removedDocuments') }}#}
-
-{#                    <h3>{{ 'Retrieved documents' }}</h3>#}
-{#                    {{ helper.documents_table(indexes, 'retrievedDocuments') }}#}
-
-{#                    <h3>{{ 'Updated documents' }}</h3>#}
-{#                    {{ helper.documents_table(indexes, 'updatedDocuments') }}#}
+                                <tr>
+                                    <th class="colored font-normal">{{- result.query -}}</th>
+                                    <th class="colored font-normal">{{- result.nbHits -}}</th>
+                                    <th class="colored font-normal">{{- result.processingTimeMs -}}</th>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     {% endif %}
 {% endblock %}
-
-{% macro index_table(array, key) %}
-    <table class="{{ class|default('') }}">
-        <thead>
-        <tr>
-            <th scope="col" class="key">
-                {{- 'Index' -}}
-            </th>
-            <th scope="col">
-                {{ 'Primary Key' }}
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for index in array['data'][key]|sort %}
-                <tr>
-                    <th>{{- index['uid'] -}}</th>
-                    <td>{{- index['primaryKey'] ?? 'Undefined' -}}</td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="2">
-                        {{- 'No indexes' -}}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}
-
-{% macro search_table(queries) %}
-    <table class="{{ class|default('') }}">
-        <thead>
-            <tr>
-                <th scope="col" class="key">
-                    {{- 'Index' -}}
-                </th>
-                <th scope="col">
-                    {{- 'Queries count' -}}
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for index, queries in queries %}
-                <tr>
-                    <th>{{- index -}}</th>
-                    <th>{{- queries|length -}}</th>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}
-
-{% macro documents_table(documents, key) %}
-    <table class="{{ class|default('') }}">
-        <thead>
-        <tr>
-            <th scope="col" class="key">
-                {{- 'Index' -}}
-            </th>
-            <th scope="col">
-                {{ 'Primary Key' }}
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for index in array['data'][key]|sort %}
-            <tr>
-                <th>{{- index['uid'] -}}</th>
-                <td>{{- index['primaryKey'] ?? 'Undefined' -}}</td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="2">
-                    {{ 'No indexes' }}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}

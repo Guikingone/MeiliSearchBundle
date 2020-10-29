@@ -17,15 +17,15 @@ boot: ## Launch the project
 boot: up vendor
 
 up: ## Up the containers
-up:
+up: docker-compose.yml
 	$(DOCKER_COMPOSE) up -d --remove-orphans
 
 down: ## Down the containers
-down:
+down: docker-compose.yml
 	$(DOCKER_COMPOSE) down
 
 vendor: ## Install the dependencies
-vendor:
+vendor: composer.json composer.lock
 	$(PHP) composer install
 
 ##

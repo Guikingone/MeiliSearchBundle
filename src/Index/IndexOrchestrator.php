@@ -107,6 +107,49 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         ], $index));
     }
 
+    public function update(string $uid, array $configuration = []): void
+    {
+        try {
+            $index = $this->getIndex($uid);
+
+            $index->update($configuration['primaryKey']);
+
+            if (!empty($configuration)) {
+                if (array_key_exists(self::DISPLAYED_ATTRIBUTES, $configuration) && [] !== $configuration[self::DISPLAYED_ATTRIBUTES]) {
+                    $index->updateDisplayedAttributes($configuration[self::DISPLAYED_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::DISTINCT_ATTRIBUTE, $configuration) && null !== $configuration[self::DISTINCT_ATTRIBUTE]) {
+                    $index->updateDistinctAttribute($configuration[self::DISTINCT_ATTRIBUTE]);
+                }
+
+                if (array_key_exists(self::FACETED_ATTRIBUTES, $configuration) && [] !== $configuration[self::FACETED_ATTRIBUTES]) {
+                    $index->updateAttributesForFaceting($configuration[self::FACETED_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::RANKING_RULES_ATTRIBUTES, $configuration)) {
+                    $index->updateStopWords($configuration[self::RANKING_RULES_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::SEARCHABLE_ATTRIBUTES, $configuration) && [] !== $configuration[self::SEARCHABLE_ATTRIBUTES]) {
+                    $index->updateSearchableAttributes($configuration[self::SEARCHABLE_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::STOP_WORDS_ATTRIBUTES, $configuration) && [] !== $configuration[self::STOP_WORDS_ATTRIBUTES]) {
+                    $index->updateStopWords($configuration[self::STOP_WORDS_ATTRIBUTES]);
+                }
+
+                if (array_key_exists(self::SYNONYMS_ATTRIBUTES, $configuration) && [] !== $configuration[self::SYNONYMS_ATTRIBUTES]) {
+                    $index->updateSynonyms($configuration[self::SYNONYMS_ATTRIBUTES]);
+                }
+            }
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf('The index cannot be created, error: "%s"', $throwable->getMessage()));
+
+            throw new RuntimeException($throwable->getMessage());
+        }
+    }
+
     /**
      * {@inheritdoc}
      */

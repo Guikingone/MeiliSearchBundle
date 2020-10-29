@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Event\Document;
 
 use Countable;
+use function array_filter;
 use function count;
 
 /**
@@ -15,7 +16,7 @@ final class DocumentEventList implements DocumentEventListInterface, Countable
     /**
      * @var array<int, DocumentEventInterface>
      */
-    private $events;
+    private $events = [];
 
     public function add(DocumentEventInterface $event): void
     {

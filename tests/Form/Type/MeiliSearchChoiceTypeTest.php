@@ -7,7 +7,9 @@ namespace Tests\MeiliSearchBundle\Form\Type;
 use MeiliSearchBundle\Form\Type\MeiliSearchChoiceType;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Search\SearchResult;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -18,12 +20,49 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class MeiliSearchChoiceTypeTest extends TypeTestCase
 {
     /**
+     * @var SearchEntryPointInterface|MockObject
+     */
+    private $searchEntryPoint;
+
+    /**
      * @return PreloadedExtension[]
      */
     protected function getExtensions(): array
     {
-        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
-        $searchEntryPoint->expects(self::once())->method('search')->willReturn(SearchResult::create([
+        $this->searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
+
+        return [
+            new PreloadedExtension([
+                new MeiliSearchChoiceType($this->searchEntryPoint),
+            ], []),
+        ];
+    }
+
+    public function testTypeCanBeConfigured(): void
+    {
+        $type = new MeiliSearchChoiceType($this->searchEntryPoint);
+
+        $resolver = new OptionsResolver();
+
+        $type->configureOptions($resolver);
+
+        static::assertSame(ChoiceType::class, $type->getParent());
+        static::assertSame('meilisearch_choice', $type->getBlockPrefix());
+
+        static::assertContains('index', $resolver->getDefinedOptions());
+        static::assertContains('attribute_to_display', $resolver->getDefinedOptions());
+        static::assertContains('attributes_to_retrieve', $resolver->getDefinedOptions());
+        static::assertContains('query', $resolver->getDefinedOptions());
+        static::assertContains('choice_loader', $resolver->getDefinedOptions());
+
+        static::assertContains('index', $resolver->getRequiredOptions());
+        static::assertContains('attribute_to_display', $resolver->getRequiredOptions());
+        static::assertContains('query', $resolver->getRequiredOptions());
+    }
+
+    public function testFormCannotBeSubmittedWithUndefinedChoice(): void
+    {
+        $this->searchEntryPoint->expects(self::once())->method('search')->willReturn(SearchResult::create([
             [
                 'id' => 1,
                 'title' => 'bar',
@@ -34,32 +73,6 @@ final class MeiliSearchChoiceTypeTest extends TypeTestCase
             ],
         ], 0, 20, 1, false, 1, 'bar'));
 
-        return [
-            new PreloadedExtension([
-                new MeiliSearchChoiceType($searchEntryPoint)
-            ], []),
-        ];
-    }
-
-    public function testTypeCanBeConfigured(): void
-    {
-        $searchEntryPoint = $this->createMock(SearchEntryPointInterface::class);
-
-        $type = new MeiliSearchChoiceType($searchEntryPoint);
-
-        $resolver = new OptionsResolver();
-
-        $type->configureOptions($resolver);
-
-        static::assertContains('index', $resolver->getDefinedOptions());
-        static::assertContains('attribute_to_display', $resolver->getDefinedOptions());
-        static::assertContains('attributes_to_retrieve', $resolver->getDefinedOptions());
-        static::assertContains('query', $resolver->getDefinedOptions());
-        static::assertContains('choice_loader', $resolver->getDefinedOptions());
-    }
-
-    public function testFormCannotBeSubmittedWithUndefinedChoice(): void
-    {
         $form = $this->factory->create(MeiliSearchChoiceType::class, null, [
             'index' => 'foo',
             'query' => 'bar',
@@ -74,6 +87,17 @@ final class MeiliSearchChoiceTypeTest extends TypeTestCase
 
     public function testFormCanBeSubmittedWithValidChoice(): void
     {
+        $this->searchEntryPoint->expects(self::once())->method('search')->willReturn(SearchResult::create([
+            [
+                'id' => 1,
+                'title' => 'bar',
+            ],
+            [
+                'id' => 2,
+                'title' => 'foo',
+            ],
+        ], 0, 20, 1, false, 1, 'bar'));
+
         $form = $this->factory->create(MeiliSearchChoiceType::class, null, [
             'index' => 'foo',
             'query' => 'bar',

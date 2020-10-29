@@ -29,7 +29,7 @@ final class SearchEventListTest extends TestCase
         static::assertSame(1, $list->count());
     }
 
-    public function testPreSearchEventCanBeRetrieved(): void
+    public function testPostSearchEventCanBeRetrieved(): void
     {
         $result = $this->createMock(SearchResultInterface::class);
 
@@ -45,7 +45,7 @@ final class SearchEventListTest extends TestCase
         static::assertSame(1, count($list->getPostSearchEvents()));
     }
 
-    public function testIndexRemovedEventCanBeRetrieved(): void
+    public function testPreSearchEventCanBeRetrieved(): void
     {
         $event = new PreSearchEvent([]);
         $secondEvent = $this->createMock(SearchEventInterface::class);

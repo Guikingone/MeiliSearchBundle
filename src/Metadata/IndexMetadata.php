@@ -150,4 +150,21 @@ final class IndexMetadata
     {
         return $this->synonyms;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'primaryKey' => $this->primaryKey,
+            'rankingRules' => $this->rankingRules,
+            'stopWords' => $this->stopWords,
+            'distinctAttribute' => $this->distinctAttribute,
+            'facetedAttributes' => $this->facetedAttributes,
+            'searchableAttributes' => $this->searchableAttributes,
+            'displayedAttributes' => $this->displayedAttributes,
+            'synonyms' => $this->synonyms,
+        ];
+    }
 }

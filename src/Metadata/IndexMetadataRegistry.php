@@ -5,17 +5,31 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Metadata;
 
 use MeiliSearchBundle\Exception\InvalidArgumentException;
+use Symfony\Component\Serializer\SerializerInterface;
 use function array_key_exists;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class IndexMetadataRegistry
 {
+    private const FILE_PATH_PREFIX = '_ms_bundle_';
+
     /**
      * @var array<string, IndexMetadata>
      */
     private $indexes = [];
+
+    /**
+     * @var string
+     */
+    private $path;
+
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
 
     public function add(string $index, IndexMetadata $configuration): void
     {
@@ -57,6 +71,11 @@ final class IndexMetadataRegistry
         unset($this->indexes[$index]);
     }
 
+    public function has(string $index): bool
+    {
+        return array_key_exists($index, $this->indexes);
+    }
+
     public function clear(): void
     {
         if (empty($this->indexes)) {
@@ -72,10 +91,5 @@ final class IndexMetadataRegistry
     public function toArray(): array
     {
         return $this->indexes;
-    }
-
-    private function has(string $index): bool
-    {
-        return array_key_exists($index, $this->indexes);
     }
 }

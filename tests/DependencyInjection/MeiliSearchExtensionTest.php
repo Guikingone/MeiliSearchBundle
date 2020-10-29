@@ -23,7 +23,6 @@ use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
-use MeiliSearchBundle\Document\TraceableDocumentEntryPoint;
 use MeiliSearchBundle\Event\Document\DocumentEventList;
 use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
@@ -44,8 +43,6 @@ use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
-use MeiliSearchBundle\Index\TraceableIndexSettingsOrchestrator;
-use MeiliSearchBundle\Index\TraceableSynonymsOrchestrator;
 use MeiliSearchBundle\Loader\LoaderInterface;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
@@ -61,9 +58,7 @@ use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
-use MeiliSearchBundle\Search\TraceableSearchEntryPoint;
 use MeiliSearchBundle\Twig\SearchExtension;
-use MeiliSearchBundle\Update\TraceableUpdateOrchestrator;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
 use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use PHPUnit\Framework\TestCase;
@@ -599,58 +594,6 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertArrayHasKey(SearchEntryPointInterface::class, $container->getAutoconfiguredInstanceof());
     }
 
-    public function testTraceableIndexSettingsOrchestratorIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition('.debug.'.TraceableIndexSettingsOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableIndexSettingsOrchestrator::class)->getArgument(0));
-        static::assertSame(IndexSettingsOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableIndexSettingsOrchestrator::class)->getDecoratedService()[0]);
-        static::assertFalse($container->getDefinition('.debug.'.TraceableIndexSettingsOrchestrator::class)->isPublic());
-    }
-
-    public function testTraceableDocumentEntryPointIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition('.debug.'.TraceableDocumentEntryPoint::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getArgument(0));
-        static::assertSame(DocumentEntryPointInterface::class, $container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->getDecoratedService()[0]);
-        static::assertFalse($container->getDefinition('.debug.'.TraceableDocumentEntryPoint::class)->isPublic());
-    }
-
-    public function testTraceableSynonymsOrchestratorIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition('.debug.'.TraceableSynonymsOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableSynonymsOrchestrator::class)->getArgument(0));
-        static::assertSame(SynonymsOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableSynonymsOrchestrator::class)->getDecoratedService()[0]);
-        static::assertFalse($container->getDefinition('.debug.'.TraceableSynonymsOrchestrator::class)->isPublic());
-    }
-
-    public function testTraceableUpdateOrchestratorIsConfigured(): void
-    {
-        $extension = new MeiliSearchExtension();
-
-        $container = new ContainerBuilder();
-        $extension->load([], $container);
-
-        static::assertTrue($container->hasDefinition('.debug.'.TraceableUpdateOrchestrator::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition('.debug.'.TraceableUpdateOrchestrator::class)->getArgument(0));
-        static::assertSame(UpdateOrchestratorInterface::class, $container->getDefinition('.debug.'.TraceableUpdateOrchestrator::class)->getDecoratedService()[0]);
-        static::assertFalse($container->getDefinition('.debug.'.TraceableUpdateOrchestrator::class)->isPublic());
-    }
-
     public function testDataCollectorIsConfigured(): void
     {
         $extension = new MeiliSearchExtension();
@@ -660,13 +603,9 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(MeiliSearchBundleDataCollector::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(0));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(1));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(2));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(3));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getArgument(4));
         static::assertFalse($container->getDefinition(MeiliSearchBundleDataCollector::class)->isPublic());
         static::assertTrue($container->getDefinition(MeiliSearchBundleDataCollector::class)->hasTag('data_collector'));
         static::assertSame('@MeiliSearch/Collector/data_collector.html.twig', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]['template']);
-        static::assertSame('meilisearch', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]['id']);
+        static::assertSame(MeiliSearchBundleDataCollector::NAME, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]['id']);
     }
 }

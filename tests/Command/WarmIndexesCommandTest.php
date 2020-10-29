@@ -145,6 +145,10 @@ final class WarmIndexesCommandTest extends TestCase
         static::assertNotEmpty($registry->toArray());
         static::assertInstanceOf(IndexMetadata::class, $registry->get('foo'));
     }
+
+    public function testCommandCanUpdateIndexes(): void
+    {
+    }
 }
 
 final class IndexesMessageBus implements MessageBusInterface
