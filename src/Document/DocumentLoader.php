@@ -58,9 +58,9 @@ final class DocumentLoader implements LoaderInterface
             throw new RuntimeException('No providers found');
         }
 
-        //$providers = array_replace($this->documentProviders, $this->filterOnPriority());
+        $providers = array_replace($this->filterOnPriority(), $this->documentProviders);
 
-        foreach ($this->documentProviders as $provider) {
+        foreach ($providers as $provider) {
             try {
                 if ($provider instanceof EmbeddedDocumentDataProviderInterface) {
                     $this->orchestrator->addDocuments(

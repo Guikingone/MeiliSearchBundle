@@ -29,7 +29,7 @@ final class IndexMetadataDenormalizer implements DenormalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function denormalize($data, string $type, string $format = null, array $context = []): IndexMetadata
+    public function denormalize($data, string $type, string $format = null, array $context = [])
     {
         return $this->objectNormalizer->denormalize($data, $type, $format, array_merge($context, [
             AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS => [
