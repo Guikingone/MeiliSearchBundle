@@ -67,35 +67,7 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
                 self::PRIMARY_KEY => $primaryKey,
             ]);
 
-            if (!empty($configuration)) {
-                if (array_key_exists(self::DISPLAYED_ATTRIBUTES, $configuration) && [] !== $configuration[self::DISPLAYED_ATTRIBUTES]) {
-                    $index->updateDisplayedAttributes($configuration[self::DISPLAYED_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::DISTINCT_ATTRIBUTE, $configuration) && null !== $configuration[self::DISTINCT_ATTRIBUTE]) {
-                    $index->updateDistinctAttribute($configuration[self::DISTINCT_ATTRIBUTE]);
-                }
-
-                if (array_key_exists(self::FACETED_ATTRIBUTES, $configuration)&& [] !== $configuration[self::FACETED_ATTRIBUTES]) {
-                    $index->updateAttributesForFaceting($configuration[self::FACETED_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::RANKING_RULES_ATTRIBUTES, $configuration)) {
-                    $index->updateStopWords($configuration[self::RANKING_RULES_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::SEARCHABLE_ATTRIBUTES, $configuration) && [] !== $configuration[self::SEARCHABLE_ATTRIBUTES]) {
-                    $index->updateSearchableAttributes($configuration[self::SEARCHABLE_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::STOP_WORDS_ATTRIBUTES, $configuration) && [] !== $configuration[self::STOP_WORDS_ATTRIBUTES]) {
-                    $index->updateStopWords($configuration[self::STOP_WORDS_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::SYNONYMS_ATTRIBUTES, $configuration) && [] !== $configuration[self::SYNONYMS_ATTRIBUTES]) {
-                    $index->updateSynonyms($configuration[self::SYNONYMS_ATTRIBUTES]);
-                }
-            }
+            $this->handleConfiguration($index, $configuration);
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The index cannot be created, error: "%s"', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
@@ -112,41 +84,17 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         try {
             $index = $this->getIndex($uid);
 
-            $index->update($configuration['primaryKey']);
-
-            if (!empty($configuration)) {
-                if (array_key_exists(self::DISPLAYED_ATTRIBUTES, $configuration) && [] !== $configuration[self::DISPLAYED_ATTRIBUTES]) {
-                    $index->updateDisplayedAttributes($configuration[self::DISPLAYED_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::DISTINCT_ATTRIBUTE, $configuration) && null !== $configuration[self::DISTINCT_ATTRIBUTE]) {
-                    $index->updateDistinctAttribute($configuration[self::DISTINCT_ATTRIBUTE]);
-                }
-
-                if (array_key_exists(self::FACETED_ATTRIBUTES, $configuration) && [] !== $configuration[self::FACETED_ATTRIBUTES]) {
-                    $index->updateAttributesForFaceting($configuration[self::FACETED_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::RANKING_RULES_ATTRIBUTES, $configuration)) {
-                    $index->updateStopWords($configuration[self::RANKING_RULES_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::SEARCHABLE_ATTRIBUTES, $configuration) && [] !== $configuration[self::SEARCHABLE_ATTRIBUTES]) {
-                    $index->updateSearchableAttributes($configuration[self::SEARCHABLE_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::STOP_WORDS_ATTRIBUTES, $configuration) && [] !== $configuration[self::STOP_WORDS_ATTRIBUTES]) {
-                    $index->updateStopWords($configuration[self::STOP_WORDS_ATTRIBUTES]);
-                }
-
-                if (array_key_exists(self::SYNONYMS_ATTRIBUTES, $configuration) && [] !== $configuration[self::SYNONYMS_ATTRIBUTES]) {
-                    $index->updateSynonyms($configuration[self::SYNONYMS_ATTRIBUTES]);
-                }
+            if (null === $index->getPrimaryKey()) {
+                $index->update(['primaryKey' => $configuration['primaryKey']]);
             }
-        } catch (Throwable $throwable) {
-            $this->logger->error(sprintf('The index cannot be created, error: "%s"', $throwable->getMessage()));
 
-            throw new RuntimeException($throwable->getMessage());
+            $this->handleConfiguration($index, $configuration);
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf('The index cannot be created, error: "%s"', $throwable->getMessage()), [
+                'trace' => $throwable->getTrace(),
+            ]);
+
+            throw new RuntimeException($throwable->getMessage(), 0, $throwable);
         }
     }
 
@@ -213,6 +161,41 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         $this->logger->info('An index has been deleted', [
             self::UID => $uid,
         ]);
+    }
+
+    private function handleConfiguration(Indexes $index, array $configuration): void
+    {
+        if (empty($configuration)) {
+            return;
+        }
+
+        if (array_key_exists(self::DISPLAYED_ATTRIBUTES, $configuration) && [] !== $configuration[self::DISPLAYED_ATTRIBUTES]) {
+            $index->updateDisplayedAttributes($configuration[self::DISPLAYED_ATTRIBUTES]);
+        }
+
+        if (array_key_exists(self::DISTINCT_ATTRIBUTE, $configuration) && null !== $configuration[self::DISTINCT_ATTRIBUTE]) {
+            $index->updateDistinctAttribute($configuration[self::DISTINCT_ATTRIBUTE]);
+        }
+
+        if (array_key_exists(self::FACETED_ATTRIBUTES, $configuration) && [] !== $configuration[self::FACETED_ATTRIBUTES]) {
+            $index->updateAttributesForFaceting($configuration[self::FACETED_ATTRIBUTES]);
+        }
+
+        if (array_key_exists(self::RANKING_RULES_ATTRIBUTES, $configuration)) {
+            $index->updateStopWords($configuration[self::RANKING_RULES_ATTRIBUTES]);
+        }
+
+        if (array_key_exists(self::SEARCHABLE_ATTRIBUTES, $configuration) && [] !== $configuration[self::SEARCHABLE_ATTRIBUTES]) {
+            $index->updateSearchableAttributes($configuration[self::SEARCHABLE_ATTRIBUTES]);
+        }
+
+        if (array_key_exists(self::STOP_WORDS_ATTRIBUTES, $configuration) && [] !== $configuration[self::STOP_WORDS_ATTRIBUTES]) {
+            $index->updateStopWords($configuration[self::STOP_WORDS_ATTRIBUTES]);
+        }
+
+        if (array_key_exists(self::SYNONYMS_ATTRIBUTES, $configuration) && [] !== $configuration[self::SYNONYMS_ATTRIBUTES]) {
+            $index->updateSynonyms($configuration[self::SYNONYMS_ATTRIBUTES]);
+        }
     }
 
     private function dispatch(Event $event): void

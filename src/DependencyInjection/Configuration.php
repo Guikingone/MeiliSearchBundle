@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\DependencyInjection;
 
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use function interface_exists;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -28,7 +31,28 @@ final class Configuration implements ConfigurationInterface
                     ->scalarNode('apiKey')
                         ->defaultNull()
                     ->end()
+                    ->scalarNode('metadata_directory')
+                        ->info('Define the directory where are stored the metadata')
+                        ->defaultValue('%kernel.project_dir%/var/_ms')
+                    ->end()
                     ->arrayNode('cache')
+                        ->validate()
+                            ->always()
+                            ->then(function (array $cacheConfiguration): array {
+                                switch ($cacheConfiguration) {
+                                    case $cacheConfiguration['enabled'] && !interface_exists(AdapterInterface::class):
+                                        throw new InvalidConfigurationException('The cache cannot be enabled without the "symfony/cache" package');
+                                    case !$cacheConfiguration['enabled'] && $cacheConfiguration['clear_on_new_document']:
+                                        throw new InvalidConfigurationException('The cache must be enabled to use the "clear_on_new_document" option');
+                                    case !$cacheConfiguration['enabled'] && $cacheConfiguration['clear_on_document_update']:
+                                        throw new InvalidConfigurationException('The cache must be enabled to use the "clear_on_document_update" option');
+                                    case !$cacheConfiguration['enabled'] && $cacheConfiguration['fallback']:
+                                        throw new InvalidConfigurationException('The cache must be enabled to use the "fallback" option');
+                                    default:
+                                        return $cacheConfiguration;
+                                }
+                            })
+                        ->end()
                         ->children()
                             ->scalarNode('enabled')
                                 ->info('Enable the CachedSearchEntryPoint')
@@ -40,6 +64,10 @@ final class Configuration implements ConfigurationInterface
                             ->end()
                             ->scalarNode('clear_on_document_update')
                                 ->info('Clear the cache every time that a document is updated')
+                                ->defaultValue(false)
+                            ->end()
+                            ->scalarNode('fallback')
+                                ->info('Define if the cache is used as a fallback for every search')
                                 ->defaultValue(false)
                             ->end()
                             ->scalarNode('pool')

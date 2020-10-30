@@ -123,7 +123,7 @@ final class SearchResult implements SearchResultInterface
     }
 
     /**
-     * @return array<int,array>
+     * @return array<int, array>
      */
     public function getHits(): array
     {
@@ -166,7 +166,7 @@ final class SearchResult implements SearchResultInterface
     }
 
     /**
-     * @return array<string,mixed>
+     * @return array<string, mixed>
      */
     public function getFacetsDistribution(): array
     {

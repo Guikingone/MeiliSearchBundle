@@ -52,6 +52,7 @@ use MeiliSearchBundle\Messenger\Handler\DeleteIndexMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\Document\AddDocumentMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\Document\DeleteDocumentMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\Document\UpdateDocumentMessageHandler;
+use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use MeiliSearchBundle\Result\ResultBuilder;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
@@ -65,6 +66,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -104,9 +106,19 @@ final class MeiliSearchExtensionTest extends TestCase
 
         $container = new ContainerBuilder();
         $container->setDefinition('annotation_reader', new Definition(AnnotationReader::class));
-        $extension->load([], $container);
+        $extension->load([
+            'meili_search' => [
+                'host' => 'http://127.0.0.1:7700',
+                'apiKey' => 'test',
+                'metadata_directory' => '%kernel.project_dir%/var/_ms',
+            ],
+        ], $container);
 
         static::assertTrue($container->hasDefinition(IndexMetadataRegistry::class));
+        static::assertTrue($container->hasAlias(IndexMetadataRegistryInterface::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexMetadataRegistry::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexMetadataRegistry::class)->getArgument(1));
+        static::assertSame('%kernel.project_dir%/var/_ms', $container->getDefinition(IndexMetadataRegistry::class)->getArgument(2));
         static::assertFalse($container->getDefinition(IndexMetadataRegistry::class)->isPublic());
         static::assertTrue($container->getDefinition(IndexMetadataRegistry::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]);
@@ -586,6 +598,7 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(2));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(3));
+        static::assertNull($container->getDefinition(SearchEntryPoint::class)->getArgument(4));
         static::assertFalse($container->getDefinition(SearchEntryPoint::class)->isPublic());
         static::assertTrue($container->getDefinition(SearchEntryPoint::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]);

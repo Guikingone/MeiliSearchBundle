@@ -30,15 +30,15 @@ final class FooType extends AbstractType
 
 The important options are `index`, `query` and `attribute_to_display`, here's the role of each:
 
-- **index**: Define the index where the document should be searched
+- **index**: Define the index where the document should be searched.
 
-- **query**: Define the search that should be performed
+- **query**: Define the search that should be performed.
 
-- **attribute_to_display**: Define the attribute that should be displayed
+- **attribute_to_display**: Define the attribute that should be displayed.
 
-_Note_: 
+_Note_:
 
-- There's a fourth attribute `attributes_to_retrieve` that allow to filter the retrieved fields of each document
+- There's a fourth attribute `attributes_to_retrieve` that allow to filter the retrieved fields of each document.
 
 - This form uses the `CallbackChoiceLoader`, this way, the form can query choices thanks to lazy-loading, 
-more info on the [official documentation](https://symfony.com/doc/current/reference/forms/types/choice.html#choice-loader)
+more info on the [official documentation](https://symfony.com/doc/current/reference/forms/types/choice.html#choice-loader).

@@ -40,7 +40,7 @@ Allow to delete all the indexes.
 bin/console meili:warm test
 ```
 
-This command allow to load documents into a specific index thanks to `DataProviders`.
+This command allow loading documents into a specific index thanks to [DataProviders](data_provider.md).
 
 ## Clearing the search result cache
 
@@ -48,4 +48,4 @@ This command allow to load documents into a specific index thanks to `DataProvid
 bin/console meili:clear-search-cache
 ```
 
-This command allow to clear the search result cache (if the cache on search is enabled).
+This command allow to clear the search result cache (if the [cache](cache.md) on search is enabled).

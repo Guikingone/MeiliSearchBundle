@@ -2,7 +2,7 @@
 
 This bundle allows you to define annotations to ease the configuration:
 
-- `Document` define a document related to an index
+- [Document](../src/Bridge/Doctrine/Annotation/Document.php) define a document related to an `index`
 
 ## Defining a document
 
@@ -11,7 +11,7 @@ Defining a document is as simple as it sounds:
 ```php
 <?php
 
-use MeiliSearchBundle\Annotation as MeiliSearch;
+use MeiliSearchBundle\Bridge\Doctrine\Annotation as MeiliSearch;
 
 /**
  * @MeiliSearch\Document(index="bar", primaryKey="id")
@@ -37,7 +37,7 @@ after a successful search, let's see how to use it:
 ```php
 <?php
 
-use MeiliSearchBundle\Annotation as MeiliSearch;
+use MeiliSearchBundle\Bridge\Doctrine\Annotation as MeiliSearch;
 // ...
 
 /**

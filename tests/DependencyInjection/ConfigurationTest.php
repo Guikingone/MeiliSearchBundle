@@ -6,6 +6,7 @@ namespace Tests\MeiliSearchBundle\DependencyInjection;
 
 use MeiliSearchBundle\DependencyInjection\Configuration;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 
 /**
@@ -32,6 +33,8 @@ final class ConfigurationTest extends TestCase
 
         static::assertArrayHasKey('host', $configuration);
         static::assertArrayHasKey('apiKey', $configuration);
+        static::assertArrayHasKey('metadata_directory', $configuration);
+        static::assertSame('%kernel.project_dir%/var/_ms', $configuration['metadata_directory']);
         static::assertSame('http://127.0.0.1', $configuration['host']);
         static::assertSame('test', $configuration['apiKey']);
         static::assertNull($configuration['prefix']);
@@ -141,6 +144,64 @@ final class ConfigurationTest extends TestCase
         static::assertSame('system', $configuration['cache']['pool']);
     }
 
+    public function testConfigurationCannotDefineClearUpdateDocumentPoliciesWithoutCache(): void
+    {
+        $processor = new Processor();
+
+        static::expectException(InvalidConfigurationException::class);
+        static::expectExceptionMessage('The cache must be enabled to use the "clear_on_document_update" option');
+        $processor->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'cache' => [
+                    'enabled' => false,
+                    'clear_on_document_update' => true,
+                ],
+                'indexes' => [
+                    'foo' => [
+                        'primaryKey' => 'id',
+                    ],
+                    'bar' => [
+                        'primaryKey' => 'title',
+                        'displayedAttributes' => [
+                            'id',
+                            'title',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function testConfigurationCannotDefineClearNewDocumentPolicyWithoutCache(): void
+    {
+        $processor = new Processor();
+
+        static::expectException(InvalidConfigurationException::class);
+        static::expectExceptionMessage('The cache must be enabled to use the "clear_on_new_document" option');
+        $processor->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'cache' => [
+                    'enabled' => false,
+                    'clear_on_new_document' => true,
+                ],
+                'indexes' => [
+                    'foo' => [
+                        'primaryKey' => 'id',
+                    ],
+                    'bar' => [
+                        'primaryKey' => 'title',
+                        'displayedAttributes' => [
+                            'id',
+                            'title',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function testConfigurationCanDefineClearPolicies(): void
     {
         $configuration = (new Processor())->processConfiguration(new Configuration(), [
@@ -171,6 +232,65 @@ final class ConfigurationTest extends TestCase
         static::assertTrue($configuration['cache']['enabled']);
         static::assertTrue($configuration['cache']['clear_on_new_document']);
         static::assertTrue($configuration['cache']['clear_on_document_update']);
+    }
+
+    public function testConfigurationCannotDefineFallbackWithoutCache(): void
+    {
+        $processor = new Processor();
+
+        static::expectException(InvalidConfigurationException::class);
+        static::expectExceptionMessage('The cache must be enabled to use the "fallback" option');
+        $processor->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'cache' => [
+                    'enabled' => false,
+                    'fallback' => true,
+                ],
+                'indexes' => [
+                    'foo' => [
+                        'primaryKey' => 'id',
+                    ],
+                    'bar' => [
+                        'primaryKey' => 'title',
+                        'displayedAttributes' => [
+                            'id',
+                            'title',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function testConfigurationCanDefineFallback(): void
+    {
+        $configuration = (new Processor())->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'cache' => [
+                    'enabled' => true,
+                    'fallback' => true,
+                ],
+                'indexes' => [
+                    'foo' => [
+                        'primaryKey' => 'id',
+                    ],
+                    'bar' => [
+                        'primaryKey' => 'title',
+                        'displayedAttributes' => [
+                            'id',
+                            'title',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        static::assertArrayHasKey('cache', $configuration);
+        static::assertArrayHasKey('enabled', $configuration['cache']);
+        static::assertTrue($configuration['cache']['enabled']);
+        static::assertTrue($configuration['cache']['fallback']);
     }
 
     public function testConfigurationCanDefineSynonyms(): void

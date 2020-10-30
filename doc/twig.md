@@ -12,5 +12,5 @@ allows you to trigger search directly in your templates.
 {% endforeach %}
 ```
 
-_Note: The `SearchExtension` is lazy-loaded so the impact on performances should be minimal,
-keep in mind that fetching the MeiliSearch API is done via HTTP so a small latency can occurs_
+_Note: As The [SearchExtension](../src/Twig/SearchExtension.php) is lazy-loaded, the impact on performances should be minimal,
+keep in mind that fetching the MeiliSearch API's done via HTTP, a small latency can occur_

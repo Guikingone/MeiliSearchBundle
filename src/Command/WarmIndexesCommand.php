@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Command;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Messenger\AddIndexMessage;
 use MeiliSearchBundle\Metadata\IndexMetadata;
-use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
+use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,7 +33,7 @@ final class WarmIndexesCommand extends Command
     private $indexes;
 
     /**
-     * @var IndexMetadataRegistry
+     * @var IndexMetadataRegistryInterface
      */
     private $indexMetadataRegistry;
 
@@ -58,15 +58,15 @@ final class WarmIndexesCommand extends Command
     protected static $defaultName = 'meili:warm-indexes';
 
     /**
-     * @param array<string,array>        $indexes
-     * @param IndexMetadataRegistry      $indexMetadataRegistry
-     * @param IndexOrchestratorInterface $indexOrchestrator
-     * @param MessageBusInterface|null   $messageBus
-     * @param string|null                $indexPrefix
+     * @param array<string, array>           $indexes
+     * @param IndexMetadataRegistryInterface $indexMetadataRegistry
+     * @param IndexOrchestratorInterface     $indexOrchestrator
+     * @param MessageBusInterface|null       $messageBus
+     * @param string|null                    $indexPrefix
      */
     public function __construct(
         array $indexes,
-        IndexMetadataRegistry $indexMetadataRegistry,
+        IndexMetadataRegistryInterface $indexMetadataRegistry,
         IndexOrchestratorInterface $indexOrchestrator,
         ?MessageBusInterface $messageBus = null,
         ?string $indexPrefix = null

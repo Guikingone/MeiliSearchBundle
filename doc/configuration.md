@@ -7,6 +7,8 @@ This bundle allows you to connect and configure the indexes of a MeiliSearch ins
 meili_search:
     host: 'http://127.0.0.1'
     apiKey: '%env(MEILI_SEARCH_API_KEY)%'
+    metadata_directory: '%kernel.root_dir%/var/_ms'
+    prefix: '_app'
     indexes:
         admin_posts:
             primaryKey: 'id'
@@ -27,6 +29,10 @@ Here's a full breakdown of each configuration keys:
 - **host**: The address of the MeiliSearch instance.
 
 - **apiKey**: The key used to connect to the MeiliSearch instance, more info on the [official documentation]('https://docs.meilisearch.com/guides/advanced_guides/authentication.html#master-key').
+
+- **metadata_directory**: Used to store the metadata (mostly indexes) locally, this directory must be writable (or symlinked).
+
+- **prefix**: Used to define a prefix for each index.
 
 - **indexes**: A list of indexes to create along with their configuration.
 

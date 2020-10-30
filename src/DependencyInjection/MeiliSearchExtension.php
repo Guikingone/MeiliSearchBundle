@@ -49,11 +49,13 @@ use MeiliSearchBundle\Messenger\Handler\Document\AddDocumentMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\Document\DeleteDocumentMessageHandler;
 use MeiliSearchBundle\Messenger\Handler\Document\UpdateDocumentMessageHandler;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
+use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use MeiliSearchBundle\Result\ResultBuilder;
 use MeiliSearchBundle\EventSubscriber\ExceptionSubscriber;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
+use MeiliSearchBundle\Search\FallbackSearchEntrypoint;
 use MeiliSearchBundle\Twig\SearchExtension;
 use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
@@ -122,6 +124,9 @@ final class MeiliSearchExtension extends Extension
         $container->registerForAutoconfiguration(TraceableDataCollectorInterface::class)
             ->addTag('meili_search.data_collector.traceable')
         ;
+        $container->registerForAutoconfiguration(SearchEntryPointInterface::class)
+            ->addTag('meili_search.search_entry_point')
+        ;
     }
 
     private function registerClientAndMetadataRegistry(ContainerBuilder $container, array $configuration): void
@@ -139,11 +144,18 @@ final class MeiliSearchExtension extends Extension
         ;
 
         $container->register(IndexMetadataRegistry::class, IndexMetadataRegistry::class)
+            ->setArguments([
+                new Reference('filesystem', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference('serializer', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                $configuration['metadata_directory'],
+            ])
             ->setPublic(false)
             ->addTag('container.preload', [
                 'class' => IndexMetadataRegistry::class,
             ])
         ;
+
+        $container->setAlias(IndexMetadataRegistryInterface::class, IndexMetadataRegistry::class);
     }
 
     public function handleCacheConfiguration(ContainerBuilder $container, array $configuration): void
@@ -315,7 +327,7 @@ final class MeiliSearchExtension extends Extension
             ->setArguments([
                 new Reference(DocumentEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(DocumentReader::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(IndexMetadataRegistry::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexMetadataRegistryInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference('property_accessor', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(SerializerInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(MessageBusInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
@@ -375,6 +387,7 @@ final class MeiliSearchExtension extends Extension
                 new Reference(ResultBuilderInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(EventDispatcherInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                $configuration['prefix'],
             ])
             ->setPublic(false)
             ->addTag('container.preload', [
@@ -384,7 +397,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->setAlias(SearchEntryPointInterface::class, SearchEntryPoint::class);
 
-        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && interface_exists(CacheItemPoolInterface::class)) {
+        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled']) {
             $container->register(SearchResultCacheOrchestrator::class, SearchResultCacheOrchestrator::class)
                 ->setArguments([
                     new Reference(CacheItemPoolInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
@@ -408,11 +421,24 @@ final class MeiliSearchExtension extends Extension
             ;
 
             $container->setAlias(SearchEntryPointInterface::class, CachedSearchEntryPoint::class);
-        }
 
-        $container->registerForAutoconfiguration(SearchEntryPointInterface::class)
-            ->addTag('meili_search.search_entry_point')
-        ;
+            if ($configuration[self::CACHE]['fallback']) {
+                $container->register(FallbackSearchEntrypoint::class, FallbackSearchEntrypoint::class)
+                    ->setArguments([
+                        [
+                            new Reference(SearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                            new Reference(CachedSearchEntryPoint::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                        ],
+                    ])
+                    ->setPublic(false)
+                    ->addTag('container.preload', [
+                        'class' => FallbackSearchEntrypoint::class,
+                    ])
+                ;
+
+                $container->setAlias(SearchEntryPointInterface::class, FallbackSearchEntrypoint::class);
+            }
+        }
     }
 
     private function registerMessengerHandler(ContainerBuilder $container): void
@@ -635,7 +661,7 @@ final class MeiliSearchExtension extends Extension
         $container->register(DeleteIndexesCommand::class, DeleteIndexesCommand::class)
             ->setArguments([
                 new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(IndexMetadataRegistry::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexMetadataRegistryInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('console.command')
@@ -669,7 +695,7 @@ final class MeiliSearchExtension extends Extension
         $container->register(WarmIndexesCommand::class, WarmIndexesCommand::class)
             ->setArguments([
                 $configuration['indexes'],
-                new Reference(IndexMetadataRegistry::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexMetadataRegistryInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 new Reference(MessageBusInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 $configuration['prefix'],

@@ -7,16 +7,59 @@ namespace Tests\MeiliSearchBundle\Metadata;
 use MeiliSearchBundle\Exception\InvalidArgumentException;
 use MeiliSearchBundle\Metadata\IndexMetadata;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
+use MeiliSearchBundle\Serializer\IndexMetadataDenormalizer;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class IndexMetadataRegistryTest extends TestCase
 {
+    /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        $this->filesystem = new Filesystem();
+        $this->serializer = new Serializer([
+            new IndexMetadataDenormalizer(new ObjectNormalizer()),
+            new JsonSerializableNormalizer(),
+            new ObjectNormalizer(),
+        ], [
+            new JsonEncoder(),
+        ]);
+
+        $this->filesystem->remove(__DIR__.'/assets/_ms_bundle_');
+    }
+
+    public function testConfigurationCanBeAdded(): void
+    {
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
+        $registry->add('foo', new IndexMetadata('foo'));
+
+        static::assertSame('foo', $registry->get('foo')->getUid());
+        static::assertArrayHasKey('foo', $registry->toArray());
+    }
+
     public function testConfigurationCannotBeAddedThenUpdated(): void
     {
-        $registry = new IndexMetadataRegistry();
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'../');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());
@@ -27,18 +70,9 @@ final class IndexMetadataRegistryTest extends TestCase
         static::assertSame('bar', $registry->get('foo')->getUid());
     }
 
-    public function testConfigurationCanBeAdded(): void
-    {
-        $registry = new IndexMetadataRegistry();
-        $registry->add('foo', new IndexMetadata('foo'));
-
-        static::assertSame('foo', $registry->get('foo')->getUid());
-        static::assertArrayHasKey('foo', $registry->toArray());
-    }
-
     public function testConfigurationCanBeOverridden(): void
     {
-        $registry = new IndexMetadataRegistry();
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'../');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());
@@ -49,7 +83,7 @@ final class IndexMetadataRegistryTest extends TestCase
 
     public function testConfigurationCanBeRemoved(): void
     {
-        $registry = new IndexMetadataRegistry();
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'../');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());
@@ -64,7 +98,7 @@ final class IndexMetadataRegistryTest extends TestCase
 
     public function testConfigurationCanBeCleared(): void
     {
-        $registry = new IndexMetadataRegistry();
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());

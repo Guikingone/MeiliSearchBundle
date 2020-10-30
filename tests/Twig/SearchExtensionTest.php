@@ -24,6 +24,8 @@ final class SearchExtensionTest extends TestCase
         static::assertInstanceOf(RuntimeExtensionInterface::class, $extension);
         static::assertNotEmpty($extension->getFunctions());
         static::assertInstanceOf(TwigFunction::class, $extension->getFunctions()[0]);
+        static::assertInstanceOf(SearchExtension::class, $extension->getFunctions()[0]->getCallable()[0]);
+        static::assertSame('search', $extension->getFunctions()[0]->getCallable()[1]);
     }
 
     public function testExtensionCanTriggerSearch(): void

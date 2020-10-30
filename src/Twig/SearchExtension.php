@@ -31,14 +31,14 @@ final class SearchExtension extends AbstractExtension implements RuntimeExtensio
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('search', ['search', $this]),
+            new TwigFunction('search', [$this, 'search']),
         ];
     }
 
     /**
-     * @param string               $index
-     * @param string               $query
-     * @param array<string,mixed>  $options
+     * @param string                $index
+     * @param string                $query
+     * @param array<string, mixed>  $options
      *
      * @return SearchResultInterface<string, mixed>
      *

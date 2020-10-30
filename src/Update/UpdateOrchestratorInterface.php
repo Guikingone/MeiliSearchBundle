@@ -24,7 +24,7 @@ interface UpdateOrchestratorInterface
     /**
      * @param string $uid
      *
-     * @return array<int,UpdateInterface>
+     * @return array<int, UpdateInterface>
      *
      * @throws Throwable
      */

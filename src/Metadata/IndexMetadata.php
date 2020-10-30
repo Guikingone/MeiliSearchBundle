@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Metadata;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class IndexMetadata
+final class IndexMetadata implements IndexMetadataInterface
 {
     /**
      * @var string
@@ -99,7 +99,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int, string>
+     * {@inheritdoc}
      */
     public function getRankingRules(): array
     {
@@ -107,7 +107,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int, string>
+     * {@inheritdoc}
      */
     public function getStopWords(): array
     {
@@ -120,7 +120,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function getFacetedAttributes(): array
     {
@@ -128,7 +128,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int, string>
+     * {@inheritdoc}
      */
     public function getSearchableAttributes(): array
     {
@@ -136,7 +136,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<int, string>
+     * {@inheritdoc}
      */
     public function getDisplayedAttributes(): array
     {
@@ -144,7 +144,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<string, array>
+     * {@inheritdoc}
      */
     public function getSynonyms(): array
     {
@@ -152,7 +152,7 @@ final class IndexMetadata
     }
 
     /**
-     * @return array<string, mixed>
+     * {@inheritdoc}
      */
     public function toArray(): array
     {

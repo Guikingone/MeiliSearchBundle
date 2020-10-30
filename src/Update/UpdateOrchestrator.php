@@ -69,7 +69,7 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
     }
 
     /**
-     * @return UpdateInterface[]
+     * {@inheritdoc}
      */
     public function getUpdates(string $uid): array
     {

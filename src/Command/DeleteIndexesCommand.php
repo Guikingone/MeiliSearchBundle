@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
-use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
+use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,7 +25,7 @@ final class DeleteIndexesCommand extends Command
     private $indexOrchestrator;
 
     /**
-     * @var IndexMetadataRegistry
+     * @var IndexMetadataRegistryInterface
      */
     private $indexMetadataRegistry;
 
@@ -36,7 +36,7 @@ final class DeleteIndexesCommand extends Command
 
     public function __construct(
         IndexOrchestratorInterface $indexOrchestrator,
-        IndexMetadataRegistry $indexMetadataRegistry
+        IndexMetadataRegistryInterface $indexMetadataRegistry
     ) {
         $this->indexOrchestrator = $indexOrchestrator;
         $this->indexMetadataRegistry = $indexMetadataRegistry;

@@ -9,10 +9,10 @@ use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReaderInterface;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
-use MeiliSearchBundle\Metadata\IndexMetadataRegistry;
 use MeiliSearchBundle\Messenger\Document\AddDocumentMessage;
 use MeiliSearchBundle\Messenger\Document\DeleteDocumentMessage;
 use MeiliSearchBundle\Messenger\Document\UpdateDocumentMessage;
+use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -34,7 +34,7 @@ final class DocumentSubscriber implements EventSubscriber
     private $documentReader;
 
     /**
-     * @var IndexMetadataRegistry
+     * @var IndexMetadataRegistryInterface
      */
     private $indexMetadataRegistry;
 
@@ -56,7 +56,7 @@ final class DocumentSubscriber implements EventSubscriber
     public function __construct(
         DocumentEntryPointInterface $documentOrchestrator,
         DocumentReaderInterface $documentReader,
-        IndexMetadataRegistry $indexMetadataRegistry,
+        IndexMetadataRegistryInterface $indexMetadataRegistry,
         PropertyAccessorInterface $propertyAccessor,
         SerializerInterface $serializer,
         ?MessageBusInterface $messageBus = null

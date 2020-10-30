@@ -47,16 +47,23 @@ final class SearchEntryPoint implements SearchEntryPointInterface
      */
     private $resultBuilder;
 
+    /**
+     * @var string|null
+     */
+    private $prefix;
+
     public function __construct(
         IndexOrchestratorInterface $indexOrchestrator,
         ?ResultBuilderInterface $resultBuilder = null,
         ?EventDispatcherInterface $eventDispatcher = null,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?string $prefix = null
     ) {
         $this->indexOrchestrator = $indexOrchestrator;
         $this->resultBuilder = $resultBuilder;
         $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger ?: new NullLogger();
+        $this->prefix = $prefix;
     }
 
     /**
@@ -65,7 +72,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     public function search(string $index, string $query, array $options = []): SearchResultInterface
     {
         try {
-            $index = $this->indexOrchestrator->getIndex($index);
+            $index = $this->indexOrchestrator->getIndex(null === $this->prefix ? $index : sprintf('%s%s', $this->prefix, $index));
         } catch (Throwable $throwable) {
             $this->logger->error('The search cannot occur as an error occurred when fetching the index', [
                 self::INDEX => $index,
