@@ -56,6 +56,7 @@ use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use MeiliSearchBundle\Result\ResultBuilder;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
+use MeiliSearchBundle\Search\FallbackSearchEntrypoint;
 use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
@@ -66,7 +67,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -282,6 +282,7 @@ final class MeiliSearchExtensionTest extends TestCase
                     'pool' => 'app',
                     'clear_on_new_document' => true,
                     'clear_on_document_update' => true,
+                    'fallback' => true,
                 ],
                 'indexes' => [
                     'foo' => [
@@ -293,7 +294,6 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->has(SearchResultCacheOrchestrator::class));
         static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
-        static::assertSame(CachedSearchEntryPoint::class, (string) $container->getAlias(SearchEntryPointInterface::class));
         static::assertTrue($container->hasDefinition(SearchResultCacheOrchestrator::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getArgument(1));
@@ -379,6 +379,15 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(WarmIndexesCommand::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(WarmIndexesCommand::class)->getTag('container.preload')[0]);
         static::assertSame(WarmIndexesCommand::class, $container->getDefinition(WarmIndexesCommand::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(FallbackSearchEntrypoint::class));
+        static::assertIsArray($container->getDefinition(FallbackSearchEntrypoint::class)->getArgument(0));
+        static::assertFalse($container->getDefinition(FallbackSearchEntrypoint::class)->isPublic());
+        static::assertTrue($container->getDefinition(FallbackSearchEntrypoint::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(FallbackSearchEntrypoint::class)->getTag('container.preload')[0]);
+        static::assertSame(FallbackSearchEntrypoint::class, $container->getDefinition(FallbackSearchEntrypoint::class)->getTag('container.preload')[0]['class']);
+
+        static::assertSame(FallbackSearchEntrypoint::class, (string) $container->getAlias(SearchEntryPointInterface::class));
     }
 
     public function testCommandsAreConfiguredWithoutCache(): void
@@ -620,5 +629,8 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(MeiliSearchBundleDataCollector::class)->hasTag('data_collector'));
         static::assertSame('@MeiliSearch/Collector/data_collector.html.twig', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]['template']);
         static::assertSame(MeiliSearchBundleDataCollector::NAME, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('data_collector')[0]['id']);
+        static::assertTrue($container->getDefinition(MeiliSearchBundleDataCollector::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('container.preload')[0]);
+        static::assertSame(MeiliSearchBundleDataCollector::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('container.preload')[0]['class']);
     }
 }

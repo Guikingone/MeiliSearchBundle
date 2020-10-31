@@ -8,6 +8,7 @@ use Exception;
 use MeiliSearchBundle\Result\ResultBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use stdClass;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -16,6 +17,20 @@ use Symfony\Component\Serializer\Serializer;
  */
 final class ResultBuilderTest extends TestCase
 {
+    public function testBuilderSupport(): void
+    {
+        $serializer = $this->createMock(Serializer::class);
+        $serializer->expects(self::never())->method('denormalize');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $builder = new ResultBuilder($serializer, $logger);
+
+        static::assertFalse($builder->support(['test' => 'foo']));
+        static::assertTrue($builder->support(['model' => stdClass::class]));
+    }
+
     public function testDataCannotBeBuiltWithExceptionAndLogger(): void
     {
         $serializer = $this->createMock(Serializer::class);

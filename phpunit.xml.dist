@@ -15,9 +15,7 @@
 
     <filter>
         <whitelist>
-            <directory>src/Client</directory>
-            <directory>src/Command</directory>
-            <directory>src/DependencyInjection</directory>
+            <directory>src/</directory>
         </whitelist>
     </filter>
 

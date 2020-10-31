@@ -84,6 +84,27 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator->getIndex('foo');
     }
 
+    public function testIndexCanBeRetrieved(): void
+    {
+        $indexes = $this->createMock(Indexes::class);
+
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('An index has been retrieved'), [
+            'uid' => 'foo',
+        ]);
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->with(self::equalTo('foo'))->willReturn($indexes);
+
+        $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
+
+        $index = $orchestrator->getIndex('foo');
+
+        static::assertSame($indexes, $index);
+    }
+
     public function testAllIndexesCanBeRetrieved(): void
     {
         $firstIndexes = $this->createMock(Indexes::class);

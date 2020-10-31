@@ -16,3 +16,4 @@ summary.log
 
 # PHPUnit
 .phpunit.result.cache
+reports
