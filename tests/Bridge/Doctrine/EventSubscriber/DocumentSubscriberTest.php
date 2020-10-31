@@ -66,8 +66,10 @@ final class DocumentSubscriberTest extends TestCase
 
         $reader = new DocumentReader(new AnnotationReader());
 
-        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
         $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
+
+        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::once())->method('addDocument');
 
         $serializer = $this->createMock(Serializer::class);
         $serializer->expects(self::once())->method('normalize')->willReturn([
