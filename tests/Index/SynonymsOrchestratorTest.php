@@ -6,6 +6,7 @@ namespace Tests\MeiliSearchBundle\Index;
 
 use Exception;
 use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\Exception\RuntimeException;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use PHPUnit\Framework\TestCase;
@@ -70,6 +71,79 @@ final class SynonymsOrchestratorTest extends TestCase
         $orchestrator = new SynonymsOrchestrator($indexOrchestrator, $eventDispatcher, $logger);
 
         static::assertArrayHasKey('logan', $orchestrator->getSynonyms('foo'));
+    }
+
+    public function testSynonymsCannotBeUpdatedWithException(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('error')
+            ->with(self::equalTo('An error occurred when trying to update the synonyms'), [
+                'index' => 'foo',
+                'error' => 'An error occurred',
+                'synonyms' => ['xmen' => 'wolverine'],
+            ])
+        ;
+
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::never())->method('dispatch');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::never())->method('updateSynonyms');
+
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $indexOrchestrator->expects(self::once())->method('getIndex')->willThrowException(new RuntimeException('An error occurred'));
+
+        $orchestrator = new SynonymsOrchestrator($indexOrchestrator, $eventDispatcher, $logger);
+
+        static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        $orchestrator->updateSynonyms('foo', ['xmen' => 'wolverine']);
+    }
+
+    public function testSynonymsCanBeUpdated(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('updateSynonyms')
+            ->with(self::equalTo(['xmen' => 'wolverine']))
+            ->willReturn([
+                'updateId' => 1,
+            ])
+        ;
+
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $indexOrchestrator->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new SynonymsOrchestrator($indexOrchestrator, $eventDispatcher, $logger);
+        $orchestrator->updateSynonyms('foo', ['xmen' => 'wolverine']);
+    }
+
+    public function testSynonymsCanBeUpdatedWithoutEventDispatcher(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::never())->method('dispatch');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('updateSynonyms')
+            ->with(self::equalTo(['xmen' => 'wolverine']))
+            ->willReturn([
+                'updateId' => 1,
+            ])
+        ;
+
+        $indexOrchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $indexOrchestrator->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new SynonymsOrchestrator($indexOrchestrator, null, $logger);
+        $orchestrator->updateSynonyms('foo', ['xmen' => 'wolverine']);
     }
 
     public function testSynonymsCannotBeResetWithException(): void

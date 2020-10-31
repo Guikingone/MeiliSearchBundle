@@ -103,7 +103,7 @@
 		"symfony/http-kernel": "^4.4|^5.0",
 		"symfony/property-access": "^4.4|^5.0",
 		"symfony/options-resolver": "^4.4|^5.0",
-		"symfony/serializer": "^4.4|^5.0"
+		"symfony/serializer": "^5.0"
 	},
 	"require-dev": {
 		"doctrine/common": "^2.13",

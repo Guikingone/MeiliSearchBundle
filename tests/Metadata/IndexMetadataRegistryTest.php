@@ -59,7 +59,7 @@ final class IndexMetadataRegistryTest extends TestCase
 
     public function testConfigurationCannotBeAddedThenUpdated(): void
     {
-        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'../');
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());
@@ -70,9 +70,17 @@ final class IndexMetadataRegistryTest extends TestCase
         static::assertSame('bar', $registry->get('foo')->getUid());
     }
 
+    public function testConfigurationCanBeCreatedDuringOverrideIfNotSet(): void
+    {
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
+
+        $registry->override('foo', new IndexMetadata('bar'));
+        static::assertSame('bar', $registry->get('foo')->getUid());
+    }
+
     public function testConfigurationCanBeOverridden(): void
     {
-        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'../');
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());
@@ -81,9 +89,18 @@ final class IndexMetadataRegistryTest extends TestCase
         static::assertSame('bar', $registry->get('foo')->getUid());
     }
 
-    public function testConfigurationCanBeRemoved(): void
+    public function testMetadataCannotBeRemovedIfNotSet(): void
     {
-        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'../');
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
+
+        static::expectException(InvalidArgumentException::class);
+        static::expectExceptionMessage('The desired index does not exist');
+        $registry->remove('foo');
+    }
+
+    public function testMetadataCanBeRemoved(): void
+    {
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
         $registry->add('foo', new IndexMetadata('foo'));
 
         static::assertSame('foo', $registry->get('foo')->getUid());
@@ -94,6 +111,14 @@ final class IndexMetadataRegistryTest extends TestCase
         static::expectException(InvalidArgumentException::class);
         static::expectExceptionMessage('The desired index does not exist');
         $registry->get('foo');
+    }
+
+    public function testConfigurationCanBeClearedWhenEmpty(): void
+    {
+        $registry = new IndexMetadataRegistry($this->filesystem, $this->serializer, __DIR__.'/assets');
+
+        $registry->clear();
+        static::assertEmpty($registry->toArray());
     }
 
     public function testConfigurationCanBeCleared(): void

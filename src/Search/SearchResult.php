@@ -19,7 +19,7 @@ final class SearchResult implements SearchResultInterface
     /**
      * @var array<int, array>
      */
-    private $hits;
+    private $hits = [];
 
     /**
      * @var int

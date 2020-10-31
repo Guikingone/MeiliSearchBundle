@@ -159,4 +159,33 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator = new IndexOrchestrator($client, null, $logger);
         $orchestrator->removeIndex('test');
     }
+
+    public function testIndexesCannotBeDeletedWithException(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('error')->with(self::equalTo('The indexes cannot be deleted, error: "An error occurred".'));
+        $logger->expects(self::never())->method('info');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('deleteAllIndexes')->willThrowException(new RuntimeException('An error occurred'));
+
+        $orchestrator = new IndexOrchestrator($client, null, $logger);
+
+        static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        $orchestrator->removeIndexes();
+    }
+
+    public function testIndexesCanBeDeleted(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('The indexes have been deleted'));
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('deleteAllIndexes');
+
+        $orchestrator = new IndexOrchestrator($client, null, $logger);
+        $orchestrator->removeIndexes();
+    }
 }

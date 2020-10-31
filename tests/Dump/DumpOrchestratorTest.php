@@ -37,6 +37,31 @@ final class DumpOrchestratorTest extends TestCase
         $orchestrator->create();
     }
 
+    public function testDumpCanBeCreatedWithoutEventDispatcher(): void
+    {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::never())->method('dispatch');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('critical');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('createDump')->willReturn([
+            'uid' => '1',
+            'status' => 'done',
+        ]);
+
+        $orchestrator = new DumpOrchestrator($client, null, $logger);
+        $dump = $orchestrator->create();
+
+        static::assertArrayHasKey('uid', $dump);
+        static::assertArrayHasKey('status', $dump);
+        static::assertSame([
+            'uid' => '1',
+            'status' => 'done',
+        ], $dump);
+    }
+
     public function testDumpCanBeCreated(): void
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);

@@ -134,21 +134,6 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
     /**
      * {@inheritdoc}
      */
-    public function removeIndexes(): void
-    {
-        try {
-            $this->client->deleteAllIndexes();
-        } catch (Throwable $exception) {
-            $this->logger->error(sprintf('The indexes cannot be deleted, error: "%s".', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
-        }
-
-        $this->logger->info('The indexes have been deleted');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function removeIndex(string $uid): void
     {
         try {
@@ -161,6 +146,22 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         $this->logger->info('An index has been deleted', [
             self::UID => $uid,
         ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function removeIndexes(): void
+    {
+        try {
+            $this->client->deleteAllIndexes();
+        } catch (Throwable $exception) {
+            $this->logger->error(sprintf('The indexes cannot be deleted, error: "%s".', $exception->getMessage()));
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
+        }
+
+        $this->logger->info('The indexes have been deleted');
     }
 
     private function handleConfiguration(Indexes $index, array $configuration): void
