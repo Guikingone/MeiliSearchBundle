@@ -79,25 +79,6 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         ], $index));
     }
 
-    public function update(string $uid, array $configuration = []): void
-    {
-        try {
-            $index = $this->getIndex($uid);
-
-            if (null === $index->getPrimaryKey()) {
-                $index->update(['primaryKey' => $configuration['primaryKey']]);
-            }
-
-            $this->handleConfiguration($index, $configuration);
-        } catch (Throwable $throwable) {
-            $this->logger->error(sprintf('The index cannot be created, error: "%s"', $throwable->getMessage()), [
-                'trace' => $throwable->getTrace(),
-            ]);
-
-            throw new RuntimeException($throwable->getMessage(), 0, $throwable);
-        }
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -128,6 +109,28 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The index cannot be retrieved, error: "%s".', $exception->getMessage()));
             throw new RuntimeException($exception->getMessage());
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function update(string $uid, array $configuration = []): void
+    {
+        try {
+            $index = $this->getIndex($uid);
+
+            if (null === $index->getPrimaryKey()) {
+                $index->update(['primaryKey' => $configuration['primaryKey']]);
+            }
+
+            $this->handleConfiguration($index, $configuration);
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf('The index cannot be created, error: "%s"', $throwable->getMessage()), [
+                'trace' => $throwable->getTrace(),
+            ]);
+
+            throw new RuntimeException($throwable->getMessage(), 0, $throwable);
         }
     }
 
@@ -183,7 +186,7 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
         }
 
         if (array_key_exists(self::RANKING_RULES_ATTRIBUTES, $configuration)) {
-            $index->updateStopWords($configuration[self::RANKING_RULES_ATTRIBUTES]);
+            $index->updateRankingRules($configuration[self::RANKING_RULES_ATTRIBUTES]);
         }
 
         if (array_key_exists(self::SEARCHABLE_ATTRIBUTES, $configuration) && [] !== $configuration[self::SEARCHABLE_ATTRIBUTES]) {

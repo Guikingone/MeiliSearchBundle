@@ -17,13 +17,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 final class DumpOrchestratorTest extends TestCase
 {
-    public function testDumpCannotBeCreated(): void
+    public function testDumpCannotBeCreatedWithException(): void
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::never())->method('dispatch');
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('critical');
+        $logger->expects(self::once())->method('critical')->with(self::equalTo('An error occurred when trying to create a new dump'), [
+            'error' => 'An error occurred',
+        ]);
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('createDump')
@@ -34,6 +36,7 @@ final class DumpOrchestratorTest extends TestCase
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->create();
     }
 
@@ -87,13 +90,15 @@ final class DumpOrchestratorTest extends TestCase
         ], $dump);
     }
 
-    public function testDumpStatusCannotBeRetrieved(): void
+    public function testDumpStatusCannotBeRetrievedWithException(): void
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::never())->method('dispatch');
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('critical');
+        $logger->expects(self::once())->method('critical')->with(self::equalTo('An error occurred when trying to fetch the dump status'), [
+            'error' => 'An error occurred',
+        ]);
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getDumpStatus')->with(self::equalTo('foo'))
@@ -104,6 +109,7 @@ final class DumpOrchestratorTest extends TestCase
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->getStatus('foo');
     }
 

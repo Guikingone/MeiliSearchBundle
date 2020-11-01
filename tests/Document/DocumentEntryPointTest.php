@@ -10,6 +10,10 @@ use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidNormalizer;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
+use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
+use MeiliSearchBundle\Event\Document\PostDocumentRetrievedEvent;
+use MeiliSearchBundle\Event\Document\PreDocumentDeletionEvent;
+use MeiliSearchBundle\Event\Document\PreDocumentRetrievedEvent;
 use MeiliSearchBundle\Exception\RuntimeException;
 use MeiliSearchBundle\Result\ResultBuilder;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
@@ -248,7 +252,18 @@ final class DocumentEntryPointTest extends TestCase
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willReturn($index);
 
-        $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch')
+            ->withConsecutive(
+                [new PreDocumentRetrievedEvent($index, 'test')],
+                [new PostDocumentRetrievedEvent($index, [
+                    'id' => 'foo',
+                    'value' => 'foo',
+                ])]
+            )
+        ;
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher);
         $document = $orchestrator->getDocument('test', 'test');
 
         static::assertArrayHasKey('id', $document);
@@ -516,7 +531,18 @@ final class DocumentEntryPointTest extends TestCase
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willReturn($index);
 
-        $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch')
+            ->withConsecutive(
+                [new PreDocumentDeletionEvent($index, [
+                    'id' => 1,
+                    'value' => 'foo',
+                ])],
+                [new PostDocumentDeletionEvent(1)]
+            )
+        ;
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher);
         $orchestrator->removeDocument('foo', 1);
     }
 

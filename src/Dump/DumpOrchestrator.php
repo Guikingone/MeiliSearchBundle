@@ -57,7 +57,6 @@ final class DumpOrchestrator implements DumpOrchestratorInterface
         } catch (Throwable $throwable) {
             $this->logger->critical(sprintf('An error occurred when trying to create a new dump'), [
                 'error' => $throwable->getMessage(),
-                'trace' => $throwable->getTraceAsString(),
             ]);
 
             throw $throwable;
@@ -74,7 +73,6 @@ final class DumpOrchestrator implements DumpOrchestratorInterface
         } catch (Throwable $throwable) {
             $this->logger->critical(sprintf('An error occurred when trying to fetch the dump status'), [
                 'error' => $throwable->getMessage(),
-                'trace' => $throwable->getTraceAsString(),
             ]);
 
             throw $throwable;
