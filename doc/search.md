@@ -3,6 +3,8 @@
 This bundle provides a [Search](../src/Search/Search.php) utils 
 that allows you to build complex queries using a fluent interface. 
 
+# Building a search
+
 ## Querying an index
 
 ```php
@@ -17,6 +19,26 @@ $search->in('foo');
 
 $search = Search::within('foo');
 ```
+
+**Note**: Keep in mind that using `Search::within('foo')` is just a shortcut for the first syntax.
+
+## Specifying the query
+
+```php
+<?php
+
+use MeiliSearchBundle\Search\Search;
+
+$search = new Search();
+$search->in('foo');
+$search->query('bar');
+
+// OR
+
+$search = Search::on('foo', 'bar');
+```
+
+**Note**: Keep in mind that using `Search::on('foo', 'bar')` is just a shortcut for the first syntax.
 
 ## Conditions
 
@@ -205,3 +227,5 @@ $search->in('foo')->paginate('id', '>', $result->getLastIdentifier(), 20);
 
 $search = Search::within('foo')->paginate('id', '>', $result->getLastIdentifier(), 20);
 ```
+
+## Usage

@@ -19,9 +19,34 @@ final class SearchTest extends TestCase
 
         $search->in('foo');
         static::assertSame('foo', $search->getRaw()['index']);
+        static::assertSame('foo', $search->getIndex());
 
         $search = Search::within('foo');
         static::assertSame('foo', $search->getRaw()['index']);
+        static::assertSame('foo', $search->getIndex());
+    }
+
+    public function testSearchCanBeBuiltOnSpecificQuery(): void
+    {
+        $search = new Search();
+
+        $search->in('foo')->query('bar');
+        static::assertSame('foo', $search->getRaw()['index']);
+        static::assertSame('bar', $search->getRaw()['query']);
+        static::assertSame('foo', $search->getIndex());
+        static::assertSame('bar', $search->getQuery());
+
+        $search = Search::within('foo')->query('bar');
+        static::assertSame('foo', $search->getRaw()['index']);
+        static::assertSame('bar', $search->getRaw()['query']);
+        static::assertSame('foo', $search->getIndex());
+        static::assertSame('bar', $search->getQuery());
+
+        $search = Search::on('foo', 'bar');
+        static::assertSame('foo', $search->getRaw()['index']);
+        static::assertSame('bar', $search->getRaw()['query']);
+        static::assertSame('foo', $search->getIndex());
+        static::assertSame('bar', $search->getQuery());
     }
 
     public function testSearchCanTargetSpecificIndexAndLimitResults(): void
@@ -31,10 +56,12 @@ final class SearchTest extends TestCase
 
         static::assertSame('foo', $search->getRaw()['index']);
         static::assertSame(10, $search->getRaw()['limit']);
+        static::assertSame(10, $search->getLimit());
 
         $search = Search::within('foo')->max(10);
         static::assertSame('foo', $search->getRaw()['index']);
         static::assertSame(10, $search->getRaw()['limit']);
+        static::assertSame(10, $search->getLimit());
     }
 
     public function testSearchCanTargetSpecificIndexAndOffset(): void
@@ -48,17 +75,6 @@ final class SearchTest extends TestCase
         $search = Search::within('foo')->offset(10);
         static::assertSame('foo', $search->getRaw()['index']);
         static::assertSame(10, $search->getRaw()['offset']);
-    }
-
-    public function testSearchCanSpecifyAQuery(): void
-    {
-        $search = new Search();
-        $search->in('foo')->query('foo');
-
-        static::assertSame('foo', $search->getRaw()['query']);
-
-        $search = Search::within('foo')->query('foo');
-        static::assertSame('foo', $search->getRaw()['query']);
     }
 
     public function testSearchCannotBeBuiltWithInvalidWhereCondition(): void

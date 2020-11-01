@@ -174,6 +174,14 @@ final class SearchResult implements SearchResultInterface
     }
 
     /**
+     * @return mixed
+     */
+    public function getLastIdentifier()
+    {
+        return $this->lastIdentifier;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function toArray(): array

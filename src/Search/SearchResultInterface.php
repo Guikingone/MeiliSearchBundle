@@ -49,6 +49,15 @@ interface SearchResultInterface extends Countable, IteratorAggregate
 
     public function getQuery(): string;
 
+    public function getExhaustiveFacetsCount(): ?bool;
+
+    public function getFacetsDistribution(): array;
+
+    /**
+     * @return mixed Can be either a string, integer or null.
+     */
+    public function getLastIdentifier();
+
     /**
      * @return array<string,mixed>
      */

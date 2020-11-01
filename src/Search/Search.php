@@ -29,6 +29,11 @@ final class Search
     private $index;
 
     /**
+     * @var string
+     */
+    private $search;
+
+    /**
      * @var int
      */
     private $limit = 20;
@@ -82,6 +87,16 @@ final class Search
         $this->index = $index;
 
         return $this;
+    }
+
+    public static function on(string $index, string $query): self
+    {
+        $self = new self();
+
+        $self->in($index);
+        $self->query($query);
+
+        return $self;
     }
 
     public function max(int $limit): self
@@ -220,10 +235,26 @@ final class Search
         return $this;
     }
 
+    public function getIndex(): string
+    {
+        return $this->index;
+    }
+
+    public function getQuery(): string
+    {
+        return $this->query;
+    }
+
+    public function getLimit(): int
+    {
+        return $this->limit;
+    }
+
     public function getRaw(): array
     {
         return [
             'index' => $this->index,
+            'search' => $this->search,
             'query' => $this->query,
             'offset' => $this->offset,
             'limit' => $this->limit,
