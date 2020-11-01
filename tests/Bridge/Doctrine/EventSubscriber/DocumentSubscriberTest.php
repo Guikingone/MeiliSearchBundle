@@ -188,6 +188,37 @@ final class DocumentSubscriberTest extends TestCase
         $subscriber->postUpdate($lifeCycleEventArgs);
     }
 
+    public function testSubscriberCanUpdateValidDocumentWithoutMessageBus(): void
+    {
+        $metadata = $this->createMock(IndexMetadataInterface::class);
+        $metadata->expects(self::once())->method('isAsync')->willReturn(true);
+
+        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
+        $registry->expects(self::once())->method('get')->willReturn($metadata);
+
+        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::once())->method('updateDocument');
+
+        $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
+
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects(self::never())->method('dispatch');
+
+        $serializer = $this->createMock(Serializer::class);
+        $serializer->expects(self::once())->method('normalize')->willReturn([
+            'id' => 1,
+            'title' => 'bar',
+        ]);
+
+        $lifeCycleEventArgs = $this->createMock(LifecycleEventArgs::class);
+        $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn(new Foo());
+
+        $reader = new DocumentReader(new AnnotationReader());
+
+        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer);
+        $subscriber->postUpdate($lifeCycleEventArgs);
+    }
+
     public function testSubscriberCannotRemoveInvalidDocument(): void
     {
         $registry = $this->createMock(IndexMetadataRegistryInterface::class);
