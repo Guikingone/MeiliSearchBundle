@@ -8,6 +8,7 @@ use Generator;
 use MeiliSearch\Client;
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
+use MeiliSearchBundle\Exception\RuntimeException as InternalRuntimeException;
 use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Exception\RuntimeException as MeiliSeachBundleRuntimeException;
 use PHPUnit\Framework\TestCase;
@@ -124,6 +125,30 @@ final class IndexOrchestratorTest extends TestCase
         static::expectExceptionCode(0);
         static::expectExceptionMessage('An error occurred');
         $orchestrator->update('foo', ['synonyms' => ['xmen' => ['wolverine']]]);
+    }
+
+    public function testIndexCannotBeUpdatedWithExceptionOnUpdate(): void
+    {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::once())->method('dispatch');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('error')->with(self::equalTo('The index cannot be updated, error: "An error occurred"'));
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('updateSynonyms')->willThrowException(new RuntimeException('An error occurred'));
+        $index->expects(self::once())->method('getPrimaryKey')->willReturn('id');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
+
+        static::expectException(InternalRuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
+        $orchestrator->update('test', ['synonyms' => ['xmen' => ['wolverine']]]);
     }
 
     public function testIndexCanBeUpdated(): void

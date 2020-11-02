@@ -14,7 +14,6 @@ use MeiliSearchBundle\Loader\LoaderInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
-use function array_filter;
 use function array_replace;
 use function sprintf;
 use function usort;
@@ -58,7 +57,7 @@ final class DocumentLoader implements LoaderInterface
             throw new RuntimeException('No providers found');
         }
 
-        $providers = array_replace($this->filterOnPriority(), $this->documentProviders);
+        $providers = $this->filterOnPriority();
 
         foreach ($providers as $provider) {
             try {
@@ -94,14 +93,24 @@ final class DocumentLoader implements LoaderInterface
      */
     private function filterOnPriority(): array
     {
-        $providers = array_filter($this->documentProviders, function (DocumentDataProviderInterface $provider): bool {
-            return $provider instanceof PriorityDataProviderInterface;
-        });
+        $defaultProviders = [];
+        foreach ($this->documentProviders as $provider) {
+            $defaultProviders[] = $provider;
+        }
+
+        $providers = [];
+        foreach ($this->documentProviders as $provider) {
+            if (!$provider instanceof PriorityDataProviderInterface) {
+                continue;
+            }
+
+            $providers[] = $provider;
+        }
 
         usort($providers, function (PriorityDataProviderInterface $provider, PriorityDataProviderInterface $nextProvider): bool {
             return $provider->getPriority() > $nextProvider->getPriority();
         });
 
-        return $providers;
+        return array_replace($providers, $defaultProviders);
     }
 }

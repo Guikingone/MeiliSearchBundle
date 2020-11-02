@@ -46,7 +46,10 @@ final class SearchResultCacheOrchestratorTest extends TestCase
     public function testOrchestratorCanAddNewItemWithLogger(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A search result has been saved'), [
+            'identifier' => 'foo',
+            'result' => [],
+        ]);
 
         $searchResult = $this->createMock(SearchResultInterface::class);
         $searchResult->expects(self::exactly(2))->method('toArray')->willReturn([]);
@@ -56,16 +59,41 @@ final class SearchResultCacheOrchestratorTest extends TestCase
         $orchestrator->add('foo', $searchResult);
     }
 
-    public function testOrchestratorCannotReturnAnInvalidSearchResult(): void
+    public function testOrchestratorCannotReturnAnUndefinedSearchResult(): void
     {
         $cacheItemPool = new ArrayAdapter();
         $orchestrator = new SearchResultCacheOrchestrator($cacheItemPool);
 
         static::expectException(InvalidArgumentException::class);
+        static::expectExceptionMessage('The desired search result cannot be found');
+        static::expectExceptionCode(0);
         $orchestrator->get('foo');
     }
 
-    public function testOrchestratorCanReturnAnExistingSearchResult(): void
+    public function testOrchestratorCannotReturnAnInvalidSearchResult(): void
+    {
+        $searchResult = $this->createMock(SearchResultInterface::class);
+        $searchResult->expects(self::never())->method('toArray');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A search result has been retrieved'), [
+            'identifier' => 'foo',
+        ]);
+
+        $cacheItemPool = new ArrayAdapter();
+        $item = $cacheItemPool->getItem('foo');
+        $item->set('foo');
+        $cacheItemPool->save($item);
+
+        $orchestrator = new SearchResultCacheOrchestrator($cacheItemPool, $logger);
+
+        static::expectException(InvalidArgumentException::class);
+        static::expectExceptionMessage('The desired search result does not contain valid data');
+        static::expectExceptionCode(0);
+        $orchestrator->get('foo');
+    }
+
+    public function testOrchestratorCanReturnAValidSearchResult(): void
     {
         $searchResult = $this->createMock(SearchResultInterface::class);
         $searchResult->expects(self::exactly(2))->method('toArray')->willReturn([
@@ -80,8 +108,11 @@ final class SearchResultCacheOrchestratorTest extends TestCase
             'facetsDistribution' => [],
         ]);
 
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::exactly(2))->method('info');
+
         $cacheItemPool = new ArrayAdapter();
-        $orchestrator = new SearchResultCacheOrchestrator($cacheItemPool);
+        $orchestrator = new SearchResultCacheOrchestrator($cacheItemPool, $logger);
 
         $orchestrator->add('foo', $searchResult);
 
@@ -98,6 +129,8 @@ final class SearchResultCacheOrchestratorTest extends TestCase
         $orchestrator = new SearchResultCacheOrchestrator($cacheItemPool);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('The cache pool cannot be cleared');
+        static::expectExceptionCode(0);
         $orchestrator->clear();
     }
 

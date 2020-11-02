@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,13 +29,21 @@ final class DeleteIndexCommand extends Command
     private $indexOrchestrator;
 
     /**
+     * @var IndexMetadataRegistryInterface
+     */
+    private $indexMetadataRegistry;
+
+    /**
      * {@inheritdoc}
      */
     protected static $defaultName = 'meili:delete-index';
 
-    public function __construct(IndexOrchestratorInterface $indexOrchestrator)
-    {
+    public function __construct(
+        IndexOrchestratorInterface $indexOrchestrator,
+        IndexMetadataRegistryInterface $indexMetadataRegistry
+    ) {
         $this->indexOrchestrator = $indexOrchestrator;
+        $this->indexMetadataRegistry = $indexMetadataRegistry;
 
         parent::__construct();
     }
@@ -65,6 +74,7 @@ final class DeleteIndexCommand extends Command
 
             try {
                 $this->indexOrchestrator->removeIndex($index);
+                $this->indexMetadataRegistry->remove($index);
                 $io->success(sprintf('The index "%s" has been removed', $index));
 
                 return 0;

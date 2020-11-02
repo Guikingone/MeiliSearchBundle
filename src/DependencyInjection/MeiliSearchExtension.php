@@ -158,7 +158,7 @@ final class MeiliSearchExtension extends Extension
         $container->setAlias(IndexMetadataRegistryInterface::class, IndexMetadataRegistry::class);
     }
 
-    public function handleCacheConfiguration(ContainerBuilder $container, array $configuration): void
+    private function handleCacheConfiguration(ContainerBuilder $container, array $configuration): void
     {
         if (!array_key_exists(self::CACHE, $configuration) || !$configuration[self::CACHE]['enabled']) {
             return;

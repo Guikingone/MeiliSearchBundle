@@ -43,10 +43,13 @@ final class IndexEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenToIndexCreationWithLogger(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $index = $this->createMock(Indexes::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] An index has been created'), [
+            'index' => $index,
+            'configuration' => [],
+        ]);
 
         $event = new IndexCreatedEvent([], $index);
 
@@ -73,10 +76,12 @@ final class IndexEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenToIndexDeletionWithLogger(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $event = new IndexRemovedEvent('foo');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] An index has been removed'), [
+            'index' => 'foo',
+        ]);
 
         $list = $this->createMock(IndexEventListInterface::class);
         $list->expects(self::once())->method('add')->with($event);
@@ -104,11 +109,13 @@ final class IndexEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenToIndexRetrievedWithLogger(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('foo');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] An index has been retrieved'), [
+            'index' => 'foo',
+        ]);
 
         $event = new IndexRetrievedEvent($index);
 

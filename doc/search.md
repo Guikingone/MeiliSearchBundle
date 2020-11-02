@@ -103,8 +103,28 @@ $search->in('foo')->not('id', '=', 1);
 $search = Search::within('foo')->not('id', '=', 1);
 ```
 
-Keep in mind that filters can be chained: 
+Want to filter on an "isolated" negative condition?
 
+```php
+<?php
+
+use MeiliSearchBundle\Search\Search;
+
+$search = new Search();
+$search->in('foo')->where('id', '>', 1)->andNot('id', '=', 5);
+
+// OR
+
+$search = Search::within('foo')->where('id', '>', 1)->andNot('id', '=', 5);
+
+// Both will result on id > 1 AND (NOT id = 5)
+```
+
+**Note**: Keep in mind that `andNot` cannot be used without an existing `where` condition!
+
+**Note**: Every `*where*` method define a third (fourth on `where`) argument called `$isolated` which allow to use `()` to isolate the condition.
+
+Keep in mind that filters can be chained: 
 
 ```php
 <?php
@@ -227,5 +247,32 @@ $search->in('foo')->paginate('id', '>', $result->getLastIdentifier(), 20);
 
 $search = Search::within('foo')->paginate('id', '>', $result->getLastIdentifier(), 20);
 ```
+
+## Bonus: Building a search using [ExpressionLanguage](https://symfony.com/doc/current/components/expression_language.html)
+
+This bundle provides a custom `ExpressionLanguage` that brings a shortcut to building searches:
+
+```php
+<?php
+
+use MeiliSearchBundle\ExpressionLanguage\SearchExpressionLanguage;
+
+$expressionLanguage = new SearchExpressionLanguage();
+$search = $expressionLanguage->evaluate('search("foo", "bar", "title > 2", 2)');
+
+// Once defined, you can update the Search object via the defined methods
+// Ex:
+
+$search->andWhere('title', '>=', 10);
+```
+
+**Note**: 
+
+This approach only supports the following building parts of a search:
+
+- The index
+- The query
+- The filters (only the ones defined by `where`)
+- The limit (defined by `max`)
 
 ## Usage

@@ -60,4 +60,4 @@ final class FooController
 ```
 
 Thanks to the fourth argument, `SearchEntryPointInterface` will return a `Search` object where 
-every hits is an instance of the related DTO's (if the `model` key has been defined during the population).
+every hit is an instance of the related DTO's (if the `model` key has been defined during the population).

@@ -18,6 +18,13 @@ final class AddIndexMessageTest extends TestCase
 
         static::assertSame('foo', $message->getUid());
         static::assertNull($message->getPrimaryKey());
+        static::assertArrayHasKey('distinctAttribute', $message->getConfiguration());
+        static::assertArrayHasKey('facetedAttributes', $message->getConfiguration());
+        static::assertArrayHasKey('searchableAttributes', $message->getConfiguration());
+        static::assertArrayHasKey('displayedAttributes', $message->getConfiguration());
+        static::assertArrayHasKey('rankingRules', $message->getConfiguration());
+        static::assertArrayHasKey('stopWords', $message->getConfiguration());
+        static::assertArrayHasKey('synonyms', $message->getConfiguration());
     }
 
     public function testIndexDataCanBeRetrieved(): void

@@ -41,10 +41,13 @@ final class SynonymsEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenOnPostReset(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $index = $this->createMock(Indexes::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms have been reset'), [
+            'index' => $index,
+            'update' => 1,
+        ]);
 
         $event = new PostResetSynonymsEvent($index, 1);
 
@@ -67,10 +70,13 @@ final class SynonymsEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenOnPostUpdate(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $index = $this->createMock(Indexes::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms have been updated'), [
+            'index' => $index,
+            'update' => 1,
+        ]);
 
         $event = new PostUpdateSynonymsEvent($index, 1);
 
@@ -93,10 +99,12 @@ final class SynonymsEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenOnPreReset(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $index = $this->createMock(Indexes::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms are about to been reset'), [
+            'index' => $index,
+        ]);
 
         $event = new PreResetSynonymsEvent($index);
 
@@ -119,10 +127,13 @@ final class SynonymsEventSubscriberTest extends TestCase
 
     public function testSubscriberCanListenOnPreUpdate(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-
         $index = $this->createMock(Indexes::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms are about to been updated'), [
+            'index' => $index,
+            'synonyms' => [],
+        ]);
 
         $event = new PreUpdateSynonymsEvent($index, []);
 

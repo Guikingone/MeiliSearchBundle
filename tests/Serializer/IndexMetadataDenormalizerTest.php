@@ -21,6 +21,7 @@ final class IndexMetadataDenormalizerTest extends TestCase
 
         static::assertFalse($denormalizer->supportsDenormalization('', IndexMetadata::class));
         static::assertTrue($denormalizer->supportsDenormalization([], IndexMetadata::class));
+        static::assertTrue($denormalizer->supportsDenormalization([], IndexMetadataInterface::class));
     }
 
     public function testDenormalizerCanDenormalize(): void

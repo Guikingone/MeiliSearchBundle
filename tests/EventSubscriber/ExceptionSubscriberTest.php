@@ -55,7 +55,9 @@ final class ExceptionSubscriberTest extends TestCase
     public function testSubscriberCanBeCalled(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('critical')->with(self::equalTo('[MeiliSearch] An error occurred: An error occurred'));
+        $logger->expects(self::once())->method('critical')->with(self::equalTo('[MeiliSearch] An error occurred: An error occurred'), [
+            'error' => 'An error occurred',
+        ]);
 
         $kernel = $this->createMock(KernelInterface::class);
         $request = $this->createMock(Request::class);

@@ -126,9 +126,7 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
 
             $this->handleConfiguration($index, $configuration);
         } catch (Throwable $throwable) {
-            $this->logger->error(sprintf('The index cannot be created, error: "%s"', $throwable->getMessage()), [
-                'trace' => $throwable->getTrace(),
-            ]);
+            $this->logger->error(sprintf('The index cannot be updated, error: "%s"', $throwable->getMessage()));
 
             throw new RuntimeException($throwable->getMessage(), 0, $throwable);
         }

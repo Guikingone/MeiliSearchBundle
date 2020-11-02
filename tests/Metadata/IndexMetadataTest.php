@@ -14,10 +14,10 @@ final class IndexMetadataTest extends TestCase
 {
     public function testMetadataCanBeRetrieved(): void
     {
-        $metadata = new IndexMetadata('foo', true, 'id');
+        $metadata = new IndexMetadata('foo', false, 'id');
 
         static::assertSame('foo', $metadata->getUid());
-        static::assertTrue($metadata->isAsync());
+        static::assertFalse($metadata->isAsync());
         static::assertSame('id', $metadata->getPrimaryKey());
         static::assertEmpty($metadata->getRankingRules());
         static::assertEmpty($metadata->getStopWords());
@@ -25,5 +25,18 @@ final class IndexMetadataTest extends TestCase
         static::assertEmpty($metadata->getSearchableAttributes());
         static::assertEmpty($metadata->getDisplayedAttributes());
         static::assertNull($metadata->getDistinctAttribute());
+
+        static::assertArrayHasKey('primaryKey', $metadata->toArray());
+        static::assertArrayHasKey('rankingRules', $metadata->toArray());
+        static::assertArrayHasKey('stopWords', $metadata->toArray());
+        static::assertArrayHasKey('distinctAttribute', $metadata->toArray());
+        static::assertArrayHasKey('facetedAttributes', $metadata->toArray());
+        static::assertArrayHasKey('searchableAttributes', $metadata->toArray());
+        static::assertArrayHasKey('displayedAttributes', $metadata->toArray());
+        static::assertArrayHasKey('synonyms', $metadata->toArray());
+
+        $metadata = new IndexMetadata('foo', true, 'id');
+
+        static::assertTrue($metadata->isAsync());
     }
 }

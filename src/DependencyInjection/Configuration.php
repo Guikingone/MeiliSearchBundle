@@ -32,7 +32,7 @@ final class Configuration implements ConfigurationInterface
                         ->defaultNull()
                     ->end()
                     ->scalarNode('metadata_directory')
-                        ->info('Define the directory where are stored the metadata')
+                        ->info('Define the directory filters are stored the metadata')
                         ->defaultValue('%kernel.project_dir%/var/_ms')
                     ->end()
                     ->arrayNode('cache')

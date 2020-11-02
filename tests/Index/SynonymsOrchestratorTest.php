@@ -21,7 +21,10 @@ final class SynonymsOrchestratorTest extends TestCase
     public function testSynonymsCannotBeReturnedWithException(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error');
+        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when trying to fetch the synonyms'), [
+            'index' => 'foo',
+            'error' => 'An error occurred',
+        ]);
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
@@ -31,6 +34,8 @@ final class SynonymsOrchestratorTest extends TestCase
         $orchestrator = new SynonymsOrchestrator($indexOrchestrator, $eventDispatcher, $logger);
 
         static::expectException(Exception::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->getSynonyms('foo');
     }
 
@@ -149,7 +154,10 @@ final class SynonymsOrchestratorTest extends TestCase
     public function testSynonymsCannotBeResetWithException(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error');
+        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when trying to reset the synonyms'), [
+            'index' => 'foo',
+            'error' => 'An error occurred',
+        ]);
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::never())->method('dispatch');
@@ -160,6 +168,8 @@ final class SynonymsOrchestratorTest extends TestCase
         $orchestrator = new SynonymsOrchestrator($indexOrchestrator, $eventDispatcher, $logger);
 
         static::expectException(Exception::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->resetSynonyms('foo');
     }
 

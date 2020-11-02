@@ -27,16 +27,6 @@ final class ExceptionSubscriber implements EventSubscriberInterface, MeiliSearch
         $this->logger = $logger ?: new NullLogger();
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::EXCEPTION => 'onException',
-        ];
-    }
-
     public function onException(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
@@ -45,10 +35,17 @@ final class ExceptionSubscriber implements EventSubscriberInterface, MeiliSearch
         }
 
         $this->logger->critical(sprintf(self::LOG_MASK, sprintf('An error occurred: %s', $exception->getMessage())), [
-            'context' => $exception->getContext(),
-            'code' => $exception->getCode(),
-            'trace' => $exception->getTrace(),
-            'file' => $exception->getFile(),
+            'error' => $exception->getMessage(),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            KernelEvents::EXCEPTION => 'onException',
+        ];
     }
 }

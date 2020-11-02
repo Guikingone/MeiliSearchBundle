@@ -88,10 +88,10 @@ final class SearchEntryPoint implements SearchEntryPointInterface
             self::OPTIONS => $options,
         ]));
 
-        $this->logger->info('A query has been made', array_merge($options, [
+        $this->logger->info('A query has been made', [
             self::INDEX => $index,
             self::QUERY => $query,
-        ]));
+        ]);
 
         try {
             $result = $index->search($query, $options);

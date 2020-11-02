@@ -28,19 +28,6 @@ final class SynonymsEventSubscriber implements EventSubscriberInterface, MeiliSe
         $this->logger = $logger ?: new NullLogger();
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            PostResetSynonymsEvent::class => 'onPostResetSynonyms',
-            PreResetSynonymsEvent::class => 'onPreResetSynonyms',
-            PostUpdateSynonymsEvent::class => 'onPostUpdateSynonyms',
-            PreUpdateSynonymsEvent::class => 'onPreUpdateSynonyms',
-        ];
-    }
-
     public function onPostResetSynonyms(PostResetSynonymsEvent $event): void
     {
         $this->logger->info(sprintf(self::LOG_MASK, 'The synonyms have been reset'), [
@@ -70,5 +57,18 @@ final class SynonymsEventSubscriber implements EventSubscriberInterface, MeiliSe
             self::INDEX_LOG_KEY => $event->getIndex(),
             'synonyms' => $event->getSynonyms(),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            PostResetSynonymsEvent::class => 'onPostResetSynonyms',
+            PreResetSynonymsEvent::class => 'onPreResetSynonyms',
+            PostUpdateSynonymsEvent::class => 'onPostUpdateSynonyms',
+            PreUpdateSynonymsEvent::class => 'onPreUpdateSynonyms',
+        ];
     }
 }

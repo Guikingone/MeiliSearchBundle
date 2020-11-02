@@ -6,13 +6,17 @@ namespace Tests\MeiliSearchBundle\Search;
 
 use Exception;
 use MeiliSearch\Endpoints\Indexes;
+use MeiliSearchBundle\Event\PostSearchEvent;
+use MeiliSearchBundle\Event\PreSearchEvent;
 use MeiliSearchBundle\Exception\RuntimeException;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\SearchEntryPoint;
+use MeiliSearchBundle\Search\SearchResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use function array_merge;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -47,10 +51,6 @@ final class SearchEntryPointTest extends TestCase
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::once())->method('dispatch');
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The query has failed'));
-
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('search')->willThrowException(new Exception('An error occurred'));
 
@@ -59,10 +59,19 @@ final class SearchEntryPointTest extends TestCase
 
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('error')->with(self::equalTo('The query has failed'), [
+            'error' => 'An error occurred',
+            'query' => 'bar',
+            'options' => [],
+        ]);
+
         $searchEntryPoint = new SearchEntryPoint($orchestrator, $resultBuilder, $eventDispatcher, $logger);
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $searchEntryPoint->search('foo', 'bar');
     }
 
@@ -150,6 +159,80 @@ final class SearchEntryPointTest extends TestCase
         );
 
         $searchEntryPoint = new SearchEntryPoint($orchestrator, $resultBuilder, $eventDispatcher, $logger);
+        $result = $searchEntryPoint->search('foo', 'bar');
+
+        static::assertNotEmpty($result->getHits());
+        static::assertSame(2, $result->count());
+        static::assertSame(20, $result->getLimit());
+        static::assertSame(0, $result->getOffset());
+        static::assertSame('bar', $result->getQuery());
+    }
+
+    public function testSearchCanOccursWithPrefix(): void
+    {
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('search')->willReturn([
+            'hits' => [
+                [
+                    'id' => 1,
+                    'title' => 'bar',
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'foo',
+                ],
+            ],
+            "offset" => 0,
+            "limit" => 20,
+            "nbHits" => 2,
+            "exhaustiveNbHits" => false,
+            "processingTimeMs" => 35,
+            "query" => 'bar'
+        ]);
+
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::once())->method('getIndex')->with(self::equalTo('_app_foo'))->willReturn($index);
+
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch')->withConsecutive(
+            [
+                new PreSearchEvent([
+                    'index' => $index,
+                    'query' => 'bar',
+                    'options' => [],
+                ]),
+            ],
+            [
+                new PostSearchEvent(SearchResult::create(
+                    [
+                        [
+                            'id' => 1,
+                            'title' => 'bar',
+                        ],
+                        [
+                            'id' => 2,
+                            'title' => 'foo',
+                        ],
+                    ],
+                    0,
+                    20,
+                    2,
+                    false,
+                    35,
+                    'bar'
+                )),
+            ]
+        );
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A query has been made'), [
+            'index' => $index,
+            'query' => 'bar',
+        ]);
+
+        $searchEntryPoint = new SearchEntryPoint($orchestrator, $resultBuilder, $eventDispatcher, $logger, '_app_');
         $result = $searchEntryPoint->search('foo', 'bar');
 
         static::assertNotEmpty($result->getHits());

@@ -46,10 +46,12 @@ final class SearchEventSubscriberTest extends TestCase
     public function testSubscriberCanListenPostSearch(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] A search has been made'), [
+            'results' => [],
+        ]);
 
         $searchResult = $this->createMock(SearchResultInterface::class);
-        $searchResult->expects(self::once())->method('toArray');
+        $searchResult->expects(self::once())->method('toArray')->willReturn([]);
 
         $event = new PostSearchEvent($searchResult);
 
@@ -77,7 +79,9 @@ final class SearchEventSubscriberTest extends TestCase
     public function testSubscriberCanListenPreSearch(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] A search is about to be made'), [
+            'configuration' => [],
+        ]);
 
         $event = new PreSearchEvent([]);
 

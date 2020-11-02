@@ -64,14 +64,10 @@ jobs:
         with:
           args: --dry-run .
 
-      # —— Docker ————————————————————————————————————————————————————————
-      - name: Docker setup
-        run: docker run -d -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=masterKey --no-analytics=true
-
       # —— PHPUnit ———————————————————————————————————————————————————————
       - name: PHPUnit
         run: php vendor/bin/phpunit tests
 
       # —— Infection —————————————————————————————————————————————————————
       - name: Infection
-        run: php vendor/bin/infection --no-progress --min-covered-msi=90 --min-msi=80
+        run: php vendor/bin/infection --no-progress --min-covered-msi=90 --min-msi=90

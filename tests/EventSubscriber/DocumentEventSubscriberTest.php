@@ -36,7 +36,10 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPostDocumentCreation(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document has been created'), [
+            'index' => 'foo',
+            'update' => 1,
+        ]);
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('foo');
@@ -53,7 +56,9 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPostDocumentDeletion(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document has been deleted'), [
+            'update' => 1,
+        ]);
 
         $event = new PostDocumentDeletionEvent(1);
 
@@ -67,7 +72,13 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPostDocumentRetrieve(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document has been retrieved'), [
+            'index' => 'foo',
+            'document' => [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]);
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('foo');
@@ -87,7 +98,9 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPostDocumentUpdate(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document has been updated'), [
+            'update' => 1,
+        ]);
 
         $event = new PostDocumentUpdateEvent(1);
 
@@ -101,7 +114,13 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPreDocumentCreation(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document is about to be created'), [
+            'index' => 'bar',
+            'document' => [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]);
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('bar');
@@ -120,7 +139,13 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPreDocumentDeletion(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document is about to be deleted'), [
+            'index' => 'bar',
+            'document' => [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]);
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('bar');
@@ -139,7 +164,10 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPreDocumentRetrieve(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document is about to be retrieved'), [
+            'index' => 'foo',
+            'document' => 1,
+        ]);
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('foo');
@@ -155,7 +183,13 @@ final class DocumentEventSubscriberTest extends TestCase
     public function testSubscriberCanListenOnPreDocumentUpdate(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info');
+        $logger->expects(self::once())->method('info')->with(self::equalTo('A document is about to be updated'), [
+            'index' => 'bar',
+            'document' => [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]);
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('bar');

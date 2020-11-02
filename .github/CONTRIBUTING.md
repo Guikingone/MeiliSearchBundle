@@ -17,10 +17,21 @@ Here's the allowed contexts:
 
 Here's the allowed scopes:
 
+- bridge
+- cache
 - client
 - command
 - dic
+- document
 - collector
+- dump
+- events
+- form
+- messenger
+- metadata
+- provider
+- result
+- search
 - docker
 - tests
 
