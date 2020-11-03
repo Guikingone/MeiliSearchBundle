@@ -15,6 +15,8 @@ use MeiliSearchBundle\Command\ClearSearchResultCacheCommand;
 use MeiliSearchBundle\Command\DeleteIndexCommand;
 use MeiliSearchBundle\Command\DeleteIndexesCommand;
 use MeiliSearchBundle\Command\ListIndexesCommand;
+use MeiliSearchBundle\Command\MigrateDocumentsCommand;
+use MeiliSearchBundle\Command\UpdateIndexesCommand;
 use MeiliSearchBundle\Command\WarmDocumentsCommand;
 use MeiliSearchBundle\Command\WarmIndexesCommand;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
@@ -23,6 +25,10 @@ use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
 use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
+use MeiliSearchBundle\Document\DocumentMigrationOrchestrator;
+use MeiliSearchBundle\Document\DocumentMigrationOrchestratorInterface;
+use MeiliSearchBundle\Dump\DumpOrchestrator;
+use MeiliSearchBundle\Dump\DumpOrchestratorInterface;
 use MeiliSearchBundle\Event\Document\DocumentEventList;
 use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
@@ -38,9 +44,13 @@ use MeiliSearchBundle\EventSubscriber\SearchEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SettingsEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SynonymsEventSubscriber;
 use MeiliSearchBundle\Form\Type\MeiliSearchChoiceType;
+use MeiliSearchBundle\Health\HealthEntryPoint;
+use MeiliSearchBundle\Health\HealthEntryPointInterface;
 use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexSynchronizer;
+use MeiliSearchBundle\Index\IndexSynchronizerInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
 use MeiliSearchBundle\Loader\LoaderInterface;
@@ -60,6 +70,8 @@ use MeiliSearchBundle\Search\FallbackSearchEntrypoint;
 use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
+use MeiliSearchBundle\Settings\SettingsEntryPoint;
+use MeiliSearchBundle\Settings\SettingsEntryPointInterface;
 use MeiliSearchBundle\Twig\SearchExtension;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
 use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
@@ -77,7 +89,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
  */
 final class MeiliSearchExtensionTest extends TestCase
 {
-    public function testClientCanBeConfigured(): void
+    public function testClientAndMetadataRegistryAndIndexSynchronizerCanBeConfigured(): void
     {
         $extension = new MeiliSearchExtension();
 
@@ -98,6 +110,32 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(Client::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(Client::class)->getTag('container.preload')[0]);
         static::assertSame(Client::class, $container->getDefinition(Client::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(IndexMetadataRegistry::class));
+        static::assertTrue($container->hasAlias(IndexMetadataRegistryInterface::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexMetadataRegistry::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexMetadataRegistry::class)->getArgument(1));
+        static::assertSame('%kernel.project_dir%/var/_ms', $container->getDefinition(IndexMetadataRegistry::class)->getArgument(2));
+        static::assertFalse($container->getDefinition(IndexMetadataRegistry::class)->isPublic());
+        static::assertTrue($container->getDefinition(IndexMetadataRegistry::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]);
+        static::assertSame(IndexMetadataRegistry::class, $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(IndexSynchronizer::class));
+        static::assertTrue($container->hasAlias(IndexSynchronizerInterface::class));
+        static::assertNotEmpty($container->getDefinition(IndexSynchronizer::class)->getArguments());
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexSynchronizer::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexSynchronizer::class)->getArgument(1));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexSynchronizer::class)->getArgument(2));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexSynchronizer::class)->getArgument(3));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexSynchronizer::class)->getArgument(4));
+        static::assertFalse($container->getDefinition(IndexSynchronizer::class)->isPublic());
+        static::assertTrue($container->getDefinition(IndexSynchronizer::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(IndexSynchronizer::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(IndexSynchronizer::class)->getTag('monolog.logger')[0]['channel']);
+        static::assertTrue($container->getDefinition(IndexSynchronizer::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(IndexSynchronizer::class)->getTag('container.preload')[0]);
+        static::assertSame(IndexSynchronizer::class, $container->getDefinition(IndexSynchronizer::class)->getTag('container.preload')[0]['class']);
     }
 
     public function testDefinitionsAreRegistered(): void
@@ -113,16 +151,6 @@ final class MeiliSearchExtensionTest extends TestCase
                 'metadata_directory' => '%kernel.project_dir%/var/_ms',
             ],
         ], $container);
-
-        static::assertTrue($container->hasDefinition(IndexMetadataRegistry::class));
-        static::assertTrue($container->hasAlias(IndexMetadataRegistryInterface::class));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexMetadataRegistry::class)->getArgument(0));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(IndexMetadataRegistry::class)->getArgument(1));
-        static::assertSame('%kernel.project_dir%/var/_ms', $container->getDefinition(IndexMetadataRegistry::class)->getArgument(2));
-        static::assertFalse($container->getDefinition(IndexMetadataRegistry::class)->isPublic());
-        static::assertTrue($container->getDefinition(IndexMetadataRegistry::class)->hasTag('container.preload'));
-        static::assertArrayHasKey('class', $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]);
-        static::assertSame(IndexMetadataRegistry::class, $container->getDefinition(IndexMetadataRegistry::class)->getTag('container.preload')[0]['class']);
 
         static::assertTrue($container->hasDefinition(ResultBuilder::class));
         static::assertTrue($container->hasAlias(ResultBuilderInterface::class));
@@ -169,34 +197,84 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertSame(DocumentEntryPoint::class, $container->getDefinition(DocumentEntryPoint::class)->getTag('container.preload')[0]['class']);
         static::assertFalse($container->getDefinition(DocumentEntryPoint::class)->isPublic());
 
+        static::assertTrue($container->hasDefinition(DumpOrchestrator::class));
+        static::assertTrue($container->hasAlias(DumpOrchestratorInterface::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DumpOrchestrator::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DumpOrchestrator::class)->getArgument(1));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DumpOrchestrator::class)->getArgument(2));
+        static::assertTrue($container->getDefinition(DumpOrchestrator::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(DumpOrchestrator::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(DumpOrchestrator::class)->getTag('monolog.logger')[0]['channel']);
+        static::assertTrue($container->getDefinition(DumpOrchestrator::class)->hasTag('container.preload'));
+        static::assertNotEmpty($container->getDefinition(DumpOrchestrator::class)->getArguments());
+        static::assertArrayHasKey('class', $container->getDefinition(DumpOrchestrator::class)->getTag('container.preload')[0]);
+        static::assertSame(DumpOrchestrator::class, $container->getDefinition(DumpOrchestrator::class)->getTag('container.preload')[0]['class']);
+        static::assertFalse($container->getDefinition(DumpOrchestrator::class)->isPublic());
+
         static::assertTrue($container->hasDefinition(SynonymsOrchestrator::class));
         static::assertTrue($container->hasAlias(SynonymsOrchestratorInterface::class));
+        static::assertNotEmpty($container->getDefinition(SynonymsOrchestrator::class)->getArguments());
         static::assertInstanceOf(Reference::class, $container->getDefinition(SynonymsOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SynonymsOrchestrator::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SynonymsOrchestrator::class)->getArgument(2));
+        static::assertTrue($container->getDefinition(SynonymsOrchestrator::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(SynonymsOrchestrator::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(SynonymsOrchestrator::class)->getTag('monolog.logger')[0]['channel']);
         static::assertTrue($container->getDefinition(SynonymsOrchestrator::class)->hasTag('container.preload'));
-        static::assertNotEmpty($container->getDefinition(SynonymsOrchestrator::class)->getArguments());
         static::assertArrayHasKey('class', $container->getDefinition(SynonymsOrchestrator::class)->getTag('container.preload')[0]);
         static::assertSame(SynonymsOrchestrator::class, $container->getDefinition(SynonymsOrchestrator::class)->getTag('container.preload')[0]['class']);
         static::assertFalse($container->getDefinition(SynonymsOrchestrator::class)->isPublic());
 
         static::assertTrue($container->hasDefinition(UpdateOrchestrator::class));
         static::assertTrue($container->hasAlias(UpdateOrchestratorInterface::class));
+        static::assertNotEmpty($container->getDefinition(UpdateOrchestrator::class)->getArguments());
         static::assertInstanceOf(Reference::class, $container->getDefinition(UpdateOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(UpdateOrchestrator::class)->getArgument(1));
+        static::assertFalse($container->getDefinition(UpdateOrchestrator::class)->isPublic());
+        static::assertTrue($container->getDefinition(UpdateOrchestrator::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(UpdateOrchestrator::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(UpdateOrchestrator::class)->getTag('monolog.logger')[0]['channel']);
         static::assertTrue($container->getDefinition(UpdateOrchestrator::class)->hasTag('container.preload'));
-        static::assertNotEmpty($container->getDefinition(UpdateOrchestrator::class)->getArguments());
         static::assertArrayHasKey('class', $container->getDefinition(UpdateOrchestrator::class)->getTag('container.preload')[0]);
         static::assertSame(UpdateOrchestrator::class, $container->getDefinition(UpdateOrchestrator::class)->getTag('container.preload')[0]['class']);
-        static::assertFalse($container->getDefinition(UpdateOrchestrator::class)->isPublic());
+
+        static::assertTrue($container->hasDefinition(SettingsEntryPoint::class));
+        static::assertTrue($container->hasAlias(SettingsEntryPointInterface::class));
+        static::assertNotEmpty($container->getDefinition(SettingsEntryPoint::class)->getArguments());
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SettingsEntryPoint::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(SettingsEntryPoint::class)->getArgument(1));
+        static::assertFalse($container->getDefinition(SettingsEntryPoint::class)->isPublic());
+        static::assertTrue($container->getDefinition(SettingsEntryPoint::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(SettingsEntryPoint::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(SettingsEntryPoint::class)->getTag('monolog.logger')[0]['channel']);
+        static::assertTrue($container->getDefinition(SettingsEntryPoint::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(SettingsEntryPoint::class)->getTag('container.preload')[0]);
+        static::assertSame(SettingsEntryPoint::class, $container->getDefinition(SettingsEntryPoint::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(DocumentMigrationOrchestrator::class));
+        static::assertTrue($container->hasAlias(DocumentMigrationOrchestratorInterface::class));
+        static::assertNotEmpty($container->getDefinition(DocumentMigrationOrchestrator::class)->getArguments());
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentMigrationOrchestrator::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentMigrationOrchestrator::class)->getArgument(1));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentMigrationOrchestrator::class)->getArgument(2));
+        static::assertFalse($container->getDefinition(DocumentMigrationOrchestrator::class)->isPublic());
+        static::assertTrue($container->getDefinition(DocumentMigrationOrchestrator::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(DocumentMigrationOrchestrator::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(DocumentMigrationOrchestrator::class)->getTag('monolog.logger')[0]['channel']);
+        static::assertTrue($container->getDefinition(DocumentMigrationOrchestrator::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(DocumentMigrationOrchestrator::class)->getTag('container.preload')[0]);
+        static::assertSame(DocumentMigrationOrchestrator::class, $container->getDefinition(DocumentMigrationOrchestrator::class)->getTag('container.preload')[0]['class']);
 
         static::assertTrue($container->hasDefinition(DocumentLoader::class));
+        static::assertNotEmpty($container->getDefinition(DocumentLoader::class)->getArguments());
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentLoader::class)->getArgument(0));
         static::assertInstanceOf(TaggedIteratorArgument::class, $container->getDefinition(DocumentLoader::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentLoader::class)->getArgument(2));
-        static::assertTrue($container->getDefinition(DocumentLoader::class)->hasTag('container.preload'));
         static::assertTrue($container->getDefinition(DocumentLoader::class)->hasTag('meili_search.document_loader'));
-        static::assertNotEmpty($container->getDefinition(DocumentLoader::class)->getArguments());
+        static::assertTrue($container->getDefinition(DocumentLoader::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(DocumentLoader::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(DocumentLoader::class)->getTag('monolog.logger')[0]['channel']);
+        static::assertTrue($container->getDefinition(DocumentLoader::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(DocumentLoader::class)->getTag('container.preload')[0]);
         static::assertSame(DocumentLoader::class, $container->getDefinition(DocumentLoader::class)->getTag('container.preload')[0]['class']);
         static::assertFalse($container->getDefinition(DocumentLoader::class)->isPublic());
@@ -215,6 +293,9 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertArrayHasKey(LoaderInterface::class, $container->getAutoconfiguredInstanceof());
         static::assertArrayHasKey(DocumentDataProviderInterface::class, $container->getAutoconfiguredInstanceof());
         static::assertArrayHasKey(TraceableDataCollectorInterface::class, $container->getAutoconfiguredInstanceof());
+
+        static::assertFalse($container->has(SearchResultCacheOrchestrator::class));
+        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
     }
 
     public function testFormCanBeConfigured(): void
@@ -298,6 +379,9 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getArgument(1));
         static::assertFalse($container->getDefinition(SearchResultCacheOrchestrator::class)->isPublic());
+        static::assertTrue($container->getDefinition(SearchResultCacheOrchestrator::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(SearchResultCacheOrchestrator::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(SearchResultCacheOrchestrator::class)->getTag('monolog.logger')[0]['channel']);
         static::assertTrue($container->getDefinition(SearchResultCacheOrchestrator::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(SearchResultCacheOrchestrator::class)->getTag('container.preload')[0]);
         static::assertSame(SearchResultCacheOrchestrator::class, $container->getDefinition(SearchResultCacheOrchestrator::class)->getTag('container.preload')[0]['class']);
@@ -345,7 +429,6 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(DeleteIndexesCommand::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DeleteIndexesCommand::class)->getArgument(0));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(DeleteIndexesCommand::class)->getArgument(1));
         static::assertFalse($container->getDefinition(DeleteIndexesCommand::class)->isPublic());
         static::assertTrue($container->getDefinition(DeleteIndexesCommand::class)->hasTag('console.command'));
         static::assertTrue($container->getDefinition(DeleteIndexesCommand::class)->hasTag('container.preload'));
@@ -371,22 +454,39 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->hasDefinition(WarmIndexesCommand::class));
         static::assertNotEmpty($container->getDefinition(WarmIndexesCommand::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(WarmIndexesCommand::class)->getArgument(1));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(WarmIndexesCommand::class)->getArgument(2));
-        static::assertInstanceOf(Reference::class, $container->getDefinition(WarmIndexesCommand::class)->getArgument(3));
-        static::assertNull($container->getDefinition(WarmIndexesCommand::class)->getArgument(4));
+        static::assertNull($container->getDefinition(WarmIndexesCommand::class)->getArgument(2));
         static::assertFalse($container->getDefinition(WarmIndexesCommand::class)->isPublic());
         static::assertTrue($container->getDefinition(WarmIndexesCommand::class)->hasTag('console.command'));
         static::assertTrue($container->getDefinition(WarmIndexesCommand::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(WarmIndexesCommand::class)->getTag('container.preload')[0]);
         static::assertSame(WarmIndexesCommand::class, $container->getDefinition(WarmIndexesCommand::class)->getTag('container.preload')[0]['class']);
 
+        static::assertTrue($container->hasDefinition(UpdateIndexesCommand::class));
+        static::assertNotEmpty($container->getDefinition(UpdateIndexesCommand::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(UpdateIndexesCommand::class)->getArgument(1));
+        static::assertNull($container->getDefinition(UpdateIndexesCommand::class)->getArgument(2));
+        static::assertFalse($container->getDefinition(UpdateIndexesCommand::class)->isPublic());
+        static::assertTrue($container->getDefinition(UpdateIndexesCommand::class)->hasTag('console.command'));
+        static::assertTrue($container->getDefinition(UpdateIndexesCommand::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(UpdateIndexesCommand::class)->getTag('container.preload')[0]);
+        static::assertSame(UpdateIndexesCommand::class, $container->getDefinition(UpdateIndexesCommand::class)->getTag('container.preload')[0]['class']);
+
+        static::assertTrue($container->hasDefinition(MigrateDocumentsCommand::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(MigrateDocumentsCommand::class)->getArgument(0));
+        static::assertFalse($container->getDefinition(MigrateDocumentsCommand::class)->isPublic());
+        static::assertTrue($container->getDefinition(MigrateDocumentsCommand::class)->hasTag('console.command'));
+        static::assertTrue($container->getDefinition(MigrateDocumentsCommand::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(MigrateDocumentsCommand::class)->getTag('container.preload')[0]);
+        static::assertSame(MigrateDocumentsCommand::class, $container->getDefinition(MigrateDocumentsCommand::class)->getTag('container.preload')[0]['class']);
+
         static::assertTrue($container->hasDefinition(FallbackSearchEntrypoint::class));
         static::assertIsArray($container->getDefinition(FallbackSearchEntrypoint::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(FallbackSearchEntrypoint::class)->getArgument(0)[0]);
+        static::assertInstanceOf(Reference::class, $container->getDefinition(FallbackSearchEntrypoint::class)->getArgument(0)[1]);
         static::assertFalse($container->getDefinition(FallbackSearchEntrypoint::class)->isPublic());
         static::assertTrue($container->getDefinition(FallbackSearchEntrypoint::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(FallbackSearchEntrypoint::class)->getTag('container.preload')[0]);
         static::assertSame(FallbackSearchEntrypoint::class, $container->getDefinition(FallbackSearchEntrypoint::class)->getTag('container.preload')[0]['class']);
-
         static::assertSame(FallbackSearchEntrypoint::class, (string) $container->getAlias(SearchEntryPointInterface::class));
     }
 
@@ -545,6 +645,7 @@ final class MeiliSearchExtensionTest extends TestCase
 
         static::assertTrue($container->hasDefinition(DocumentEventSubscriber::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentEventSubscriber::class)->getArgument(0));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(DocumentEventSubscriber::class)->getArgument(1));
         static::assertFalse($container->getDefinition(DocumentEventSubscriber::class)->isPublic());
         static::assertTrue($container->getDefinition(DocumentEventSubscriber::class)->hasTag('kernel.event_subscriber'));
         static::assertTrue($container->getDefinition(DocumentEventSubscriber::class)->hasTag('container.preload'));
@@ -603,17 +704,36 @@ final class MeiliSearchExtensionTest extends TestCase
         $extension->load([], $container);
 
         static::assertTrue($container->hasDefinition(SearchEntryPoint::class));
+        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(0));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(1));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(2));
         static::assertInstanceOf(Reference::class, $container->getDefinition(SearchEntryPoint::class)->getArgument(3));
         static::assertNull($container->getDefinition(SearchEntryPoint::class)->getArgument(4));
         static::assertFalse($container->getDefinition(SearchEntryPoint::class)->isPublic());
+        static::assertTrue($container->getDefinition(SearchEntryPoint::class)->hasTag('monolog.logger'));
+        static::assertArrayHasKey('channel', $container->getDefinition(SearchEntryPoint::class)->getTag('monolog.logger')[0]);
+        static::assertSame('meilisearch', $container->getDefinition(SearchEntryPoint::class)->getTag('monolog.logger')[0]['channel']);
         static::assertTrue($container->getDefinition(SearchEntryPoint::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]);
         static::assertSame(SearchEntryPoint::class, $container->getDefinition(SearchEntryPoint::class)->getTag('container.preload')[0]['class']);
-        static::assertTrue($container->hasAlias(SearchEntryPointInterface::class));
         static::assertArrayHasKey(SearchEntryPointInterface::class, $container->getAutoconfiguredInstanceof());
+    }
+
+    public function testHealthEntrypointIsConfigured(): void
+    {
+        $extension = new MeiliSearchExtension();
+
+        $container = new ContainerBuilder();
+        $extension->load([], $container);
+
+        static::assertTrue($container->hasDefinition(HealthEntryPoint::class));
+        static::assertTrue($container->hasAlias(HealthEntryPointInterface::class));
+        static::assertInstanceOf(Reference::class, $container->getDefinition(HealthEntryPoint::class)->getArgument(0));
+        static::assertFalse($container->getDefinition(HealthEntryPoint::class)->isPublic());
+        static::assertTrue($container->getDefinition(HealthEntryPoint::class)->hasTag('container.preload'));
+        static::assertArrayHasKey('class', $container->getDefinition(HealthEntryPoint::class)->getTag('container.preload')[0]);
+        static::assertSame(HealthEntryPoint::class, $container->getDefinition(HealthEntryPoint::class)->getTag('container.preload')[0]['class']);
     }
 
     public function testDataCollectorIsConfigured(): void

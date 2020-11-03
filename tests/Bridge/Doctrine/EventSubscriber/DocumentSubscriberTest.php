@@ -12,6 +12,7 @@ use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReader;
 use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReaderInterface;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
+use MeiliSearchBundle\Messenger\Document\UpdateDocumentMessage;
 use MeiliSearchBundle\Metadata\IndexMetadataInterface;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use PHPUnit\Framework\TestCase;
@@ -77,10 +78,13 @@ final class DocumentSubscriberTest extends TestCase
             'title' => 'bar',
         ]);
 
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects(self::never())->method('dispatch')->willReturn(new Envelope(new stdClass()));
+
         $lifeCycleEventArgs = $this->createMock(LifecycleEventArgs::class);
         $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn(new Foo());
 
-        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer);
+        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer, $messageBus);
         $subscriber->postPersist($lifeCycleEventArgs);
     }
 
@@ -136,12 +140,22 @@ final class DocumentSubscriberTest extends TestCase
 
     public function testSubscriberCanUpdateValidDocument(): void
     {
+        $metadata = $this->createMock(IndexMetadataInterface::class);
+        $metadata->expects(self::once())->method('isAsync')->willReturn(false);
+        $metadata->expects(self::once())->method('getUid')->willReturn('foo');
+        $metadata->expects(self::once())->method('getPrimaryKey')->willReturn('id');
+
         $registry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $registry->expects(self::once())->method('get');
+        $registry->expects(self::once())->method('get')->willReturn($metadata);
 
         $reader = new DocumentReader(new AnnotationReader());
 
         $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::once())->method('updateDocument')->with(self::equalTo('foo'), [
+            'id' => 1,
+            'title' => 'bar',
+        ], self::equalTo('id'));
+
         $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
 
         $serializer = $this->createMock(Serializer::class);
@@ -150,10 +164,13 @@ final class DocumentSubscriberTest extends TestCase
             'title' => 'bar',
         ]);
 
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects(self::never())->method('dispatch')->willReturn(new Envelope(new stdClass()));
+
         $lifeCycleEventArgs = $this->createMock(LifecycleEventArgs::class);
         $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn(new Foo());
 
-        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer);
+        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer, $messageBus);
         $subscriber->postUpdate($lifeCycleEventArgs);
     }
 
@@ -173,7 +190,13 @@ final class DocumentSubscriberTest extends TestCase
         $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
 
         $messageBus = $this->createMock(MessageBusInterface::class);
-        $messageBus->expects(self::once())->method('dispatch')->willReturn(new Envelope(new stdClass()));
+        $messageBus->expects(self::once())->method('dispatch')
+            ->with(new UpdateDocumentMessage('foo', [
+                'id' => 1,
+                'title' => 'bar',
+            ], 'id'))
+            ->willReturn(new Envelope(new stdClass()))
+        ;
 
         $serializer = $this->createMock(Serializer::class);
         $serializer->expects(self::once())->method('normalize')->willReturn([
@@ -240,6 +263,8 @@ final class DocumentSubscriberTest extends TestCase
 
     public function testSubscriberCanRemoveValidDocument(): void
     {
+        $document = new Foo();
+
         $registry = $this->createMock(IndexMetadataRegistryInterface::class);
         $registry->expects(self::once())->method('get');
 
@@ -249,15 +274,86 @@ final class DocumentSubscriberTest extends TestCase
         $orchestrator->expects(self::once())->method('removeDocument');
 
         $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
-        $propertyAccessor->expects(self::once())->method('getValue')->willReturn(1);
+        $propertyAccessor->expects(self::once())->method('getValue')->with($document, 'id')->willReturn(1);
 
         $serializer = $this->createMock(Serializer::class);
         $serializer->expects(self::never())->method('normalize');
 
         $lifeCycleEventArgs = $this->createMock(LifecycleEventArgs::class);
-        $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn(new Foo());
+        $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn($document);
 
         $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer);
+        $subscriber->postRemove($lifeCycleEventArgs);
+    }
+
+    public function testSubscriberCanRemoveValidDocumentWithoutPrimaryKey(): void
+    {
+        $document = new Foo();
+
+        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
+        $registry->expects(self::once())->method('get');
+
+        $reader = $this->createMock(DocumentReaderInterface::class);
+        $reader->expects(self::once())->method('isDocument')->with($document)->willReturn(true);
+        $reader->expects(self::once())->method('getConfiguration')->with($document)->willReturn(new Document([
+            'index' => 'foo',
+        ]));
+
+        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::once())->method('removeDocument');
+
+        $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
+        $propertyAccessor->expects(self::once())->method('getValue')->with($document, 'id')->willReturn(1);
+
+        $serializer = $this->createMock(Serializer::class);
+        $serializer->expects(self::never())->method('normalize');
+
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects(self::never())->method('dispatch')->willReturn(new Envelope(new stdClass()));
+
+        $lifeCycleEventArgs = $this->createMock(LifecycleEventArgs::class);
+        $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn($document);
+
+        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer, $messageBus);
+        $subscriber->postRemove($lifeCycleEventArgs);
+    }
+
+    public function testSubscriberCanRemoveValidDocumentWithPrimaryKey(): void
+    {
+        $document = new Foo();
+
+        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
+        $registry->expects(self::once())->method('get');
+
+        $reader = $this->createMock(DocumentReaderInterface::class);
+        $reader->expects(self::once())->method('isDocument')->with($document)->willReturn(true);
+        $reader->expects(self::once())->method('getConfiguration')
+            ->with($document)
+            ->willReturn(new Document([
+                'index' => 'foo',
+                'primaryKey' => 'title',
+            ]))
+        ;
+
+        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::once())->method('removeDocument');
+
+        $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
+        $propertyAccessor->expects(self::once())->method('getValue')
+            ->with(self::equalTo($document), self::equalTo('title'))
+            ->willReturn(1)
+        ;
+
+        $serializer = $this->createMock(Serializer::class);
+        $serializer->expects(self::never())->method('normalize');
+
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects(self::never())->method('dispatch')->willReturn(new Envelope(new stdClass()));
+
+        $lifeCycleEventArgs = $this->createMock(LifecycleEventArgs::class);
+        $lifeCycleEventArgs->expects(self::once())->method('getObject')->willReturn($document);
+
+        $subscriber = new DocumentSubscriber($orchestrator, $reader, $registry, $propertyAccessor, $serializer, $messageBus);
         $subscriber->postRemove($lifeCycleEventArgs);
     }
 

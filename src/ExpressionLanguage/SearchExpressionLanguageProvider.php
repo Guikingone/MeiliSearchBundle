@@ -7,6 +7,9 @@ namespace MeiliSearchBundle\ExpressionLanguage;
 use MeiliSearchBundle\Search\Search;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+use function count;
+use function explode;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

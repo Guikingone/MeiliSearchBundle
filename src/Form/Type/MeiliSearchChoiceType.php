@@ -11,6 +11,8 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use function array_map;
+use function array_merge;
 use function is_array;
 
 /**
@@ -55,24 +57,21 @@ final class MeiliSearchChoiceType extends AbstractType
             'choice_loader' => function (Options $options): ChoiceLoaderInterface {
                 return new CallbackChoiceLoader(function () use ($options): array {
                     $result = $this->searchEntryPoint->search($options[self::INDEX], $options[self::QUERY], [
-                        'attributesToRetrieve' => is_array($options[self::ATTRIBUTES_TO_RETRIEVE]) ? $options[self::ATTRIBUTES_TO_RETRIEVE] : [],
+                        'attributesToRetrieve' => is_array($options[self::ATTRIBUTES_TO_RETRIEVE]) ? $options[self::ATTRIBUTES_TO_RETRIEVE] : [$options[self::ATTRIBUTES_TO_RETRIEVE]],
                     ]);
 
-                    $values = [];
-                    foreach ($result->getHits() as $_ => $hit) {
-                        $values[$hit[$options[self::ATTRIBUTE_TO_DISPLAY]]] = $hit[$options[self::ATTRIBUTE_TO_DISPLAY]];
-                    }
-
-                    return $values;
+                    return array_merge(...array_map(function (array $hit) use ($options): array {
+                        return [$hit[$options[self::ATTRIBUTE_TO_DISPLAY]] => $hit[$options[self::ATTRIBUTE_TO_DISPLAY]]];
+                    }, $result->getHits()));
                 });
             },
             self::ATTRIBUTES_TO_RETRIEVE => '*',
         ]);
 
-        $resolver->setAllowedTypes(self::INDEX, ['string']);
+        $resolver->setAllowedTypes(self::INDEX, 'string');
         $resolver->setAllowedTypes(self::ATTRIBUTES_TO_RETRIEVE, ['string', 'array']);
-        $resolver->setAllowedTypes(self::ATTRIBUTE_TO_DISPLAY, ['string']);
-        $resolver->setAllowedTypes(self::QUERY, ['string']);
+        $resolver->setAllowedTypes(self::ATTRIBUTE_TO_DISPLAY, 'string');
+        $resolver->setAllowedTypes(self::QUERY, 'string');
     }
 
     /**

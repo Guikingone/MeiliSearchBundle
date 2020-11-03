@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearchBundle\Index\IndexOrchestratorInterface;
-use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
+use MeiliSearchBundle\Index\IndexSynchronizerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,26 +23,18 @@ final class DeleteIndexCommand extends Command
     private const INDEX = 'index';
 
     /**
-     * @var IndexOrchestratorInterface
+     * @var IndexSynchronizerInterface
      */
-    private $indexOrchestrator;
+    private $indexSynchronizer;
 
     /**
-     * @var IndexMetadataRegistryInterface
-     */
-    private $indexMetadataRegistry;
-
-    /**
-     * {@inheritdoc}
+     * @var string|null
      */
     protected static $defaultName = 'meili:delete-index';
 
-    public function __construct(
-        IndexOrchestratorInterface $indexOrchestrator,
-        IndexMetadataRegistryInterface $indexMetadataRegistry
-    ) {
-        $this->indexOrchestrator = $indexOrchestrator;
-        $this->indexMetadataRegistry = $indexMetadataRegistry;
+    public function __construct(IndexSynchronizerInterface $indexSynchronizer)
+    {
+        $this->indexSynchronizer = $indexSynchronizer;
 
         parent::__construct();
     }
@@ -54,11 +45,11 @@ final class DeleteIndexCommand extends Command
     protected function configure(): void
     {
         $this
+            ->setDescription('Allow to delete an index')
             ->setDefinition([
                 new InputArgument(self::INDEX, InputArgument::REQUIRED, 'The index to delete'),
                 new InputOption('force', 'f', InputOption::VALUE_OPTIONAL|InputOption::VALUE_NONE, 'Allow to force the deletion'),
             ])
-            ->setDescription('Allow to delete an index')
         ;
     }
 
@@ -73,8 +64,8 @@ final class DeleteIndexCommand extends Command
             $index = $input->getArgument(self::INDEX);
 
             try {
-                $this->indexOrchestrator->removeIndex($index);
-                $this->indexMetadataRegistry->remove($index);
+                $this->indexSynchronizer->dropIndex($index);
+
                 $io->success(sprintf('The index "%s" has been removed', $index));
 
                 return 0;

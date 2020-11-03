@@ -14,8 +14,8 @@ use Psr\Cache\InvalidArgumentException;
 interface SearchResultCacheOrchestratorInterface
 {
     /**
-     * @param string                $searchResultIdentifier
-     * @param SearchResultInterface $searchResult
+     * @param string                                       $searchResultIdentifier
+     * @param SearchResultInterface<SearchResultInterface> $searchResult
      *
      * @throws InvalidArgumentException
      */

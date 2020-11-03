@@ -22,7 +22,7 @@ final class ClearSearchResultCacheCommand extends Command
     private $searchResultCacheOrchestrator;
 
     /**
-     * {@inheritdoc}
+     * @var string|null
      */
     protected static $defaultName = 'meili:clear-search-cache';
 

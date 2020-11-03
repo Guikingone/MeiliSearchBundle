@@ -6,6 +6,7 @@ namespace Tests\MeiliSearchBundle\Document;
 
 use Exception;
 use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\DataProvider\EmbeddedDocumentDataProviderInterface;
 use MeiliSearchBundle\DataProvider\ModelDataProviderInterface;
 use MeiliSearchBundle\DataProvider\PrimaryKeyOverrideDataProviderInterface;
 use MeiliSearchBundle\DataProvider\PriorityDataProviderInterface;
@@ -114,6 +115,40 @@ final class DocumentLoaderTest extends TestCase
         $loader = new DocumentLoader($orchestrator, [new BarProvider(), new PriorityProvider()], $logger);
         $loader->load();
     }
+
+    public function testLoaderCanLoadEmbeddedDocuments(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::once())->method('addDocument')->with(self::equalTo('foo'), self::equalTo([]));
+        $orchestrator->expects(self::once())->method('addDocuments')->with(self::equalTo('foo'), self::equalTo([
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ]), self::equalTo(null));
+
+        $loader = new DocumentLoader($orchestrator, [new EmbeddedProvider(), new PriorityProvider()], $logger);
+        $loader->load();
+    }
+
+    public function testLoaderCanLoadDocumentsViaPriorityProvider(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
+        $orchestrator->expects(self::never())->method('addDocuments');
+        $orchestrator->expects(self::exactly(2))->method('addDocument')->withConsecutive(
+            [self::equalTo('bar'), self::equalTo([]), self::equalTo(null), self::equalTo(null)],
+            [self::equalTo('foo'), self::equalTo([]), self::equalTo(null), self::equalTo(null)]
+        );
+
+        $loader = new DocumentLoader($orchestrator, [new SecondPriorityProvider(), new PriorityProvider()], $logger);
+        $loader->load();
+    }
 }
 
 final class FooProvider implements DocumentDataProviderInterface, PrimaryKeyOverrideDataProviderInterface
@@ -202,5 +237,56 @@ final class PriorityProvider implements DocumentDataProviderInterface, PriorityD
     public function getPriority(): int
     {
         return 0;
+    }
+}
+
+final class SecondPriorityProvider implements DocumentDataProviderInterface, PriorityDataProviderInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function support(): string
+    {
+        return 'bar';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDocument(): array
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPriority(): int
+    {
+        return 1;
+    }
+}
+
+final class EmbeddedProvider implements EmbeddedDocumentDataProviderInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function support(): string
+    {
+        return 'foo';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDocument(): array
+    {
+        return [
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ];
     }
 }

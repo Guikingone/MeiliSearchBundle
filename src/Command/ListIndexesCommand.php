@@ -26,7 +26,7 @@ final class ListIndexesCommand extends Command
     private $indexOrchestrator;
 
     /**
-     * {@inheritdoc}
+     * @var string|null
      */
     protected static $defaultName = 'meili:list-indexes';
 
@@ -56,7 +56,7 @@ final class ListIndexesCommand extends Command
 
         try {
             $indexes = $this->indexOrchestrator->getIndexes();
-            if (empty($indexes)) {
+            if (0 === $indexes->count()) {
                 $io->warning('No indexes found, please ensure that indexes have been created');
 
                 return 0;
@@ -64,6 +64,8 @@ final class ListIndexesCommand extends Command
 
             $table = new Table($output);
             $table->setHeaders(['Uid', 'PrimaryKey', 'CreatedAt', 'UpdatedAt']);
+
+            $indexes = $indexes->toArray();
 
             array_walk($indexes, function (Indexes $index) use (&$table): void {
                 $informations = $index->show();

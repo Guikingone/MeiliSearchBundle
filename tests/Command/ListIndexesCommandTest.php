@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Command;
 
-use MeiliSearch\Client;
 use MeiliSearch\Endpoints\Indexes;
-use MeiliSearchBundle\Index\IndexOrchestrator;
+use MeiliSearchBundle\Index\IndexListInterface;
 use MeiliSearchBundle\Command\ListIndexesCommand;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -19,8 +19,7 @@ final class ListIndexesCommandTest extends TestCase
 {
     public function testCommandIsConfigured(): void
     {
-        $client = $this->createMock(Client::class);
-        $orchestrator = new IndexOrchestrator($client);
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
 
         $command = new ListIndexesCommand($orchestrator);
 
@@ -30,10 +29,8 @@ final class ListIndexesCommandTest extends TestCase
 
     public function testCommandCannotListIndexesWithException(): void
     {
-        $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getAllIndexes')->willThrowException(new RuntimeException('An error occurred'));
-
-        $orchestrator = new IndexOrchestrator($client);
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::once())->method('getIndexes')->willThrowException(new RuntimeException('An error occurred'));
 
         $command = new ListIndexesCommand($orchestrator);
         $tester = new CommandTester($command);
@@ -49,10 +46,11 @@ final class ListIndexesCommandTest extends TestCase
 
     public function testCommandCannotListEmptyIndexes(): void
     {
-        $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getAllIndexes')->willReturn([]);
+        $list = $this->createMock(IndexListInterface::class);
+        $list->expects(self::once())->method('count')->willReturn(0);
 
-        $orchestrator = new IndexOrchestrator($client);
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::once())->method('getIndexes')->willReturn($list);
 
         $command = new ListIndexesCommand($orchestrator);
         $tester = new CommandTester($command);
@@ -82,13 +80,15 @@ final class ListIndexesCommandTest extends TestCase
             'updatedAt' => '2019-11-20T10:16:42.761858Z',
         ]);
 
-        $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getAllIndexes')->willReturn([
-            $firstIndex,
-            $secondIndex
+        $list = $this->createMock(IndexListInterface::class);
+        $list->expects(self::once())->method('count')->willReturn(2);
+        $list->expects(self::once())->method('toArray')->willReturn([
+            'movie_id' => $firstIndex,
+            'movie_reviews' => $secondIndex,
         ]);
 
-        $orchestrator = new IndexOrchestrator($client);
+        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $orchestrator->expects(self::once())->method('getIndexes')->willReturn($list);
 
         $command = new ListIndexesCommand($orchestrator);
         $tester = new CommandTester($command);

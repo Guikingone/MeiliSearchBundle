@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MeiliSearchBundle\Command;
+
+use MeiliSearchBundle\Document\DocumentMigrationOrchestratorInterface;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
+use function sprintf;
+
+/**
+ * @author Guillaume Loulier <contact@guillaumeloulier.fr>
+ */
+final class MigrateDocumentsCommand extends Command
+{
+    /**
+     * @var DocumentMigrationOrchestratorInterface
+     */
+    private $migrationOrchestrator;
+
+    /**
+     * @var string|null
+     */
+    protected static $defaultName = 'meili:migrate-documents';
+
+    public function __construct(DocumentMigrationOrchestratorInterface $migrationOrchestrator)
+    {
+        $this->migrationOrchestrator = $migrationOrchestrator;
+
+        parent::__construct();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configure(): void
+    {
+        $this
+            ->setDescription('Migrate the documents from an index to another one')
+            ->setDefinition([
+                new InputArgument('oldIndex', InputArgument::REQUIRED, 'The name of the index from the documents must be migrated'),
+                new InputOption('index', 'i', InputOption::VALUE_REQUIRED, 'The name of the index where the documents must be migrated'),
+                new InputOption('remove', 'r', InputOption::VALUE_OPTIONAL|InputOption::VALUE_NONE, 'If the documents must be removed from the old index'),
+            ])
+        ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $style = new SymfonyStyle($input, $output);
+
+        try {
+            $this->migrationOrchestrator->migrate(
+                $input->getArgument('oldIndex'),
+                $input->getOption('index'),
+                $input->getOption('remove') ?? false
+            );
+        } catch (Throwable $throwable) {
+            $style->error([
+                'The documents cannot be migrated!',
+                sprintf('Error: "%s"', $throwable->getMessage())
+            ]);
+
+            return 1;
+        }
+
+        $style->success('The documents have been migrated');
+
+        return 0;
+    }
+}

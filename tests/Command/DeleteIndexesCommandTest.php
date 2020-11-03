@@ -6,8 +6,7 @@ namespace Tests\MeiliSearchBundle\Command;
 
 use Exception;
 use MeiliSearchBundle\Command\DeleteIndexesCommand;
-use MeiliSearchBundle\Index\IndexOrchestratorInterface;
-use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
+use MeiliSearchBundle\Index\IndexSynchronizerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -18,10 +17,9 @@ final class DeleteIndexesCommandTest extends TestCase
 {
     public function testCommandIsConfigured(): void
     {
-        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
 
-        $command = new DeleteIndexesCommand($orchestrator, $registry);
+        $command = new DeleteIndexesCommand($synchronizer);
 
         static::assertSame('meili:delete-indexes', $command->getName());
         static::assertSame('Delete every indexes stored in MeiliSearch', $command->getDescription());
@@ -29,13 +27,10 @@ final class DeleteIndexesCommandTest extends TestCase
 
     public function testCommandCannotClearWithoutConfirmationAnswer(): void
     {
-        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $registry->expects(self::never())->method('clear');
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::never())->method('dropIndexes');
 
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::never())->method('removeIndexes');
-
-        $command = new DeleteIndexesCommand($orchestrator, $registry);
+        $command = new DeleteIndexesCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->execute([]);
@@ -46,13 +41,10 @@ final class DeleteIndexesCommandTest extends TestCase
 
     public function testCommandCannotClearWithoutConfirmation(): void
     {
-        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $registry->expects(self::never())->method('clear');
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::never())->method('dropIndexes');
 
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::never())->method('removeIndexes');
-
-        $command = new DeleteIndexesCommand($orchestrator, $registry);
+        $command = new DeleteIndexesCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->setInputs(['no']);
@@ -64,13 +56,10 @@ final class DeleteIndexesCommandTest extends TestCase
 
     public function testCommandCannotClearWithError(): void
     {
-        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $registry->expects(self::never())->method('clear');
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::once())->method('dropIndexes')->willThrowException(new Exception('An error occurred'));
 
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndexes')->willThrowException(new Exception('An error occurred'));
-
-        $command = new DeleteIndexesCommand($orchestrator, $registry);
+        $command = new DeleteIndexesCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
@@ -83,19 +72,15 @@ final class DeleteIndexesCommandTest extends TestCase
 
     public function testCommandCanClear(): void
     {
-        $registry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $registry->expects(self::once())->method('clear');
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::once())->method('dropIndexes');
 
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndexes');
-
-        $command = new DeleteIndexesCommand($orchestrator, $registry);
+        $command = new DeleteIndexesCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
         $tester->execute([]);
 
-        static::assertEmpty($registry->toArray());
         static::assertSame(0, $tester->getStatusCode());
         static::assertStringContainsString('All the indexes have been removed', $tester->getDisplay());
     }

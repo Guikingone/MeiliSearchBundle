@@ -57,13 +57,14 @@ final class FallbackSearchEntrypointTest extends TestCase
         ;
 
         $secondEntrypoint = $this->createMock(SearchEntryPointInterface::class);
-        $secondEntrypoint->expects(self::once())->method('search');
+        $secondEntrypoint->expects(self::exactly(2))->method('search');
 
         $entryPoint = new FallbackSearchEntrypoint([
             $validEntryPoint,
             $secondEntrypoint,
         ]);
 
+        $entryPoint->search('foo', 'random');
         $entryPoint->search('foo', 'random');
     }
 }

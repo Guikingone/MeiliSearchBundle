@@ -32,10 +32,17 @@ final class SearchResultTest extends TestCase
         });
 
         static::assertInstanceOf(Traversable::class, $result->getIterator());
-        static::assertSame([
-            'id' => 2,
-            'title' => 'foobar',
-        ], $result->getHit(1));
+        static::assertEquals([
+            [
+                'id' => 1,
+                'title' => 'foo',
+            ],
+        ], $result->getHits());
+        static::assertEquals([
+            'id' => 1,
+            'title' => 'foo',
+        ], $result->getHit(0));
+        static::assertNull($result->getHit(1));
         static::assertArrayHasKey('hits', $result->toArray());
         static::assertArrayHasKey('offset', $result->toArray());
         static::assertArrayHasKey('limit', $result->toArray());

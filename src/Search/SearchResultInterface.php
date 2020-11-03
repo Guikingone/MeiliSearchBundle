@@ -23,9 +23,9 @@ interface SearchResultInterface extends Countable, IteratorAggregate
     ): SearchResultInterface;
 
     /**
-     * Return a new `SearchResultInterface` instance with the hits filtered using `array_filter($this->hits, $callback, ARRAY_FILTER_USE_BOTH)`.
+     * Return a new {@see SearchResultInterface} instance with the hits filtered using `array_filter($this->hits, $callback, ARRAY_FILTER_USE_BOTH)`.
      *
-     * The method DOES not trigger a new request.
+     * The method DOES not trigger a new search.
      *
      * @param callable $callback
      *
@@ -59,7 +59,7 @@ interface SearchResultInterface extends Countable, IteratorAggregate
     public function getLastIdentifier();
 
     /**
-     * @return array<string,mixed>
+     * @return array<string, mixed>
      */
     public function toArray(): array;
 }

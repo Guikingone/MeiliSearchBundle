@@ -6,9 +6,8 @@ namespace Tests\MeiliSearchBundle\Command;
 
 use Exception;
 use Generator;
-use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Command\DeleteIndexCommand;
-use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
+use MeiliSearchBundle\Index\IndexSynchronizerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use function sprintf;
@@ -20,10 +19,9 @@ final class DeleteIndexCommandTest extends TestCase
 {
     public function testCommandIsConfigured(): void
     {
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $indexMetadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
 
-        $command = new DeleteIndexCommand($orchestrator, $indexMetadataRegistry);
+        $command = new DeleteIndexCommand($synchronizer);
 
         static::assertSame('meili:delete-index', $command->getName());
         static::assertTrue($command->getDefinition()->hasArgument('index'));
@@ -36,13 +34,13 @@ final class DeleteIndexCommandTest extends TestCase
      */
     public function testCommandCannotDeleteInvalidIndex(string $index): void
     {
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndex')->willThrowException(new Exception('An error occurred'));
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::once())->method('dropIndex')
+            ->with(self::equalTo($index))
+            ->willThrowException(new Exception('An error occurred'))
+        ;
 
-        $indexMetadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $indexMetadataRegistry->expects(self::never())->method('remove');
-
-        $command = new DeleteIndexCommand($orchestrator, $indexMetadataRegistry);
+        $command = new DeleteIndexCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
@@ -63,13 +61,10 @@ final class DeleteIndexCommandTest extends TestCase
      */
     public function testCommandCanDeleteValidIndexWithoutConfirmation(string $index): void
     {
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::never())->method('removeIndex');
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::never())->method('dropIndex');
 
-        $indexMetadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $indexMetadataRegistry->expects(self::never())->method('remove');
-
-        $command = new DeleteIndexCommand($orchestrator, $indexMetadataRegistry);
+        $command = new DeleteIndexCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->execute([
@@ -85,13 +80,10 @@ final class DeleteIndexCommandTest extends TestCase
      */
     public function testCommandCanDeleteValidIndex(string $index): void
     {
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndex')->with(self::equalTo($index));
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::once())->method('dropIndex')->with(self::equalTo($index));
 
-        $indexMetadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $indexMetadataRegistry->expects(self::once())->method('remove')->with(self::equalTo($index));
-
-        $command = new DeleteIndexCommand($orchestrator, $indexMetadataRegistry);
+        $command = new DeleteIndexCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
@@ -108,13 +100,10 @@ final class DeleteIndexCommandTest extends TestCase
      */
     public function testCommandCanDeleteValidIndexWithForceOption(string $index): void
     {
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndex')->with(self::equalTo($index));
+        $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
+        $synchronizer->expects(self::once())->method('dropIndex')->with(self::equalTo($index));
 
-        $indexMetadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $indexMetadataRegistry->expects(self::once())->method('remove')->with(self::equalTo($index));
-
-        $command = new DeleteIndexCommand($orchestrator, $indexMetadataRegistry);
+        $command = new DeleteIndexCommand($synchronizer);
 
         $tester = new CommandTester($command);
         $tester->execute([

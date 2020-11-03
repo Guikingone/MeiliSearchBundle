@@ -19,6 +19,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     $parameters->set(Option::EXCLUDE_PATHS, [
         __DIR__ . '/vendor',
+        __DIR__ . '/src/Test',
     ]);
 
     $parameters->set(Option::AUTOLOAD_PATHS, [
@@ -29,6 +30,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         SetList::PHP_70,
         SetList::PHP_71,
         SetList::PHP_72,
+        SetList::DEAD_CODE,
         //SetList::CODING_STYLE,
         //SetList::CODING_STYLE_ADVANCED,
         SetList::PERFORMANCE,

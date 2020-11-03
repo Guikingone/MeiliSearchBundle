@@ -12,6 +12,7 @@ use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentRetrievedEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentUpdateEvent;
 use PHPUnit\Framework\TestCase;
+use function count;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>

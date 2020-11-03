@@ -23,7 +23,7 @@ final class WarmDocumentsCommand extends Command
     private $loader;
 
     /**
-     * {@inheritdoc}
+     * @var string|null
      */
     protected static $defaultName = 'meili:warm-documents';
 

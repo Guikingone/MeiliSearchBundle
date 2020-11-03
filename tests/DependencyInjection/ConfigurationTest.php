@@ -302,12 +302,8 @@ final class ConfigurationTest extends TestCase
                     'foo' => [
                         'primaryKey' => 'id',
                         'synonyms' => [
-                            'bar' => [
-                                'values' => [
-                                    'id',
-                                    'title',
-                                ],
-                            ],
+                            'foo' => ['random', 'key'],
+                            'bar' => ['id', 'title'],
                         ],
                     ],
                 ],
@@ -320,7 +316,9 @@ final class ConfigurationTest extends TestCase
         static::assertSame('id', $configuration['indexes']['foo']['primaryKey']);
         static::assertNotEmpty($configuration['indexes']['foo']['synonyms']);
         static::assertArrayHasKey('bar', $configuration['indexes']['foo']['synonyms']);
-        static::assertContainsEquals('id', $configuration['indexes']['foo']['synonyms']['bar']['values']);
-        static::assertContainsEquals('title', $configuration['indexes']['foo']['synonyms']['bar']['values']);
+        static::assertContainsEquals('random', $configuration['indexes']['foo']['synonyms']['foo']);
+        static::assertContainsEquals('key', $configuration['indexes']['foo']['synonyms']['foo']);
+        static::assertContainsEquals('id', $configuration['indexes']['foo']['synonyms']['bar']);
+        static::assertContainsEquals('title', $configuration['indexes']['foo']['synonyms']['bar']);
     }
 }

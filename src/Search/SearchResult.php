@@ -66,9 +66,6 @@ final class SearchResult implements SearchResultInterface
      */
     private $lastIdentifier;
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(
         array $hits,
         int $offset,
@@ -104,17 +101,10 @@ final class SearchResult implements SearchResultInterface
     {
         $results = array_filter($this->hits, $callback, ARRAY_FILTER_USE_BOTH);
 
-        return self::create(
-            $results,
-            $this->offset,
-            $this->limit,
-            count($results),
-            $this->exhaustiveNbHits,
-            $this->processingTimeMs,
-            $this->query,
-            $this->exhaustiveFacetsCount,
-            $this->facetsDistribution
-        );
+        $this->hits = $results;
+        $this->nbHits = count($results);
+
+        return $this;
     }
 
     public function getHit(int $key, $default = null)

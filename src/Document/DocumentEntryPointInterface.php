@@ -37,8 +37,10 @@ interface DocumentEntryPointInterface
     public function getDocument(string $uid, $id);
 
     /**
-     * @param string              $uid
-     * @param array<string,mixed> $options
+     * Return every documents stored in a specific index, more info {@see https://docs.meilisearch.com/references/documents.html#get-documents}
+     *
+     * @param string               $uid
+     * @param array<string, mixed> $options {@see https://docs.meilisearch.com/references/documents.html#query-parameters}
      *
      * @return array<int, array|object> Can be both an array of arrays or an array of objects.
      */

@@ -9,6 +9,7 @@ use MeiliSearch\Client;
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
 use MeiliSearchBundle\Exception\RuntimeException as InternalRuntimeException;
+use MeiliSearchBundle\Index\IndexListInterface;
 use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Exception\RuntimeException as MeiliSeachBundleRuntimeException;
 use PHPUnit\Framework\TestCase;
@@ -37,6 +38,8 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
         static::expectException(MeiliSeachBundleRuntimeException::class);
+        static::expectExceptionMessage('HTTP 400 returned for ""');
+        static::expectExceptionCode(0);
         $orchestrator->addIndex('test', 'test');
     }
 
@@ -225,6 +228,8 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator = new IndexOrchestrator($client, null, $logger);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->getIndexes();
     }
 
@@ -272,6 +277,8 @@ final class IndexOrchestratorTest extends TestCase
             "createdAt" => "2019-11-20T09:40:33.711324Z",
             "updatedAt" => "2019-11-20T10:16:42.761858Z"
         ]);
+        $firstIndexes->expects(self::once())->method('getUid')->willReturn('foo');
+
         $secondIndexes = $this->createMock(Indexes::class);
         $secondIndexes->expects(self::never())->method('show')->willReturn([
             "uid" => "movie_reviews",
@@ -279,6 +286,7 @@ final class IndexOrchestratorTest extends TestCase
             "createdAt" => "2019-11-20T09:40:33.711324Z",
             "updatedAt" => "2019-11-20T10:16:42.761858Z"
         ]);
+        $secondIndexes->expects(self::once())->method('getUid')->willReturn('bar');
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getAllIndexes')->willReturn([
@@ -288,7 +296,12 @@ final class IndexOrchestratorTest extends TestCase
 
         $orchestrator = new IndexOrchestrator($client);
 
-        static::assertNotEmpty($orchestrator->getIndexes());
+        $list = $orchestrator->getIndexes();
+
+        static::assertInstanceOf(IndexListInterface::class, $list);
+        static::assertNotEmpty($list);
+        static::assertTrue($list->has('foo'));
+        static::assertTrue($list->has('bar'));
     }
 
     public function testIndexCannotBeDeletedWithException(): void
@@ -302,6 +315,8 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator = new IndexOrchestrator($client, null, $logger);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->removeIndex('test');
     }
 
