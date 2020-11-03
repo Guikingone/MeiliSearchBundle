@@ -6,6 +6,20 @@ MeiliSearchBundle is an opiniated Symfony bundle which configure and enable [Mei
 
 The core logic act as a wrapper around the official [MeiliSearch PHP SDK](https://github.com/meilisearch/meilisearch-php).
 
+## Main features
+
+- DTO support (thanks to `Symfony/Serializer`) for documents
+- Mapping via YAML/XML/PHP/Annotation
+- Document definition via Annotations or custom providers
+- `Symfony/Messenger` integration
+- `Symfony/HttpClient` support
+- `Symfony/Cache` integration (fallback, search, CRUD)
+- `Symfony/ExpressionLanguage` support for building queries
+- Twig integration
+- Custom form type
+- Support for PHP 7.2 to 7.4 (8.0 not supported for now)
+- Support for `Ramsey/uuid`
+
 ## Installation
 
 Make sure Composer is installed globally, as explained in the
