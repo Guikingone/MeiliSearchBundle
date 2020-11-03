@@ -8,8 +8,11 @@ use MeiliSearchBundle\Exception\InvalidArgumentException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Serializer\SerializerInterface;
+use function count;
 use function file_get_contents;
 use function sprintf;
+use function strtr;
+use function sys_get_temp_dir;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -126,6 +129,14 @@ final class IndexMetadataRegistry implements IndexMetadataRegistryInterface
         }
 
         return $list;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count(): int
+    {
+        return count($this->toArray());
     }
 
     private function getFilePath(): string

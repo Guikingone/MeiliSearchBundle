@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Document;
 
 use Exception;
+use Generator;
+use InvalidArgumentException;
 use MeiliSearch\Client;
 use MeiliSearch\Endpoints\Indexes;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
@@ -20,6 +22,7 @@ use MeiliSearchBundle\Result\ResultBuilderInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
+use stdClass;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -50,6 +53,7 @@ final class DocumentEntryPointTest extends TestCase
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->addDocument('test', [
             'id' => 1,
             'title' => 'foo',
@@ -75,6 +79,8 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
         static::expectException(Exception::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->addDocument('test', [
             'id' => 1,
             'title' => 'foo',
@@ -109,6 +115,35 @@ final class DocumentEntryPointTest extends TestCase
         ]);
     }
 
+    public function testDocumentCanBeAddedWithModel(): void
+    {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch');
+
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('addDocuments')->with([
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'model' => stdClass::class,
+            ],
+        ], 'id')->willReturn(['updateId' => 1]);
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
+        $orchestrator->addDocument('test', [
+            'id' => 1,
+            'title' => 'foo',
+        ], 'id', stdClass::class);
+    }
+
     public function testDocumentsCannotBeAddedWithInvalidIndex(): void
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
@@ -129,6 +164,7 @@ final class DocumentEntryPointTest extends TestCase
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->addDocuments('test', [
             'id' => 1,
             'title' => 'foo',
@@ -160,6 +196,7 @@ final class DocumentEntryPointTest extends TestCase
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->addDocuments('test', [
             [
                 'id' => 1,
@@ -214,6 +251,8 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->getDocument('test', 'test');
     }
 
@@ -233,6 +272,8 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->getDocument('test', 'test');
     }
 
@@ -309,7 +350,60 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
         static::expectException(Exception::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->getDocuments('test');
+    }
+
+    public function testDocumentsCannotBeReturnedWithInvalidOptions(): void
+    {
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::never())->method('getDocuments');
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::never())->method('getIndex');
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
+
+        static::expectException(InvalidArgumentException::class);
+        static::expectExceptionMessage('The option "test" is not a valid one.');
+        static::expectExceptionCode(0);
+        $orchestrator->getDocuments('test', ['test' => 'test']);
+    }
+
+    /**
+     * @dataProvider provideOptions
+     */
+    public function testDocumentsCanBeReturnedWithValidOption(array $options): void
+    {
+        $resultBuilder = $this->createMock(ResultBuilderInterface::class);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('error');
+
+        $index = $this->createMock(Indexes::class);
+        $index->expects(self::once())->method('getDocuments')->with(self::equalTo($options))->willReturn([
+            [
+                'id' => 1,
+                'value' => 'foo',
+            ],
+            [
+                'id' => 2,
+                'value' => 'foo',
+            ],
+        ]);
+
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())->method('getIndex')->willReturn($index);
+
+        $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
+
+        static::assertNotEmpty($orchestrator->getDocuments('test', $options));
     }
 
     public function testDocumentsCanBeReturned(): void
@@ -371,6 +465,9 @@ final class DocumentEntryPointTest extends TestCase
         static::assertInstanceOf(FooModel::class, $documents[1]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDocumentsCanBeReturnedWithModelsThatUseUuid(): void
     {
         $resultBuilder = new ResultBuilder(new Serializer([
@@ -433,6 +530,8 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionCode(0);
+        static::expectExceptionMessage('An error occurred');
         $orchestrator->updateDocument('test', [
             'id' => 1,
             'value' => 'foo',
@@ -514,6 +613,8 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
         static::expectException(Exception::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->removeDocument('foo', 1);
     }
 
@@ -570,6 +671,7 @@ final class DocumentEntryPointTest extends TestCase
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->removeSetOfDocuments('foo', [1, 2, 3]);
     }
 
@@ -626,6 +728,8 @@ final class DocumentEntryPointTest extends TestCase
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
         static::expectException(RuntimeException::class);
+        static::expectExceptionMessage('An error occurred');
+        static::expectExceptionCode(0);
         $orchestrator->removeDocuments('test');
     }
 
@@ -644,6 +748,25 @@ final class DocumentEntryPointTest extends TestCase
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
         $orchestrator->removeDocuments('test');
+    }
+
+    public function provideOptions(): Generator
+    {
+        yield 'offset' => [
+            [
+                'offset' => 1,
+            ],
+        ];
+        yield 'limit' => [
+            [
+                'limit' => 1,
+            ],
+        ];
+        yield 'attributesToReceive' => [
+            [
+                'attributesToReceive' => ['id', 'title'],
+            ],
+        ];
     }
 }
 

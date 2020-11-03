@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Metadata;
 
+use Countable;
+
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-interface IndexMetadataRegistryInterface
+interface IndexMetadataRegistryInterface extends Countable
 {
     public function add(string $index, IndexMetadataInterface $metadata): void;
 

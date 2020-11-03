@@ -35,6 +35,7 @@
 			"MeiliSearchBundle\\Exception\\": "src/Exception/",
 			"MeiliSearchBundle\\Form\\": "src/Form/",
 			"MeiliSearchBundle\\Form\\Type\\": "src/Form/Type/",
+			"MeiliSearchBundle\\Health\\": "src/Health/",
 			"MeiliSearchBundle\\Index\\": "src/Index/",
 			"MeiliSearchBundle\\Loader\\": "src/Loader/",
 			"MeiliSearchBundle\\Messenger\\": "src/Messenger/",
@@ -72,6 +73,7 @@
 			"Tests\\MeiliSearchBundle\\EventSubscriber\\": "tests/EventSubscriber/",
 			"Tests\\MeiliSearchBundle\\Form\\": "tests/Form/",
 			"Tests\\MeiliSearchBundle\\Form\\Type\\": "tests/Form/Type/",
+			"Tests\\MeiliSearchBundle\\Health\\": "tests/Health/",
 			"Tests\\MeiliSearchBundle\\Index\\": "tests/Index/",
 			"Tests\\MeiliSearchBundle\\Messenger\\": "tests/Messenger/",
 			"Tests\\MeiliSearchBundle\\Messenger\\Document\\": "tests/Messenger/Document/",
@@ -106,6 +108,7 @@
 		"symfony/serializer": "^5.0"
 	},
 	"require-dev": {
+		"api-platform/core": "^2.5",
 		"doctrine/common": "^2.13",
 		"doctrine/orm": "^2.7",
 		"friendsofphp/php-cs-fixer": "^2.16",
@@ -113,6 +116,7 @@
 		"phpstan/phpstan": "^0.12",
 		"phpunit/phpunit": "^8.5",
 		"ramsey/uuid": "^3.8",
+		"rector/rector": "^0.8.40",
 		"symfony/cache": "^4.4|^5.0",
 		"symfony/event-dispatcher": "^4.4|^5.0",
 		"symfony/expression-language": "^4.4|^5.0",
@@ -120,9 +124,7 @@
 		"symfony/http-client": "^4.4|^5.0",
 		"symfony/messenger": "^4.4|^5.0",
 		"twig/twig": ">=2.7",
-		"twig/extensions": ">=1.5",
-		"rector/rector": "^0.8.40",
-		"api-platform/core": "^2.5"
+		"twig/extensions": ">=1.5"
 	},
 	"suggest": {
 		"doctrine/common": "Allow to use the Document annotation",

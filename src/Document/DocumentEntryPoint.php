@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Document;
 
+use InvalidArgumentException;
 use MeiliSearch\Client;
 use MeiliSearchBundle\Event\Document\PostDocumentCreationEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
@@ -13,7 +14,6 @@ use MeiliSearchBundle\Event\Document\PreDocumentCreationEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentRetrievedEvent;
 use MeiliSearchBundle\Event\Document\PreDocumentUpdateEvent;
-use MeiliSearchBundle\Exception\InvalidArgumentException;
 use MeiliSearchBundle\Exception\RuntimeException;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use Psr\Log\LoggerInterface;
@@ -22,11 +22,11 @@ use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use function array_key_exists;
+use function array_map;
 use function array_merge;
-use function array_walk;
+use function implode;
 use function in_array;
 use function sprintf;
-use function implode;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -87,7 +87,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             $this->dispatch(new PostDocumentCreationEvent($index, $update[self::UPDATE_ID]));
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The document cannot be created, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -104,7 +105,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             $this->dispatch(new PostDocumentCreationEvent($index, $update[self::UPDATE_ID]));
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The document cannot be created, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -123,7 +125,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             return array_key_exists(self::MODEL, $document) ? $this->resultBuilder->build($document) : $document;
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The document cannot be retrieved, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -132,11 +135,9 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
      */
     public function getDocuments(string $uid, array $options = []): array
     {
-        if (!empty($options)) {
-            foreach ($options as $option) {
-                if (!in_array($option, ['offset', 'limit', 'attributesToReceive'])) {
-                    throw new InvalidArgumentException(sprintf('The option "%s" is not a valid one.', $option));
-                }
+        foreach ($options as $key => $option) {
+            if (!in_array($key, ['offset', 'limit', 'attributesToReceive'])) {
+                throw new InvalidArgumentException(sprintf('The option "%s" is not a valid one.', $option));
             }
         }
 
@@ -145,15 +146,13 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
 
             $documents = $index->getDocuments($options);
 
-            $data = [];
-            array_walk($documents, function (array $document) use (&$data): void {
-                $data[] = array_key_exists(self::MODEL, $document) ? $this->resultBuilder->build($document) : $document;
-            });
-
-            return $data;
+            return array_map(function (array $document) {
+                return array_key_exists(self::MODEL, $document) ? $this->resultBuilder->build($document) : $document;
+            }, $documents);
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The documents cannot be retrieved, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -170,7 +169,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             $this->dispatch(new PostDocumentUpdateEvent($documentUpdateId[self::UPDATE_ID]));
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The document cannot be updated, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -187,7 +187,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             $this->dispatch(new PostDocumentDeletionEvent($update[self::UPDATE_ID]));
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The document cannot be removed, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -207,7 +208,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             ]);
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The documents cannot be removed, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -219,7 +221,8 @@ final class DocumentEntryPoint implements DocumentEntryPointInterface
             $index->deleteAllDocuments();
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The documents cannot be removed, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 

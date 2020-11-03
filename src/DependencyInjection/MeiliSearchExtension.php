@@ -12,6 +12,8 @@ use MeiliSearchBundle\Cache\SearchResultCacheOrchestrator;
 use MeiliSearchBundle\Cache\SearchResultCacheOrchestratorInterface;
 use MeiliSearchBundle\Command\ClearSearchResultCacheCommand;
 use MeiliSearchBundle\Command\DeleteIndexesCommand;
+use MeiliSearchBundle\Command\MigrateDocumentsCommand;
+use MeiliSearchBundle\Command\UpdateIndexesCommand;
 use MeiliSearchBundle\Command\WarmIndexesCommand;
 use MeiliSearchBundle\DataCollector\MeiliSearchBundleDataCollector;
 use MeiliSearchBundle\DataCollector\TraceableDataCollectorInterface;
@@ -19,6 +21,10 @@ use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\EventSubscriber\DocumentSubscriber;
+use MeiliSearchBundle\Document\DocumentMigrationOrchestrator;
+use MeiliSearchBundle\Document\DocumentMigrationOrchestratorInterface;
+use MeiliSearchBundle\Dump\DumpOrchestrator;
+use MeiliSearchBundle\Dump\DumpOrchestratorInterface;
 use MeiliSearchBundle\Event\Document\DocumentEventList;
 use MeiliSearchBundle\Event\Document\DocumentEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
@@ -33,6 +39,8 @@ use MeiliSearchBundle\EventSubscriber\SearchEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SettingsEventSubscriber;
 use MeiliSearchBundle\EventSubscriber\SynonymsEventSubscriber;
 use MeiliSearchBundle\Form\Type\MeiliSearchChoiceType;
+use MeiliSearchBundle\Health\HealthEntryPoint;
+use MeiliSearchBundle\Health\HealthEntryPointInterface;
 use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Command\DeleteIndexCommand;
@@ -40,6 +48,8 @@ use MeiliSearchBundle\Command\ListIndexesCommand;
 use MeiliSearchBundle\Command\WarmDocumentsCommand;
 use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use MeiliSearchBundle\Index\IndexSettingsOrchestratorInterface;
+use MeiliSearchBundle\Index\IndexSynchronizer;
+use MeiliSearchBundle\Index\IndexSynchronizerInterface;
 use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
 use MeiliSearchBundle\Loader\LoaderInterface;
@@ -56,6 +66,8 @@ use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
 use MeiliSearchBundle\Search\FallbackSearchEntrypoint;
+use MeiliSearchBundle\Settings\SettingsEntryPoint;
+use MeiliSearchBundle\Settings\SettingsEntryPointInterface;
 use MeiliSearchBundle\Twig\SearchExtension;
 use MeiliSearchBundle\Update\UpdateOrchestratorInterface;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
@@ -116,6 +128,7 @@ final class MeiliSearchExtension extends Extension
         $this->registerEventList($container);
         $this->registerSubscribers($container);
         $this->registerCommands($container, $config);
+        $this->registerHealthEntryPoint($container);
         $this->registerDataCollector($container);
 
         $container->registerForAutoconfiguration(DocumentDataProviderInterface::class)
@@ -156,6 +169,25 @@ final class MeiliSearchExtension extends Extension
         ;
 
         $container->setAlias(IndexMetadataRegistryInterface::class, IndexMetadataRegistry::class);
+
+        $container->register(IndexSynchronizer::class, IndexSynchronizer::class)
+            ->setArguments([
+                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexMetadataRegistryInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(HealthEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(SettingsEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
+            ->addTag('container.preload', [
+                'class' => IndexSynchronizer::class,
+            ])
+        ;
+
+        $container->setAlias(IndexSynchronizerInterface::class, IndexSynchronizer::class);
     }
 
     private function handleCacheConfiguration(ContainerBuilder $container, array $configuration): void
@@ -164,7 +196,7 @@ final class MeiliSearchExtension extends Extension
             return;
         }
 
-        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && $configuration[self::CACHE]['clear_on_new_document']) {
+        if ($configuration[self::CACHE]['clear_on_new_document']) {
             $container->register(ClearDocumentOnNewSubscriber::class, ClearDocumentOnNewSubscriber::class)
                 ->setArguments([
                     new Reference(SearchResultCacheOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
@@ -177,7 +209,7 @@ final class MeiliSearchExtension extends Extension
             ;
         }
 
-        if (array_key_exists(self::CACHE, $configuration) && $configuration[self::CACHE]['enabled'] && $configuration[self::CACHE]['clear_on_document_update']) {
+        if ($configuration[self::CACHE]['clear_on_document_update']) {
             $container->register(ClearDocumentOnUpdateSubscriber::class, ClearDocumentOnUpdateSubscriber::class)
                 ->setArguments([
                     new Reference(SearchResultCacheOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
@@ -248,6 +280,22 @@ final class MeiliSearchExtension extends Extension
         ;
         $container->setAlias(DocumentEntryPointInterface::class, DocumentEntryPoint::class);
 
+        $container->register(DumpOrchestrator::class, DumpOrchestrator::class)
+            ->setArguments([
+                new Reference(Client::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(EventDispatcherInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
+            ->addTag('container.preload', [
+                'class' => DumpOrchestrator::class,
+            ])
+        ;
+        $container->setAlias(DumpOrchestratorInterface::class, DumpOrchestrator::class);
+
         $container->register(SynonymsOrchestrator::class, SynonymsOrchestrator::class)
             ->setArguments([
                 new Reference(IndexOrchestrator::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
@@ -255,6 +303,9 @@ final class MeiliSearchExtension extends Extension
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
             ->addTag('container.preload', [
                 'class' => SynonymsOrchestrator::class,
             ])
@@ -267,11 +318,48 @@ final class MeiliSearchExtension extends Extension
                 new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
             ->addTag('container.preload', [
                 'class' => UpdateOrchestrator::class,
             ])
         ;
-        $container->setAlias(UpdateOrchestratorInterface::class, 'meili_search.update_orchestrator');
+
+        $container->setAlias(UpdateOrchestratorInterface::class, UpdateOrchestrator::class);
+
+        $container->register(SettingsEntryPoint::class, SettingsEntryPoint::class)
+            ->setArguments([
+                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(LoggerInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
+            ->addTag('container.preload', [
+                'class' => SettingsEntryPoint::class,
+            ])
+        ;
+
+        $container->setAlias(SettingsEntryPointInterface::class, SettingsEntryPoint::class);
+
+        $container->register(DocumentMigrationOrchestrator::class, DocumentMigrationOrchestrator::class)
+            ->setArguments([
+                new Reference(DocumentEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(DumpOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
+            ->addTag('container.preload', [
+                'class' => DocumentMigrationOrchestrator::class,
+            ])
+        ;
+
+        $container->setAlias(DocumentMigrationOrchestratorInterface::class, DocumentMigrationOrchestrator::class);
     }
 
     private function registerLoaders(ContainerBuilder $container): void
@@ -284,6 +372,9 @@ final class MeiliSearchExtension extends Extension
             ])
             ->setPublic(false)
             ->addTag(self::LOADER_LIST['document'])
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
             ->addTag('container.preload', [
                 'class' => DocumentLoader::class,
             ])
@@ -390,6 +481,9 @@ final class MeiliSearchExtension extends Extension
                 $configuration['prefix'],
             ])
             ->setPublic(false)
+            ->addTag('monolog.logger', [
+                'channel' => 'meilisearch',
+            ])
             ->addTag('container.preload', [
                 'class' => SearchEntryPoint::class,
             ])
@@ -404,6 +498,9 @@ final class MeiliSearchExtension extends Extension
                     new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 ])
                 ->setPublic(false)
+                ->addTag('monolog.logger', [
+                    'channel' => 'meilisearch',
+                ])
                 ->addTag('container.preload', [
                     'class' => SearchResultCacheOrchestrator::class,
                 ])
@@ -630,6 +727,9 @@ final class MeiliSearchExtension extends Extension
                     new Reference(LoggerInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 ])
                 ->setPublic(false)
+                ->addTag('monolog.logger', [
+                    'channel' => 'meilisearch',
+                ])
                 ->addTag('container.preload', [
                     'class' => SearchResultCacheOrchestrator::class,
                 ])
@@ -649,7 +749,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(DeleteIndexCommand::class, DeleteIndexCommand::class)
             ->setArguments([
-                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexSynchronizerInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('console.command')
@@ -660,8 +760,7 @@ final class MeiliSearchExtension extends Extension
 
         $container->register(DeleteIndexesCommand::class, DeleteIndexesCommand::class)
             ->setArguments([
-                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(IndexMetadataRegistryInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                new Reference(IndexSynchronizerInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
             ])
             ->setPublic(false)
             ->addTag('console.command')
@@ -695,9 +794,7 @@ final class MeiliSearchExtension extends Extension
         $container->register(WarmIndexesCommand::class, WarmIndexesCommand::class)
             ->setArguments([
                 $configuration['indexes'],
-                new Reference(IndexMetadataRegistryInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(IndexOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
-                new Reference(MessageBusInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference(IndexSynchronizerInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
                 $configuration['prefix'],
             ])
             ->setPublic(false)
@@ -706,6 +803,45 @@ final class MeiliSearchExtension extends Extension
                 'class' => WarmIndexesCommand::class,
             ])
         ;
+
+        $container->register(UpdateIndexesCommand::class, UpdateIndexesCommand::class)
+            ->setArguments([
+                $configuration['indexes'],
+                new Reference(IndexSynchronizerInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+                $configuration['prefix'],
+            ])
+            ->setPublic(false)
+            ->addTag('console.command')
+            ->addTag('container.preload', [
+                'class' => UpdateIndexesCommand::class,
+            ])
+        ;
+
+        $container->register(MigrateDocumentsCommand::class, MigrateDocumentsCommand::class)
+            ->setArguments([
+                new Reference(DocumentMigrationOrchestratorInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('console.command')
+            ->addTag('container.preload', [
+                'class' => MigrateDocumentsCommand::class,
+            ])
+        ;
+    }
+
+    private function registerHealthEntryPoint(ContainerBuilder $container): void
+    {
+        $container->register(HealthEntryPoint::class, HealthEntryPoint::class)
+            ->setArguments([
+                new Reference(Client::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('container.preload', [
+                'class' => HealthEntryPoint::class,
+            ])
+        ;
+
+        $container->setAlias(HealthEntryPointInterface::class, HealthEntryPoint::class);
     }
 
     private function registerDataCollector(ContainerBuilder $container): void

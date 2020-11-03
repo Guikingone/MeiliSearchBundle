@@ -78,10 +78,7 @@ final class DocumentLoader implements LoaderInterface
                     $provider instanceof ModelDataProviderInterface ? $provider->getModel() : null
                 );
             } catch (Throwable $throwable) {
-                $this->logger->error(sprintf(
-                    'The document cannot be loaded, error: "%s"',
-                    $throwable->getMessage()
-                ));
+                $this->logger->error(sprintf('The document cannot be loaded, error: "%s"', $throwable->getMessage()));
 
                 throw $throwable;
             }

@@ -12,6 +12,7 @@ use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Throwable;
 use function is_array;
 
 /**
@@ -103,7 +104,7 @@ final class SearchResultCacheOrchestrator implements SearchResultCacheOrchestrat
     }
 
     /**
-     * @throws InvalidArgumentException {@see CacheItemPoolInterface::hasItem()}
+     * @throws Throwable|InvalidArgumentException
      */
     private function has(string $searchResultIdentifier): bool
     {

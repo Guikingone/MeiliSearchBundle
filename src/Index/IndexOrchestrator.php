@@ -70,7 +70,8 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
             $this->handleConfiguration($index, $configuration);
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The index cannot be created, error: "%s"', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
 
         $this->dispatch(new IndexCreatedEvent([
@@ -82,13 +83,14 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
     /**
      * {@inheritdoc}
      */
-    public function getIndexes(): array
+    public function getIndexes(): IndexListInterface
     {
         try {
-            return $this->client->getAllIndexes();
+            return new IndexList($this->client->getAllIndexes());
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The indexes cannot be retrieved, error: "%s".', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -141,7 +143,7 @@ final class IndexOrchestrator implements IndexOrchestratorInterface
             $this->client->deleteIndex($uid);
         } catch (Throwable $exception) {
             $this->logger->error(sprintf('The index cannot be deleted, error: "%s".', $exception->getMessage()));
-            throw new RuntimeException($exception->getMessage());
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
 
         $this->logger->info('An index has been deleted', [

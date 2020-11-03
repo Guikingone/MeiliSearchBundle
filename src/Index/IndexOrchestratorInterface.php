@@ -25,9 +25,9 @@ interface IndexOrchestratorInterface
     public function update(string $uid, array $configuration = []): void;
 
     /**
-     * @return array<string,Indexes>
+     * @return IndexListInterface<string, Indexes>
      */
-    public function getIndexes(): array;
+    public function getIndexes(): IndexListInterface;
 
     /**
      * @param string $uid

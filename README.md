@@ -1,6 +1,7 @@
 # MeiliSearchBundle
 
 ![MeiliSearchBundle CI](https://github.com/Guikingone/MeiliSearchBundle/workflows/MeiliSearchBundle%20CI/badge.svg?branch=master)
+[![SymfonyInsight](https://insight.symfony.com/projects/05c41f57-2d98-4fdb-b07b-53f3795a29fb/mini.svg)](https://insight.symfony.com/projects/05c41f57-2d98-4fdb-b07b-53f3795a29fb)
 
 MeiliSearchBundle is an opiniated Symfony bundle which configure and enable [MeiliSearch](https://github.com/meilisearch/MeiliSearch).
 

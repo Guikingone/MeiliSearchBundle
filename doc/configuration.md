@@ -18,8 +18,7 @@ meili_search:
             searchableAttributes: ['id', 'title', 'header', 'tags', 'creation_date']
             displayedAttributes: ['id', 'title', 'header', 'tags', 'url']
             synonyms: 
-                wolverine:
-                    values: ['xmen', 'logan', 'jackman']
+                wolverine: ['xmen', 'logan', 'jackman']
 ```
 
 ## General configuration
@@ -57,4 +56,3 @@ Each index allows to configure the following keys:
 - **[displayedAttributes](https://docs.meilisearch.com/guides/advanced_guides/field_properties.html#displayed-fields)**: An array of fields that are displayed for each matching documents.
 
 - **[synonyms](https://docs.meilisearch.com/guides/advanced_guides/synonyms.html)**: A list of synonyms to create for this index
- 

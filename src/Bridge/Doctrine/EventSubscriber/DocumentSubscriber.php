@@ -26,7 +26,7 @@ final class DocumentSubscriber implements EventSubscriber
     /**
      * @var DocumentEntryPointInterface
      */
-    private $documentOrchestrator;
+    private $documentEntryPoint;
 
     /**
      * @var DocumentReaderInterface
@@ -54,14 +54,14 @@ final class DocumentSubscriber implements EventSubscriber
     private $serializer;
 
     public function __construct(
-        DocumentEntryPointInterface $documentOrchestrator,
+        DocumentEntryPointInterface $documentEntryPoint,
         DocumentReaderInterface $documentReader,
         IndexMetadataRegistryInterface $indexMetadataRegistry,
         PropertyAccessorInterface $propertyAccessor,
         SerializerInterface $serializer,
         ?MessageBusInterface $messageBus = null
     ) {
-        $this->documentOrchestrator = $documentOrchestrator;
+        $this->documentEntryPoint = $documentEntryPoint;
         $this->documentReader = $documentReader;
         $this->indexMetadataRegistry = $indexMetadataRegistry;
         $this->propertyAccessor = $propertyAccessor;
@@ -103,7 +103,7 @@ final class DocumentSubscriber implements EventSubscriber
             return;
         }
 
-        $this->documentOrchestrator->addDocument(
+        $this->documentEntryPoint->addDocument(
             $indexMetadata->getUid(),
             $documentBody,
             $indexMetadata->getPrimaryKey(),
@@ -125,16 +125,16 @@ final class DocumentSubscriber implements EventSubscriber
         if ($indexMetadata->isAsync() && null !== $this->messageBus) {
             $this->messageBus->dispatch(new UpdateDocumentMessage(
                 $configuration->getIndex(),
-                [$documentBody],
+                $documentBody,
                 $configuration->getPrimaryKey()
             ));
 
             return;
         }
 
-        $this->documentOrchestrator->updateDocument(
+        $this->documentEntryPoint->updateDocument(
             $indexMetadata->getUid(),
-            [$documentBody],
+            $documentBody,
             $indexMetadata->getPrimaryKey()
         );
     }
@@ -149,7 +149,7 @@ final class DocumentSubscriber implements EventSubscriber
         $configuration = $this->documentReader->getConfiguration($document);
         $identifier = $this->propertyAccessor->getValue(
             $document,
-            null === $configuration->getPrimaryKey() ? $configuration->getPrimaryKey() : 'id'
+            $configuration->getPrimaryKey() ?? 'id'
         );
 
         $indexMetadata = $this->indexMetadataRegistry->get($configuration->getIndex());
@@ -162,6 +162,6 @@ final class DocumentSubscriber implements EventSubscriber
             return;
         }
 
-        $this->documentOrchestrator->removeDocument($indexMetadata->getUid(), $identifier);
+        $this->documentEntryPoint->removeDocument($indexMetadata->getUid(), $identifier);
     }
 }

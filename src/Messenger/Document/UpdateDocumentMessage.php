@@ -17,7 +17,7 @@ final class UpdateDocumentMessage implements MessageInterface
     private $index;
 
     /**
-     * @var array<string,mixed>
+     * @var array<string, mixed>
      */
     private $documentUpdate;
 
@@ -27,9 +27,9 @@ final class UpdateDocumentMessage implements MessageInterface
     private $primaryKey;
 
     /**
-     * @param string              $index
-     * @param array<string,mixed> $documentUpdate
-     * @param string|null         $primaryKey
+     * @param string               $index
+     * @param array<string, mixed> $documentUpdate
+     * @param string|null          $primaryKey
      */
     public function __construct(
         string $index,
@@ -47,7 +47,7 @@ final class UpdateDocumentMessage implements MessageInterface
     }
 
     /**
-     * @return array<string,mixed>
+     * @return array<string, mixed>
      */
     public function getDocumentUpdate(): array
     {

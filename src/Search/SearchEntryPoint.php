@@ -14,7 +14,7 @@ use Psr\Log\NullLogger;
 use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
-use function array_merge;
+use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -102,7 +102,7 @@ final class SearchEntryPoint implements SearchEntryPointInterface
                 self::OPTIONS => $options,
             ]);
 
-            throw new RuntimeException($throwable->getMessage());
+            throw new RuntimeException($throwable->getMessage(), 0, $throwable);
         }
 
         $this->buildModels($result[self::HITS]);
