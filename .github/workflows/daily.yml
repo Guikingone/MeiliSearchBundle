@@ -1,4 +1,4 @@
-name: MeiliSearchBundle CI
+name: MeiliSearchBundle CI - Daily
 on:
   schedule:
     - cron: "0 0 * * *"
