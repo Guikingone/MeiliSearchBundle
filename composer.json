@@ -15,6 +15,9 @@
 		"psr-4": {
 			"MeiliSearchBundle\\": "src/",
 			"MeiliSearchBundle\\Bridge\\": "src/Bridge/",
+			"MeiliSearchBundle\\Bridge\\ApiPlatform\\": "src/Bridge/ApiPlatform/",
+			"MeiliSearchBundle\\Bridge\\ApiPlatform\\Api\\": "src/Bridge/ApiPlatform/Api/",
+			"MeiliSearchBundle\\Bridge\\ApiPlatform\\DataProvider\\": "src/Bridge/ApiPlatform/DataProvider/",
 			"MeiliSearchBundle\\Bridge\\Doctrine\\": "src/Bridge/Doctrine/",
 			"MeiliSearchBundle\\Bridge\\Doctrine\\Annotation\\": "src/Bridge/Doctrine/Annotation/",
 			"MeiliSearchBundle\\Bridge\\Doctrine\\Annotation\\Reader\\": "src/Bridge/Doctrine/Annotation/Reader/",
@@ -55,6 +58,9 @@
 		"psr-4": {
 			"Tests\\MeiliSearchBundle\\": "tests/",
 			"Tests\\MeiliSearchBundle\\Bridge\\": "tests/Bridge/",
+			"Tests\\MeiliSearchBundle\\Bridge\\ApiPlatform\\": "tests/Bridge/ApiPlatform/",
+			"Tests\\MeiliSearchBundle\\Bridge\\ApiPlatform\\Api\\": "tests/Bridge/ApiPlatform/Api/",
+			"Tests\\MeiliSearchBundle\\Bridge\\ApiPlatform\\DataProvider\\": "tests/Bridge/ApiPlatform/DataProvider/",
 			"Tests\\MeiliSearchBundle\\Bridge\\Doctrine\\": "tests/Bridge/Doctrine/",
 			"Tests\\MeiliSearchBundle\\Bridge\\Doctrine\\Annotation\\": "tests/Bridge/Doctrine/Annotation/",
 			"Tests\\MeiliSearchBundle\\Bridge\\Doctrine\\Annotation\\Reader\\": "tests/Bridge/Doctrine/Annotation/Reader/",
