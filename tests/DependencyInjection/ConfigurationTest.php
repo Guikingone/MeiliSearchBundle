@@ -79,6 +79,22 @@ final class ConfigurationTest extends TestCase
         static::assertSame('bar', $configuration['prefix']);
     }
 
+    public function testConfigurationCanEnableApiPlatform()
+    {
+        $configuration = (new Processor())->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'api_platform' => [
+                    'enabled' => true,
+                ],
+            ],
+        ]);
+
+        static::assertArrayHasKey('api_platform', $configuration);
+        static::assertArrayHasKey('enabled', $configuration['api_platform']);
+        static::assertTrue($configuration['api_platform']['enabled']);
+    }
+
     public function testConfigurationDoesNotEnableCacheByDefault(): void
     {
         $configuration = (new Processor())->processConfiguration(new Configuration(), [
@@ -90,7 +106,7 @@ final class ConfigurationTest extends TestCase
 
         static::assertArrayHasKey('cache', $configuration);
         static::assertArrayHasKey('enabled', $configuration['cache']);
-        static::assertSame(false, $configuration['cache']['enabled']);
+        static::assertFalse($configuration['cache']['enabled']);
         static::assertArrayHasKey('pool', $configuration['cache']);
         static::assertSame('app', $configuration['cache']['pool']);
     }
