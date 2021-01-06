@@ -129,6 +129,11 @@ final class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
+                    ->arrayNode('scoped_indexes')
+                        ->info('A list of indexes to search in when trying to find documents')
+                        ->useAttributeAsKey('name')
+                        ->variablePrototype()->end()
+                    ->end()
                 ->end()
             ->end()
         ;
