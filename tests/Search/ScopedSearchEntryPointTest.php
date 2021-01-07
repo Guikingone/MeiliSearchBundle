@@ -66,11 +66,7 @@ final class ScopedSearchEntryPointTest extends TestCase
         $secondResult->expects(self::never())->method('getHits');
 
         $entryPoint = $this->createMock(SearchEntryPointInterface::class);
-        $entryPoint->expects(self::exactly(2))->method('search')->withConsecutive([
-            self::equalTo('bar'), self::equalTo('bar'),
-        ], [
-            self::equalTo('random'), self::equalTo('bar'),
-        ])->willReturnOnConsecutiveCalls($result, $secondResult);
+        $entryPoint->expects(self::once())->method('search')->with(self::equalTo('bar'), self::equalTo('bar'))->willReturn($result);
 
         $scopedEntryPoint = new ScopedSearchEntryPoint([
             'foo' => ['bar', 'random'],
@@ -79,6 +75,6 @@ final class ScopedSearchEntryPointTest extends TestCase
 
         $searchResult = $scopedEntryPoint->search('foo', 'bar');
 
-        self::assertArrayHasKey('id', $secondResult->getHits());
+        self::assertArrayHasKey('id', $searchResult->getHits());
     }
 }

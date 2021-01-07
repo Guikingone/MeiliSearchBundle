@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Event;
 
 use Countable;
+use function array_filter;
 use function count;
 
 /**

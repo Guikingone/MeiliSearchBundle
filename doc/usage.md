@@ -118,6 +118,6 @@ final class FooController
 }
 ```
 
-If the search is valid, you must receive a [Search](../src/Search/SearchResult.php) instance in `$data`,
+If the search is valid, you must receive a [SearchResult](../src/Search/SearchResult.php) instance in `$data`,
 this last one contain a set of methods and shortcuts that allows you to play with the search result.
 By default, the 'hits' are an associative array, we'll see later how to retrieve objects.

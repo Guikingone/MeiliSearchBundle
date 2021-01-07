@@ -15,7 +15,7 @@ use function count;
 final class ScopedSearchEntryPoint implements SearchEntryPointInterface
 {
     /**
-     * @var array<string, <int, string>>
+     * @var array<string, array<int, string>>
      */
     private $scopedIndexes;
 
@@ -25,8 +25,8 @@ final class ScopedSearchEntryPoint implements SearchEntryPointInterface
     private $searchEntryPoint;
 
     /**
-     * @param array<string, <int, string>> $scopedIndexes
-     * @param SearchEntryPointInterface    $searchEntryPoint
+     * @param array<string, array<int, string>> $scopedIndexes
+     * @param SearchEntryPointInterface         $searchEntryPoint
      */
     public function __construct(
         array $scopedIndexes,
@@ -48,11 +48,11 @@ final class ScopedSearchEntryPoint implements SearchEntryPointInterface
         foreach ($this->scopedIndexes[$index] as $usedIndex) {
             $result = $this->searchEntryPoint->search($usedIndex, $query, $options);
 
-            if (0 === count($result->getHits())) {
-                continue;
+            if (0 !== count($result->getHits())) {
+                return $result;
             }
 
-            return $result;
+            continue;
         }
 
         throw new RuntimeException('No result can be found');

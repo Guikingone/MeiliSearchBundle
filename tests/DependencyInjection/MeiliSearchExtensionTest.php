@@ -67,6 +67,7 @@ use MeiliSearchBundle\Result\ResultBuilder;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Search\FallbackSearchEntrypoint;
+use MeiliSearchBundle\Search\ScopedSearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPoint;
 use MeiliSearchBundle\Search\SearchEntryPointInterface;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
@@ -752,5 +753,29 @@ final class MeiliSearchExtensionTest extends TestCase
         static::assertTrue($container->getDefinition(MeiliSearchBundleDataCollector::class)->hasTag('container.preload'));
         static::assertArrayHasKey('class', $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('container.preload')[0]);
         static::assertSame(MeiliSearchBundleDataCollector::class, $container->getDefinition(MeiliSearchBundleDataCollector::class)->getTag('container.preload')[0]['class']);
+    }
+
+    public function testScopedEntryPointIsConfigured(): void
+    {
+        $extension = new MeiliSearchExtension();
+
+        $container = new ContainerBuilder();
+        $extension->load([
+            'meili_search' => [
+                'scoped_indexes' => [
+                    'foo' => ['bar', 'random'],
+                ],
+            ],
+        ], $container);
+
+        self::assertTrue($container->hasDefinition(ScopedSearchEntryPoint::class));
+        self::assertEquals([
+            'foo' => ['bar', 'random'],
+        ], $container->getDefinition(ScopedSearchEntryPoint::class)->getArgument(0));
+        self::assertInstanceOf(Reference::class, $container->getDefinition(ScopedSearchEntryPoint::class)->getArgument(1));
+        self::assertFalse($container->getDefinition(ScopedSearchEntryPoint::class)->isPublic());
+        self::assertTrue($container->getDefinition(ScopedSearchEntryPoint::class)->hasTag('container.preload'));
+        self::assertArrayHasKey('class', $container->getDefinition(ScopedSearchEntryPoint::class)->getTag('container.preload')[0]);
+        self::assertSame(ScopedSearchEntryPoint::class, $container->getDefinition(ScopedSearchEntryPoint::class)->getTag('container.preload')[0]['class']);
     }
 }

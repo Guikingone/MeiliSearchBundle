@@ -66,6 +66,7 @@ use MeiliSearchBundle\Result\ResultBuilderInterface;
 use MeiliSearchBundle\Search\CachedSearchEntryPoint;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
 use MeiliSearchBundle\Search\FallbackSearchEntrypoint;
+use MeiliSearchBundle\Search\ScopedSearchEntryPoint;
 use MeiliSearchBundle\Settings\SettingsEntryPoint;
 use MeiliSearchBundle\Settings\SettingsEntryPointInterface;
 use MeiliSearchBundle\Twig\SearchExtension;
@@ -88,6 +89,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function array_key_exists;
+use function count;
 use function interface_exists;
 use function sprintf;
 
@@ -116,6 +118,7 @@ final class MeiliSearchExtension extends Extension
 
         $this->registerClientAndMetadataRegistry($container, $config);
         $this->handleCacheConfiguration($container, $config);
+        $this->handleScopedIndexes($container, $config);
         $this->registerResultBuilder($container);
         $this->registerOrchestrator($container);
         $this->registerLoaders($container);
@@ -221,6 +224,24 @@ final class MeiliSearchExtension extends Extension
                 ])
             ;
         }
+    }
+
+    private function handleScopedIndexes(ContainerBuilder $container, array $configuration): void
+    {
+        if (!array_key_exists('scoped_indexes', $configuration) || 0 === count($configuration['scoped_indexes'])) {
+            return;
+        }
+
+        $container->register(ScopedSearchEntryPoint::class, ScopedSearchEntryPoint::class)
+            ->setArguments([
+                $configuration['scoped_indexes'],
+                new Reference(SearchEntryPointInterface::class, ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false)
+            ->addTag('container.preload', [
+                'class' => ScopedSearchEntryPoint::class,
+            ])
+        ;
     }
 
     private function registerResultBuilder(ContainerBuilder $container): void

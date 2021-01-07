@@ -19,6 +19,8 @@ meili_search:
             displayedAttributes: ['id', 'title', 'header', 'tags', 'url']
             synonyms: 
                 wolverine: ['xmen', 'logan', 'jackman']
+    scoped_indexes:
+        admin: ['admin_posts', 'tags']
 ```
 
 ## General configuration
@@ -34,6 +36,8 @@ Here's a full breakdown of each configuration keys:
 - **prefix**: Used to define a prefix for each index.
 
 - **indexes**: A list of indexes to create along with their configuration.
+
+- **scoped_indexes**: A list of indexes groups that can be used to search.
 
 ## Indexes
 
