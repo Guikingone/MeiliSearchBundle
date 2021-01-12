@@ -44,7 +44,7 @@ php-cs-fixer-dry:
 
 phpstan: ## Run PHPStan (the configuration must be defined in phpstan.neon)
 phpstan: phpstan.neon
-	$(DOCKER) run --rm -v $(PWD):/app phpstan/phpstan analyse /app/src
+	$(PHP) vendor/bin/phpstan analyse
 
 rector-dry: ## Run Rector in --dry-run mode
 rector-dry: rector.php
