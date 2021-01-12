@@ -104,7 +104,7 @@ final class SearchResultCacheOrchestrator implements SearchResultCacheOrchestrat
     }
 
     /**
-     * @throws Throwable|InvalidArgumentException
+     * @throws Throwable
      */
     private function has(string $searchResultIdentifier): bool
     {

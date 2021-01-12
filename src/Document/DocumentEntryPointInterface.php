@@ -22,9 +22,9 @@ interface DocumentEntryPointInterface
     /**
      * Add multiple documents in the desired index.
      *
-     * @param string                         $uid
-     * @param array<string, int|string|bool> $documents
-     * @param string|null                    $primaryKey
+     * @param string                                                  $uid
+     * @param array<string, int|string|bool>|array<int, array|object> $documents
+     * @param string|null                                             $primaryKey
      */
     public function addDocuments(string $uid, array $documents, string $primaryKey = null): void;
 
@@ -32,7 +32,7 @@ interface DocumentEntryPointInterface
      * @param string     $uid
      * @param string|int $id
      *
-     * @return array|object As a document can be stored with a 'model' key, an object can be returned.
+     * @return array<string, mixed>|object As a document can be stored with a 'model' key, an object can be returned.
      */
     public function getDocument(string $uid, $id);
 

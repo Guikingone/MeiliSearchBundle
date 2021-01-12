@@ -1,4 +1,4 @@
- # Form
+# Form
 
 This bundle provides a [MeiliSearchChoiceType](../src/Form/Type/MeiliSearchChoiceType.php)
 that allows to display a dropdown filled with the result of a search in the MeiliSearch API.
