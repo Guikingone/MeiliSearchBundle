@@ -18,10 +18,14 @@ final class PreDocumentUpdateEvent extends Event
     private $index;
 
     /**
-     * @var array<string,mixed>
+     * @var array<string, mixed>
      */
     private $document;
 
+    /**
+     * @param Indexes              $index
+     * @param array<string, mixed> $document
+     */
     public function __construct(Indexes $index, array $document)
     {
         $this->index = $index;
@@ -33,6 +37,9 @@ final class PreDocumentUpdateEvent extends Event
         return $this->index;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getDocument(): array
     {
         return $this->document;

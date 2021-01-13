@@ -6,7 +6,7 @@ namespace MeiliSearchBundle\Cache;
 
 use MeiliSearchBundle\Exception\RuntimeException;
 use MeiliSearchBundle\Search\SearchResultInterface;
-use Psr\Cache\InvalidArgumentException;
+use Throwable;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -17,7 +17,7 @@ interface SearchResultCacheOrchestratorInterface
      * @param string                                       $searchResultIdentifier
      * @param SearchResultInterface<SearchResultInterface> $searchResult
      *
-     * @throws InvalidArgumentException
+     * @throws Throwable
      */
     public function add(string $searchResultIdentifier, SearchResultInterface $searchResult): void;
 
@@ -26,7 +26,7 @@ interface SearchResultCacheOrchestratorInterface
      *
      * @return SearchResultInterface<string, mixed>
      *
-     * @throws InvalidArgumentException
+     * @throws Throwable
      */
     public function get(string $searchResultIdentifier): SearchResultInterface;
 

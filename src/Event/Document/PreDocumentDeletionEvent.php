@@ -18,10 +18,14 @@ final class PreDocumentDeletionEvent extends Event
     private $index;
 
     /**
-     * @var array<string,mixed>
+     * @var array<string, mixed>
      */
     private $document;
 
+    /**
+     * @param Indexes              $index
+     * @param array<string, mixed> $document
+     */
     public function __construct(Indexes $index, array $document)
     {
         $this->index = $index;
@@ -34,7 +38,7 @@ final class PreDocumentDeletionEvent extends Event
     }
 
     /**
-     * @return array<string,mixed>
+     * @return array<string, mixed>
      */
     public function getDocument(): array
     {

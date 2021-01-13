@@ -26,6 +26,11 @@ final class AddIndexMessage implements MessageInterface
      */
     private $configuration;
 
+    /**
+     * @param string                     $uid
+     * @param string|null                $primaryKey
+     * @param array<string, string|null> $configuration
+     */
     public function __construct(
         string $uid,
         ?string $primaryKey = null,
@@ -50,6 +55,9 @@ final class AddIndexMessage implements MessageInterface
         return $this->primaryKey;
     }
 
+    /**
+     * @return array<string, string|null>
+     */
     public function getConfiguration(): array
     {
         return $this->configuration;
