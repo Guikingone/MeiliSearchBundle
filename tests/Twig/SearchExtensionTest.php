@@ -21,11 +21,12 @@ final class SearchExtensionTest extends TestCase
 
         $extension = new SearchExtension($searchEntryPoint);
 
-        static::assertInstanceOf(RuntimeExtensionInterface::class, $extension);
-        static::assertNotEmpty($extension->getFunctions());
-        static::assertInstanceOf(TwigFunction::class, $extension->getFunctions()[0]);
-        static::assertInstanceOf(SearchExtension::class, $extension->getFunctions()[0]->getCallable()[0]);
-        static::assertSame('search', $extension->getFunctions()[0]->getCallable()[1]);
+        self::assertInstanceOf(RuntimeExtensionInterface::class, $extension);
+        self::assertNotEmpty($extension->getFunctions());
+        self::assertInstanceOf(TwigFunction::class, $extension->getFunctions()[0]);
+        self::assertInstanceOf(TwigFunction::class, $extension->getFunctions()[1]);
+        self::assertInstanceOf(SearchExtension::class, $extension->getFunctions()[0]->getCallable()[0]);
+        self::assertSame('search', $extension->getFunctions()[0]->getCallable()[1]);
     }
 
     public function testExtensionCanTriggerSearch(): void
@@ -35,5 +36,9 @@ final class SearchExtensionTest extends TestCase
 
         $extension = new SearchExtension($searchEntryPoint);
         $extension->search('foo', 'bar');
+    }
+
+    public function testExtensionCannotTriggerScopedSearchWithUndefinedScopedEntryPoint(): void
+    {
     }
 }

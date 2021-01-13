@@ -9,7 +9,6 @@ use MeiliSearchBundle\Exception\RuntimeException;
 use MeiliSearchBundle\Search\SearchResult;
 use MeiliSearchBundle\Search\SearchResultInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
@@ -104,7 +103,7 @@ final class SearchResultCacheOrchestrator implements SearchResultCacheOrchestrat
     }
 
     /**
-     * @throws Throwable|InvalidArgumentException
+     * @throws Throwable
      */
     private function has(string $searchResultIdentifier): bool
     {

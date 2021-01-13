@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Serializer;
 
 use MeiliSearchBundle\Metadata\IndexMetadata;
-use MeiliSearchBundle\Metadata\IndexMetadataInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;

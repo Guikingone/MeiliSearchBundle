@@ -44,6 +44,11 @@ final class Settings
      */
     private $synonyms;
 
+    /**
+     * @param array<string, mixed> $settings
+     *
+     * @return Settings
+     */
     public static function create(array $settings): self
     {
         $self = new self();

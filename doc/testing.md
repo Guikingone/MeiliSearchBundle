@@ -11,10 +11,12 @@ This bundle provides a set of shortcuts to help during tests.
 A set of assertions is available thanks to the [MeiliSearchBundleAssertionTrait](../src/Test/MeiliSearchBundleAssertionTrait.php)
 during functional tests:
 
-- [IndexCreated](../src/Test/Constraint/Index/IndexCreated.php) | Allow to test the number of index created:
+- [IndexCreated](../src/Test/Constraint/Index/IndexCreated.php) | Allow to test the number of created indexes:
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use MeiliSearchBundle\Test\MeiliSearchBundleAssertionTrait;
@@ -32,10 +34,12 @@ final class Test extends TestCase
 }
 ```
 
-- [IndexRemoved](../src/Test/Constraint/Index/IndexRemoved.php) | Allow to test the number of index removed:
+- [IndexRemoved](../src/Test/Constraint/Index/IndexRemoved.php) | Allow to test the number of removed indexes:
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use MeiliSearchBundle\Test\MeiliSearchBundleAssertionTrait;
@@ -58,6 +62,8 @@ final class Test extends TestCase
 ```php
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
 use MeiliSearchBundle\Test\MeiliSearchBundleAssertionTrait;
 
@@ -73,3 +79,5 @@ final class Test extends TestCase
     }
 }
 ```
+
+_New in **0.2**: In the case of a [scoped search](search.md#Scoped indexes), only the successful one (if any) is counted._

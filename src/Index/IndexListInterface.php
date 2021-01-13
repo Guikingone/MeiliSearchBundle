@@ -27,7 +27,7 @@ interface IndexListInterface extends Countable, IteratorAggregate
      *
      * @param Closure $filter
      *
-     * @return IndexListInterface
+     * @return IndexListInterface<string, Indexes>
      */
     public function filter(Closure $filter): IndexListInterface;
 

@@ -35,10 +35,6 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
 
-      # —— Security ——————————————————————————————————————————————————————
-      - name: Symfony Security Checker
-        uses: symfonycorp/security-checker-action@v2
-
       - name: Get composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -47,7 +43,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ matrix.composer-dependencies }}-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ matrix.composer-dependencies }}-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-${{ matrix.composer-dependencies }}-
 
       - name: Install Composer dependencies
@@ -58,11 +54,19 @@ jobs:
         if: matrix.composer-dependencies == 'lowest'
         run: composer update --prefer-lowest
 
+      # —— Security ——————————————————————————————————————————————————————
+      - name: Symfony Security Checker
+        uses: symfonycorp/security-checker-action@v2
+
       # —— Style —————————————————————————————————————————————————————————
       - name: PHP-CS-FIXER
         uses: docker://oskarstark/php-cs-fixer-ga
         with:
           args: --dry-run .
+
+      # —— PHPStan ———————————————————————————————————————————————————————
+      - name: PHPUnit
+        run: php vendor/bin/phpstan analyze
 
       # —— PHPUnit ———————————————————————————————————————————————————————
       - name: PHPUnit

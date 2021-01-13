@@ -122,6 +122,9 @@ final class SearchEntryPoint implements SearchEntryPointInterface
         return $searchResult;
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $results
+     */
     private function buildModels(array &$results): void
     {
         foreach ($results as $key => $hit) {

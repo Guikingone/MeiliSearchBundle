@@ -321,4 +321,27 @@ final class ConfigurationTest extends TestCase
         static::assertContainsEquals('id', $configuration['indexes']['foo']['synonyms']['bar']);
         static::assertContainsEquals('title', $configuration['indexes']['foo']['synonyms']['bar']);
     }
+
+    public function testScopedIndexesCanBeCreated(): void
+    {
+        $configuration = (new Processor())->processConfiguration(new Configuration(), [
+            'meili_search' => [
+                'apiKey' => 'test',
+                'indexes' => [],
+                'scoped_indexes' => [
+                    'foo' => ['bar', 'random'],
+                    'bar' => ['foo', 'random'],
+                ],
+            ],
+        ]);
+
+        self::assertArrayHasKey('scoped_indexes', $configuration);
+        self::assertCount(2, $configuration['scoped_indexes']);
+        self::assertArrayHasKey('foo', $configuration['scoped_indexes']);
+        self::assertArrayHasKey('bar', $configuration['scoped_indexes']);
+        self::assertContains('bar', $configuration['scoped_indexes']['foo']);
+        self::assertContains('random', $configuration['scoped_indexes']['foo']);
+        self::assertContains('foo', $configuration['scoped_indexes']['bar']);
+        self::assertContains('random', $configuration['scoped_indexes']['bar']);
+    }
 }

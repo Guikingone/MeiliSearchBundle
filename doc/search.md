@@ -1,14 +1,23 @@
 # Search
 
+Chapters:
+
+- [Tools](search.md#Tools)
+- [Scoped indexes](search.md#Scoped indexes)
+
+## Tools
+
 This bundle provides a [Search](../src/Search/Search.php) utils 
 that allows you to build complex queries using a fluent interface. 
 
-# Building a search
+## Building a search
 
-## Querying an index
+### Querying an index
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 use MeiliSearchBundle\Search\Search;
 
@@ -22,10 +31,12 @@ $search = Search::within('foo');
 
 **Note**: Keep in mind that using `Search::within('foo')` is just a shortcut for the first syntax.
 
-## Specifying the query
+### Specifying the query
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 use MeiliSearchBundle\Search\Search;
 
@@ -40,7 +51,7 @@ $search = Search::on('foo', 'bar');
 
 **Note**: Keep in mind that using `Search::on('foo', 'bar')` is just a shortcut for the first syntax.
 
-## Conditions
+### Conditions
 
 Conditions (or filters in MeiliSearch) can be hard to handle, 
 thanks to `Search`, you can easily combine almost every filter that you may need.
@@ -141,7 +152,7 @@ $search = Search::within('foo')->where('id', '=', 1)->andWhere('title', '!=', 'R
 // Both will produce id = 1 AND title != 'Random' OR title = 'Hello World'
 ```
 
-## Limiting the results
+### Limiting the results
 
 ```php
 <?php
@@ -156,7 +167,7 @@ $search->in('foo')->max(10);
 $search = Search::within('foo')->max(10);
 ```
 
-## Defining an offset
+### Defining an offset
 
 ```php
 <?php
@@ -171,7 +182,7 @@ $search->in('foo')->offset(10);
 $search = Search::within('foo')->offset(10);
 ```
 
-## Limiting the retrieved attributes
+### Limiting the retrieved attributes
 
 ```php
 <?php
@@ -186,7 +197,7 @@ $search->in('foo')->shouldRetrieve(['id', 'title', 'tags']);
 $search = Search::within('foo')->shouldRetrieve(['id', 'title', 'tags']);
 ```
 
-## Defining highlighted attributes
+### Defining highlighted attributes
 
 ```php
 <?php
@@ -201,7 +212,7 @@ $search->in('foo')->shouldHighlight(['id', 'title', 'tags']);
 $search = Search::within('foo')->shouldHighlight(['id', 'title', 'tags']);
 ```
 
-## Pagination
+### Pagination
 
 Paginating hits on MeiliSearch can be hard (as not supported for now), 
 this bundle provides a different approach based on "cursor pagination". 
@@ -248,7 +259,7 @@ $search->in('foo')->paginate('id', '>', $result->getLastIdentifier(), 20);
 $search = Search::within('foo')->paginate('id', '>', $result->getLastIdentifier(), 20);
 ```
 
-## Bonus: Building a search using [ExpressionLanguage](https://symfony.com/doc/current/components/expression_language.html)
+### Bonus: Building a search using [ExpressionLanguage](https://symfony.com/doc/current/components/expression_language.html)
 
 This bundle provides a custom `ExpressionLanguage` that brings a shortcut to building searches:
 
@@ -276,3 +287,49 @@ This approach only supports the following building parts of a search:
 - The limit (defined by `max`)
 
 ## Usage
+
+// TODO
+
+## Scoped indexes
+
+_Since **0.2**_
+
+This bundle provides a feature called "Scoped Indexes", this feature allows you to search on X indexes
+at the same time.
+
+### Usage
+
+To use this feature, first, you must define indexes in the configuration file then use the `scoped_indexes` key:
+
+```yaml
+meili_search:
+  # ...
+  scoped_indexes:
+    admin: ['admin_posts', 'tags']
+```
+
+Once defined, a `ScopedEntryPoint` is available:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use MeiliSearchBundle\Search\ScopedSearchEntryPoint;
+use Symfony\Component\HttpFoundation\Response;
+
+final class FooController
+{
+    public function __invoke(ScopedSearchEntryPoint $entryPoint): Response
+    {
+        $result = $entryPoint->search('admin', 'bar');
+        
+        // ...
+    }
+}
+```
+
+The only requirements here is to use the keys (in this example `admin`), once the search is triggered,
+the `ScopedEntryPoint` will try to find an occurrence in both `admin_posts` and `tags` indexes.
+
+_PS: If no occurrence is found, an exception is thrown._
