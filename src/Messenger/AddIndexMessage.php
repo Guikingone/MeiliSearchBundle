@@ -22,14 +22,14 @@ final class AddIndexMessage implements MessageInterface
     private $primaryKey;
 
     /**
-     * @var array<mixed,mixed>
+     * @var array<string, string|int|bool|null>
      */
     private $configuration;
 
     /**
-     * @param string                     $uid
-     * @param string|null                $primaryKey
-     * @param array<string, string|null> $configuration
+     * @param string                              $uid
+     * @param string|null                         $primaryKey
+     * @param array<string, string|int|bool|null> $configuration
      */
     public function __construct(
         string $uid,
@@ -56,7 +56,7 @@ final class AddIndexMessage implements MessageInterface
     }
 
     /**
-     * @return array<string, string|null>
+     * @return array<string, string|int|bool|null>
      */
     public function getConfiguration(): array
     {

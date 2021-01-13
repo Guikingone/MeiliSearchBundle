@@ -22,6 +22,9 @@ final class IndexList implements IndexListInterface
      */
     private $indexes = [];
 
+    /**
+     * @param array<int, Indexes> $indexes
+     */
     public function __construct(array $indexes = [])
     {
         array_walk($indexes, function (Indexes $index): void {

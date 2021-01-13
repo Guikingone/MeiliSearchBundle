@@ -64,6 +64,10 @@ jobs:
         with:
           args: --dry-run .
 
+      # —— PHPStan ———————————————————————————————————————————————————————
+      - name: PHPUnit
+        run: php vendor/bin/phpstan analyze
+
       # —— PHPUnit ———————————————————————————————————————————————————————
       - name: PHPUnit
         run: php vendor/bin/phpunit tests

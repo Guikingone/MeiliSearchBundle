@@ -181,6 +181,11 @@ final class IndexSynchronizer implements IndexSynchronizerInterface
         return $this->healthEntryPoint->isUp();
     }
 
+    /**
+     * @param array<string, array<string, string|int|bool|null>> $indexes
+     * @param string|null                                        $prefix
+     * @param bool                                               $override
+     */
     private function handleMetadataIndexes(array $indexes, ?string $prefix = null, bool $override = false): void
     {
         array_walk($indexes, function (array $index, string $key) use ($prefix, $override): void {
