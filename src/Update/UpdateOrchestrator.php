@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Update;
 
-use MeiliSearch\Client;
+use Meilisearch\Client;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+
 use function array_walk;
 use function sprintf;
 
@@ -18,21 +19,12 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
 {
     private const INDEX_LOG_KEY = 'index';
 
-    /**
-     * @var Client
-     */
-    private $client;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        Client $client,
+        private readonly Client $client,
         ?LoggerInterface $logger = null
     ) {
-        $this->client = $client;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -44,27 +36,34 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
         try {
             $index = $this->client->getIndex($uid);
         } catch (Throwable $throwable) {
-            $this->logger->error(sprintf(
-                'An error occurred when trying to fetch the index, error "%s"',
-                $throwable->getMessage()
-            ));
+            $this->logger->error(
+                sprintf(
+                    'An error occurred when trying to fetch the index, error "%s"',
+                    $throwable->getMessage()
+                )
+            );
 
             throw $throwable;
         }
 
-        $update = $index->getUpdateStatus($updateId);
+        $update = $index->getTask($updateId);
 
         $this->logger->info('An update has been retrieved', [
             self::INDEX_LOG_KEY => $uid,
         ]);
 
         return Update::create(
+            $update['uid'],
+            $update['indexUid'],
             $update['status'],
-            $update['updateId'],
             $update['type'],
+            $update['canceledBy'],
+            $update['details'],
+            $update['error'],
             $update['duration'],
             $update['enqueuedAt'],
-            $update['processedAt']
+            $update['startedAt'],
+            $update['finishedAt']
         );
     }
 
@@ -76,25 +75,32 @@ final class UpdateOrchestrator implements UpdateOrchestratorInterface
         try {
             $index = $this->client->getIndex($uid);
         } catch (Throwable $throwable) {
-            $this->logger->error(sprintf(
-                'An error occurred when trying to fetch the index, error "%s"',
-                $throwable->getMessage()
-            ));
+            $this->logger->error(
+                sprintf(
+                    'An error occurred when trying to fetch the index, error "%s"',
+                    $throwable->getMessage()
+                )
+            );
 
             throw $throwable;
         }
 
-        $updates = $index->getAllUpdateStatus();
+        $updates = $index->getTasks()->getResults();
 
         $values = [];
-        array_walk($updates, function (array $update) use (&$values): void {
+        array_walk($updates, static function (array $update) use (&$values): void {
             $values[] = Update::create(
+                $update['uid'],
+                $update['indexUid'],
                 $update['status'],
-                $update['updateId'],
                 $update['type'],
+                $update['canceledBy'],
+                $update['details'],
+                $update['error'],
                 $update['duration'],
                 $update['enqueuedAt'],
-                $update['processedAt']
+                $update['startedAt'],
+                $update['finishedAt']
             );
         });
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Event\Document;
 
 use Generator;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Document\PreDocumentRetrievedEvent;
 use PHPUnit\Framework\TestCase;
 

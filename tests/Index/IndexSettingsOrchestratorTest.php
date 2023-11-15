@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Index;
 
 use Exception;
-use MeiliSearch\Client;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Client;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Exception\InvalidArgumentException;
 use MeiliSearchBundle\Index\IndexSettingsOrchestrator;
 use PHPUnit\Framework\TestCase;
@@ -21,10 +21,13 @@ final class IndexSettingsOrchestratorTest extends TestCase
     public function testSettingsCannotBeRetrievedWithException(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when fetching the settings'), [
-            'index' => 'foo',
-            'error' => 'An error occurred',
-        ]);
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when fetching the settings'),
+            [
+                'index' => 'foo',
+                'error' => 'An error occurred',
+            ]
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getSettings')->willThrowException(new Exception('An error occurred'));
@@ -76,10 +79,13 @@ final class IndexSettingsOrchestratorTest extends TestCase
     public function testSettingsCannotBeUpdatedWithException(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when updating the settings'), [
-            'index' => 'foo',
-            'error' => 'An error occurred',
-        ]);
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when updating the settings'),
+            [
+                'index' => 'foo',
+                'error' => 'An error occurred',
+            ]
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('updateSettings')->willThrowException(new Exception('An error occurred'));
@@ -105,10 +111,13 @@ final class IndexSettingsOrchestratorTest extends TestCase
     public function testSettingsCanBeUpdatedWithInvalidKeys(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when updating the settings'), [
-            'index' => 'foo',
-            'error' => 'The following key "test" is not allowed',
-        ]);
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when updating the settings'),
+            [
+                'index' => 'foo',
+                'error' => 'The following key "test" is not allowed',
+            ]
+        );
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::never())->method('dispatch');
@@ -175,10 +184,13 @@ final class IndexSettingsOrchestratorTest extends TestCase
     public function testSettingsCannotBeResetWithInvalidIndex(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when trying to reset the settings'), [
-            'index' => 'foo',
-            'error' => 'An error occurred',
-        ]);
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when trying to reset the settings'),
+            [
+                'index' => 'foo',
+                'error' => 'An error occurred',
+            ]
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::never())->method('resetSettings');
@@ -195,10 +207,13 @@ final class IndexSettingsOrchestratorTest extends TestCase
     public function testSettingsCannotBeResetWithException(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when trying to reset the settings'), [
-            'index' => 'foo',
-            'error' => 'An error occurred',
-        ]);
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when trying to reset the settings'),
+            [
+                'index' => 'foo',
+                'error' => 'An error occurred',
+            ]
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('resetSettings')->willThrowException(new Exception('An error occurred'));

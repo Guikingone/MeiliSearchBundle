@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader;
+namespace MeiliSearchBundle\Bridge\Doctrine\Attribute\Reader;
 
 use ReflectionException;
 
@@ -12,9 +12,7 @@ use ReflectionException;
 interface DocumentReaderInterface extends ReaderInterface
 {
     /**
-     * @param object $object
      *
-     * @return bool
      *
      * @throws ReflectionException
      */

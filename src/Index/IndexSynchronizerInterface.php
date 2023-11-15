@@ -13,38 +13,28 @@ use Throwable;
 interface IndexSynchronizerInterface
 {
     /**
-     * @param array<string, array> $indexes
-     * @param string|null          $prefix
-     *
      * @throws Throwable
+     * @param string|null $prefix
+     *
+     * @param array<string, array> $indexes
      */
     public function createIndexes(array $indexes, ?string $prefix = null): void;
 
     /**
      * Override every indexes stored in the {@see IndexMetadataRegistryInterface} then update it via {@see IndexOrchestratorInterface::update()}.
      *
-     * @param array<string, array> $indexes
-     * @param string|null          $prefix
-     *
      * @throws Throwable
+     * @param string|null $prefix
+     *
+     * @param array<string, array> $indexes
      */
     public function updateIndexes(array $indexes, ?string $prefix = null): void;
-
-    /**
-     * This method allows to drop every indexes stored in the MeiliSearch instance and locally.
-     *
-     * If an exception is thrown during the MeiliSearch instance operation, the local indexes are not dropped.
-     *
-     * @throws Throwable
-     */
-    public function dropIndexes(): void;
 
     /**
      * This method allows to drop an index stored in the MeiliSearch instance and locally.
      *
      * If an exception is thrown during the MeiliSearch instance operation, the local index is not dropped.
      *
-     * @param string $index
      *
      * @throws Throwable
      */

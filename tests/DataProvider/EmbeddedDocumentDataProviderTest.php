@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\DataProvider;
 
 use MeiliSearchBundle\DataProvider\DocumentDataProviderInterface;
+use MeiliSearchBundle\DataProvider\EmbeddedDocumentDataProviderInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,7 +29,7 @@ final class EmbeddedDocumentDataProviderTest extends TestCase
     }
 }
 
-final class FooEmbeddedDataProvider implements DocumentDataProviderInterface
+final class FooEmbeddedDataProvider implements EmbeddedDocumentDataProviderInterface
 {
     /**
      * {@inheritdoc}
@@ -39,7 +40,7 @@ final class FooEmbeddedDataProvider implements DocumentDataProviderInterface
     }
 
     /**
-     * @return array<int, array<int, int|string>>
+     * {@inheritdoc}
      */
     public function getDocument(): array
     {

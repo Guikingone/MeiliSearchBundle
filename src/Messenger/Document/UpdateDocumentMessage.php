@@ -12,33 +12,14 @@ use MeiliSearchBundle\Messenger\MessageInterface;
 final class UpdateDocumentMessage implements MessageInterface
 {
     /**
-     * @var string
-     */
-    private $index;
-
-    /**
-     * @var array<string, mixed>
-     */
-    private $documentUpdate;
-
-    /**
-     * @var string|null
-     */
-    private $primaryKey;
-
-    /**
-     * @param string               $index
      * @param array<string, mixed> $documentUpdate
-     * @param string|null          $primaryKey
+     * @param string|null $primaryKey
      */
     public function __construct(
-        string $index,
-        array $documentUpdate,
-        ?string $primaryKey = null
+        private readonly string $index,
+        private readonly array $documentUpdate,
+        private readonly ?string $primaryKey = null
     ) {
-        $this->index = $index;
-        $this->documentUpdate = $documentUpdate;
-        $this->primaryKey = $primaryKey;
     }
 
     public function getIndex(): string

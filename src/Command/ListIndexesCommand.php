@@ -4,47 +4,32 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Command;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
+
 use function array_walk;
 use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
+#[AsCommand(
+    name: 'meili:list-indexes',
+    description: 'List the indexes',
+)]
 final class ListIndexesCommand extends Command
 {
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    /**
-     * @var string|null
-     */
-    protected static $defaultName = 'meili:list-indexes';
-
-    public function __construct(IndexOrchestratorInterface $indexOrchestrator)
-    {
-        $this->indexOrchestrator = $indexOrchestrator;
-
+    public function __construct(
+        private readonly IndexOrchestratorInterface $indexOrchestrator
+    ) {
         parent::__construct();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('List the indexes')
-        ;
     }
 
     /**
@@ -67,10 +52,17 @@ final class ListIndexesCommand extends Command
 
             $indexes = $indexes->toArray();
 
-            array_walk($indexes, function (Indexes $index) use (&$table): void {
+            array_walk($indexes, static function (Indexes $index) use (&$table): void {
+                /** @var array{uid:string, primaryKey:string|null, createdAt:string, updatedAt:string} $informations */
                 $informations = $index->show();
-
-                $table->addRow([$informations['uid'], $informations['primaryKey'] ?? 'Undefined', $informations['createdAt'], $informations['updatedAt']]);
+                $table->addRow(
+                    [
+                        $informations['uid'],
+                        $informations['primaryKey'] ?? 'Undefined',
+                        $informations['createdAt'],
+                        $informations['updatedAt'],
+                    ]
+                );
             });
 
             $io->note('The following indexes have been found:');

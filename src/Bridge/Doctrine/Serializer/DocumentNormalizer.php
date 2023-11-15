@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Bridge\Doctrine\Serializer;
 
-use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReaderInterface;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Document;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Reader\DocumentReaderInterface;
 use MeiliSearchBundle\Exception\InvalidDocumentConfigurationException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+
 use function sprintf;
 
 /**
@@ -16,29 +18,11 @@ use function sprintf;
  */
 final class DocumentNormalizer implements NormalizerInterface
 {
-    /**
-     * @var DocumentReaderInterface
-     */
-    private $documentReader;
-
-    /**
-     * @var ObjectNormalizer
-     */
-    private $objectNormalizer;
-
-    /**
-     * @var PropertyAccessorInterface
-     */
-    private $propertyAccessor;
-
     public function __construct(
-        DocumentReaderInterface $documentReader,
-        ObjectNormalizer $objectNormalizer,
-        PropertyAccessorInterface $propertyAccessor
+        private readonly DocumentReaderInterface $documentReader,
+        private readonly ObjectNormalizer $objectNormalizer,
+        private readonly PropertyAccessorInterface $propertyAccessor
     ) {
-        $this->documentReader = $documentReader;
-        $this->objectNormalizer = $objectNormalizer;
-        $this->propertyAccessor = $propertyAccessor;
     }
 
     /**
@@ -46,17 +30,21 @@ final class DocumentNormalizer implements NormalizerInterface
      */
     public function normalize($object, $format = null, array $context = [])
     {
+        /** @var Document $configuration */
         $configuration = $this->documentReader->getConfiguration($object);
         $primaryKey = $configuration->getPrimaryKey();
-
-        if (null !== $primaryKey && !$this->propertyAccessor->isReadable($object, $primaryKey)) {
-            throw new InvalidDocumentConfigurationException(sprintf(
+        if (null === $primaryKey) {
+            return $this->objectNormalizer->normalize($object, $format, $context);
+        }
+        if ($this->propertyAccessor->isReadable($object, $primaryKey)) {
+            return $this->objectNormalizer->normalize($object, $format, $context);
+        }
+        throw new InvalidDocumentConfigurationException(
+            sprintf(
                 'The configured primary key does not exist in the current object, given: "%s"',
                 $primaryKey
-            ));
-        }
-
-        return $this->objectNormalizer->normalize($object, $format, $context);
+            )
+        );
     }
 
     /**

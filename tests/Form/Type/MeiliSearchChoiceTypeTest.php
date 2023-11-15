@@ -127,16 +127,18 @@ final class MeiliSearchChoiceTypeTest extends TypeTestCase
 
     public function testFormCannotBeSubmittedWithUndefinedChoice(): void
     {
-        $this->searchEntryPoint->expects(self::once())->method('search')->willReturn(SearchResult::create([
-            [
-                'id' => 1,
-                'title' => 'bar',
-            ],
-            [
-                'id' => 2,
-                'title' => 'foo',
-            ],
-        ], 0, 20, 1, false, 1, 'bar'));
+        $this->searchEntryPoint->expects(self::once())->method('search')->willReturn(
+            SearchResult::create([
+                [
+                    'id' => 1,
+                    'title' => 'bar',
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'foo',
+                ],
+            ], 0, 20, 1, false, 1, 'bar')
+        );
 
         $form = $this->factory->create(MeiliSearchChoiceType::class, null, [
             'index' => 'foo',
@@ -153,18 +155,23 @@ final class MeiliSearchChoiceTypeTest extends TypeTestCase
     public function testFormCanBeSubmittedWithValidChoice(): void
     {
         $this->searchEntryPoint->expects(self::once())->method('search')
-            ->with(self::equalTo('foo'), self::equalTo('bar'), self::equalTo(['attributesToRetrieve' => ['id', 'title']]))
-            ->willReturn(SearchResult::create([
-                [
-                    'id' => 1,
-                    'title' => 'bar',
-                ],
-                [
-                    'id' => 2,
-                    'title' => 'foo',
-                ],
-            ], 0, 20, 1, false, 1, 'bar'))
-        ;
+            ->with(
+                self::equalTo('foo'),
+                self::equalTo('bar'),
+                self::equalTo(['attributesToRetrieve' => ['id', 'title']])
+            )
+            ->willReturn(
+                SearchResult::create([
+                    [
+                        'id' => 1,
+                        'title' => 'bar',
+                    ],
+                    [
+                        'id' => 2,
+                        'title' => 'foo',
+                    ],
+                ], 0, 20, 1, false, 1, 'bar')
+            );
 
         $form = $this->factory->create(MeiliSearchChoiceType::class, null, [
             'index' => 'foo',
@@ -205,17 +212,18 @@ final class MeiliSearchChoiceTypeTest extends TypeTestCase
     {
         $this->searchEntryPoint->expects(self::once())->method('search')
             ->with(self::equalTo('foo'), self::equalTo('bar'), self::equalTo(['attributesToRetrieve' => ['title']]))
-            ->willReturn(SearchResult::create([
-                [
-                    'id' => 1,
-                    'title' => 'bar',
-                ],
-                [
-                    'id' => 2,
-                    'title' => 'foo',
-                ],
-            ], 0, 20, 1, false, 1, 'bar'))
-        ;
+            ->willReturn(
+                SearchResult::create([
+                    [
+                        'id' => 1,
+                        'title' => 'bar',
+                    ],
+                    [
+                        'id' => 2,
+                        'title' => 'foo',
+                    ],
+                ], 0, 20, 1, false, 1, 'bar')
+            );
 
         $form = $this->factory->create(MeiliSearchChoiceType::class, null, [
             'index' => 'foo',

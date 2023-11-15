@@ -42,7 +42,7 @@ interface DocumentDataProviderInterface
      *
      * The returned array CAN contain multiple documents (only if {@see EmbeddedDocumentDataProviderInterface}).
      *
-     * @return array<int, array>
+     * @return array<int|string, mixed>
      */
     public function getDocument(): array;
 }

@@ -29,14 +29,12 @@ final class FallbackSearchEntrypointTest extends TestCase
         $validEntryPoint = $this->createMock(SearchEntryPointInterface::class);
         $validEntryPoint->expects(self::once())->method('search')
             ->with(self::equalTo('foo'), self::equalTo('random'), [])
-            ->willThrowException(new InvalidArgumentException('Random error'))
-        ;
+            ->willThrowException(new InvalidArgumentException('Random error'));
 
         $secondEntrypoint = $this->createMock(SearchEntryPointInterface::class);
         $secondEntrypoint->expects(self::once())->method('search')
             ->with(self::equalTo('foo'), self::equalTo('random'), [])
-            ->willThrowException(new InvalidArgumentException('Random error'))
-        ;
+            ->willThrowException(new InvalidArgumentException('Random error'));
 
         $entryPoint = new FallbackSearchEntrypoint([
             $validEntryPoint,
@@ -53,8 +51,7 @@ final class FallbackSearchEntrypointTest extends TestCase
         $validEntryPoint = $this->createMock(SearchEntryPointInterface::class);
         $validEntryPoint->expects(self::once())->method('search')
             ->with(self::equalTo('foo'), self::equalTo('random'), [])
-            ->willThrowException(new InvalidArgumentException('Random error'))
-        ;
+            ->willThrowException(new InvalidArgumentException('Random error'));
 
         $secondEntrypoint = $this->createMock(SearchEntryPointInterface::class);
         $secondEntrypoint->expects(self::exactly(2))->method('search');

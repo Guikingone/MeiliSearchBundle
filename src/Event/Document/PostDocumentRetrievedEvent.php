@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Document;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -13,23 +13,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class PostDocumentRetrievedEvent extends Event implements DocumentEventInterface
 {
     /**
-     * @var Indexes
-     */
-    private $index;
-
-    /**
-     * @var array<string,mixed>
-     */
-    private $document;
-
-    /**
-     * @param Indexes             $index
      * @param array<string,mixed> $document
      */
-    public function __construct(Indexes $index, array $document)
+    public function __construct(private readonly Indexes $index, private readonly array $document)
     {
-        $this->index = $index;
-        $this->document = $document;
     }
 
     public function getIndex(): Indexes

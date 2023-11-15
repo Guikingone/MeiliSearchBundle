@@ -13,6 +13,7 @@ use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+
 use function is_array;
 
 /**
@@ -22,21 +23,12 @@ final class SearchResultCacheOrchestrator implements SearchResultCacheOrchestrat
 {
     private const RESULT_IDENTIFIER_CACHE_KEY = 'identifier';
 
-    /**
-     * @var CacheItemPoolInterface
-     */
-    private $cacheItemPool;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        CacheItemPoolInterface $cacheItemPool,
+        private readonly CacheItemPoolInterface $cacheItemPool,
         ?LoggerInterface $logger = null
     ) {
-        $this->cacheItemPool = $cacheItemPool;
         $this->logger = $logger ?: new NullLogger();
     }
 

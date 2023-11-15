@@ -51,7 +51,7 @@ final class IndexMetadataDenormalizerTest extends TestCase
                 'searchableAttributes' => [],
                 'displayedAttributes' => [],
                 'synonyms' => [],
-            ]
+            ],
         ])->willReturn(new IndexMetadata('foo', false, 'id'));
 
         $denormalizer = new IndexMetadataDenormalizer($objectNormalizer);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use PHPUnit\Framework\TestCase;
 

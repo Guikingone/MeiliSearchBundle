@@ -15,14 +15,8 @@ use Twig\TwigFunction;
  */
 final class SearchExtension extends AbstractExtension implements RuntimeExtensionInterface
 {
-    /**
-     * @var SearchEntryPointInterface
-     */
-    private $searchEntryPoint;
-
-    public function __construct(SearchEntryPointInterface $searchEntryPoint)
+    public function __construct(private readonly SearchEntryPointInterface $searchEntryPoint)
     {
-        $this->searchEntryPoint = $searchEntryPoint;
     }
 
     /**
@@ -36,9 +30,7 @@ final class SearchExtension extends AbstractExtension implements RuntimeExtensio
     }
 
     /**
-     * @param string                $index
-     * @param string                $query
-     * @param array<string, mixed>  $options
+     * @param array<string, mixed> $options
      *
      * @return SearchResultInterface<string, mixed>
      *

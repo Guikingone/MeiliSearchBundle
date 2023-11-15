@@ -6,21 +6,16 @@ namespace MeiliSearchBundle\Messenger\Handler\Synonyms;
 
 use MeiliSearchBundle\Index\SynonymsOrchestratorInterface;
 use MeiliSearchBundle\Messenger\Synonyms\ResetSynonymsMessage;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class ResetSynonymsMessageHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+final class ResetSynonymsMessageHandler
 {
-    /**
-     * @var SynonymsOrchestratorInterface
-     */
-    private $synonymsOrchestrator;
-
-    public function __construct(SynonymsOrchestratorInterface $synonymsOrchestrator)
+    public function __construct(private readonly SynonymsOrchestratorInterface $synonymsOrchestrator)
     {
-        $this->synonymsOrchestrator = $synonymsOrchestrator;
     }
 
     public function __invoke(ResetSynonymsMessage $message): void

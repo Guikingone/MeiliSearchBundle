@@ -10,8 +10,8 @@ use MeiliSearchBundle\DataProvider\EmbeddedDocumentDataProviderInterface;
 use MeiliSearchBundle\DataProvider\ModelDataProviderInterface;
 use MeiliSearchBundle\DataProvider\PrimaryKeyOverrideDataProviderInterface;
 use MeiliSearchBundle\DataProvider\PriorityDataProviderInterface;
-use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
+use MeiliSearchBundle\Document\DocumentLoader;
 use MeiliSearchBundle\Exception\RuntimeException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -36,7 +36,9 @@ final class DocumentLoaderTest extends TestCase
     public function testLoaderCannotLoadDocumentOnException(): void
     {
         $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
-        $orchestrator->expects(self::once())->method('addDocument')->willThrowException(new Exception('An error occurred'));
+        $orchestrator->expects(self::once())->method('addDocument')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $documentProvider = $this->createMock(DocumentDataProviderInterface::class);
 
@@ -50,10 +52,14 @@ final class DocumentLoaderTest extends TestCase
     public function testLoaderCannotLoadDocumentOnExceptionWithLogger(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The document cannot be loaded, error: "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('The document cannot be loaded, error: "An error occurred"')
+        );
 
         $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
-        $orchestrator->expects(self::once())->method('addDocument')->willThrowException(new Exception('An error occurred'));
+        $orchestrator->expects(self::once())->method('addDocument')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $documentProvider = $this->createMock(DocumentDataProviderInterface::class);
 
@@ -123,12 +129,16 @@ final class DocumentLoaderTest extends TestCase
 
         $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
         $orchestrator->expects(self::once())->method('addDocument')->with(self::equalTo('foo'), self::equalTo([]));
-        $orchestrator->expects(self::once())->method('addDocuments')->with(self::equalTo('foo'), self::equalTo([
-            [
-                'id' => 1,
-                'title' => 'foo',
-            ],
-        ]), self::equalTo(null));
+        $orchestrator->expects(self::once())->method('addDocuments')->with(
+            self::equalTo('foo'),
+            self::equalTo([
+                [
+                    'id' => 1,
+                    'title' => 'foo',
+                ],
+            ]),
+            self::equalTo(null)
+        );
 
         $loader = new DocumentLoader($orchestrator, [new EmbeddedProvider(), new PriorityProvider()], $logger);
         $loader->load();
@@ -141,10 +151,14 @@ final class DocumentLoaderTest extends TestCase
 
         $orchestrator = $this->createMock(DocumentEntryPointInterface::class);
         $orchestrator->expects(self::never())->method('addDocuments');
-        $orchestrator->expects(self::exactly(2))->method('addDocument')->withConsecutive(
-            [self::equalTo('bar'), self::equalTo([]), self::equalTo(null), self::equalTo(null)],
-            [self::equalTo('foo'), self::equalTo([]), self::equalTo(null), self::equalTo(null)]
-        );
+        $matcher = $this->exactly(2);
+        $orchestrator->expects(self::exactly(2))->method('addDocument')
+            ->willReturnCallback(function () use ($matcher) {
+                return match ($matcher->getInvocationCount()) {
+                    0 => [self::equalTo('bar'), self::equalTo([]), self::equalTo(null), self::equalTo(null)],
+                    default => [self::equalTo('foo'), self::equalTo([]), self::equalTo(null), self::equalTo(null)],
+                };
+            });
 
         $loader = new DocumentLoader($orchestrator, [new SecondPriorityProvider(), new PriorityProvider()], $logger);
         $loader->load();
@@ -178,7 +192,10 @@ final class FooProvider implements DocumentDataProviderInterface, PrimaryKeyOver
     }
 }
 
-final class BarProvider implements DocumentDataProviderInterface, PrimaryKeyOverrideDataProviderInterface, ModelDataProviderInterface
+final class BarProvider implements
+    DocumentDataProviderInterface,
+    PrimaryKeyOverrideDataProviderInterface,
+    ModelDataProviderInterface
 {
     /**
      * {@inheritdoc}

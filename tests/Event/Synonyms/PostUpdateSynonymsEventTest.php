@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event\Synonyms;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Synonyms\PostUpdateSynonymsEvent;
 use PHPUnit\Framework\TestCase;
 

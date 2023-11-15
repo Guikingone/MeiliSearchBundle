@@ -22,10 +22,14 @@ final class SearchExtensionTest extends TestCase
         $extension = new SearchExtension($searchEntryPoint);
 
         static::assertInstanceOf(RuntimeExtensionInterface::class, $extension);
-        static::assertNotEmpty($extension->getFunctions());
-        static::assertInstanceOf(TwigFunction::class, $extension->getFunctions()[0]);
-        static::assertInstanceOf(SearchExtension::class, $extension->getFunctions()[0]->getCallable()[0]);
-        static::assertSame('search', $extension->getFunctions()[0]->getCallable()[1]);
+        $functions = $extension->getFunctions();
+        static::assertNotEmpty($functions);
+        $function = $functions[0];
+        static::assertInstanceOf(TwigFunction::class, $function);
+        /** @var array{class-string, string} $callable */
+        $callable = $function->getCallable();
+        static::assertInstanceOf(SearchExtension::class, $callable[0]);
+        static::assertSame('search', $function->getName());
     }
 
     public function testExtensionCanTriggerSearch(): void

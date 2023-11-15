@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Event;
 
 use Countable;
+
 use function count;
 
 /**
@@ -15,7 +16,7 @@ final class SearchEventList implements SearchEventListInterface, Countable
     /**
      * @var array<int, SearchEventInterface>
      */
-    private $events = [];
+    private array $events = [];
 
     /**
      * {@inheritdoc}
@@ -30,9 +31,10 @@ final class SearchEventList implements SearchEventListInterface, Countable
      */
     public function getPostSearchEvents(): array
     {
-        return array_filter($this->events, function (SearchEventInterface $event): bool {
-            return $event instanceof PostSearchEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (SearchEventInterface $event): bool => $event instanceof PostSearchEvent
+        );
     }
 
     /**
@@ -40,9 +42,10 @@ final class SearchEventList implements SearchEventListInterface, Countable
      */
     public function getPreSearchEvents(): array
     {
-        return array_filter($this->events, function (SearchEventInterface $event): bool {
-            return $event instanceof PreSearchEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (SearchEventInterface $event): bool => $event instanceof PreSearchEvent
+        );
     }
 
     /**

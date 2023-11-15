@@ -27,9 +27,6 @@ interface IndexMetadataInterface
 
     public function getDistinctAttribute(): ?string;
 
-    /**
-     * @return array
-     */
     public function getFacetedAttributes(): array;
 
     /**

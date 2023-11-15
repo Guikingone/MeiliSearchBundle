@@ -9,57 +9,75 @@ namespace MeiliSearchBundle\Update;
  */
 final class Update implements UpdateInterface
 {
-    /**
-     * @var string
-     */
-    private $status;
+    private int $uid;
 
-    /**
-     * @var int
-     */
-    private $updateId;
+    private string $indexUid;
+
+    private string $status;
+
+    private string $type;
+
+    private int|null $canceledBy = null;
 
     /**
      * @var array<string,mixed>
      */
-    private $type;
+    private array $details = [];
 
     /**
-     * @var float
+     * @var array<string,string>|null
      */
-    private $duration;
+    private array|null $error = null;
 
-    /**
-     * @var string
-     */
-    private $enqueuedAt;
+    private string $duration;
 
-    /**
-     * @var string
-     */
-    private $processedAt;
+    private string $enqueuedAt;
+
+    private string $startedAt;
+
+    private string $finishedAt;
 
     /**
      * {@inheritdoc}
      */
     public static function create(
+        int $uid,
+        string $indexUid,
         string $status,
-        int $updateId,
-        array $type,
-        float $duration,
+        string $type,
+        int|null $canceledBy,
+        array $details,
+        array|null $error,
+        string $duration,
         string $enqueuedAt,
-        string $processedAt
+        string $startedAt,
+        string $finishedAt,
     ): UpdateInterface {
         $self = new self();
 
+        $self->uid = $uid;
+        $self->indexUid = $indexUid;
         $self->status = $status;
-        $self->updateId = $updateId;
         $self->type = $type;
+        $self->canceledBy = $canceledBy;
+        $self->details = $details;
+        $self->error = $error;
         $self->duration = $duration;
         $self->enqueuedAt = $enqueuedAt;
-        $self->processedAt = $processedAt;
+        $self->startedAt = $startedAt;
+        $self->finishedAt = $finishedAt;
 
         return $self;
+    }
+
+    public function getUid(): int
+    {
+        return $this->uid;
+    }
+
+    public function getIndexUid(): string
+    {
+        return $this->indexUid;
     }
 
     public function getStatus(): string
@@ -67,20 +85,33 @@ final class Update implements UpdateInterface
         return $this->status;
     }
 
-    public function getUpdateId(): int
+    public function getType(): string
     {
-        return $this->updateId;
+        return $this->type;
+    }
+
+    public function getCanceledBy(): ?int
+    {
+        return $this->canceledBy;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getType(): array
+    public function getDetails(): array
     {
-        return $this->type;
+        return $this->details;
     }
 
-    public function getDuration(): float
+    /**
+     * {@inheritdoc}
+     */
+    public function getError(): ?array
+    {
+        return $this->error;
+    }
+
+    public function getDuration(): string
     {
         return $this->duration;
     }
@@ -90,8 +121,13 @@ final class Update implements UpdateInterface
         return $this->enqueuedAt;
     }
 
-    public function getProcessedAt(): string
+    public function getStartedAt(): string
     {
-        return $this->processedAt;
+        return $this->startedAt;
+    }
+
+    public function getFinishedAt(): string
+    {
+        return $this->finishedAt;
     }
 }

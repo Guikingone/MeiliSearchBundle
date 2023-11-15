@@ -9,78 +9,36 @@ namespace MeiliSearchBundle\Metadata;
  */
 final class IndexMetadata implements IndexMetadataInterface
 {
-    /**
-     * @var string
-     */
-    private $uid;
-
-    /**
-     * @var bool
-     */
-    private $async;
-
-    /**
-     * @var string|null
-     */
-    private $primaryKey;
-
-    /**
-     * @var array<int, string>
-     */
-    private $rankingRules;
-
-    /**
-     * @var array<int, string>
-     */
-    private $stopWords;
-
-    /**
-     * @var string|null
-     */
-    private $distinctAttribute;
-
-    /**
-     * @var array<int, string>
-     */
-    private $facetedAttributes;
-
-    /**
-     * @var array<int, string>
-     */
-    private $searchableAttributes;
-
-    /**
-     * @var array<int, string>
-     */
-    private $displayedAttributes;
-
-    /**
-     * @var array<string, array>
-     */
-    private $synonyms;
-
     public function __construct(
-        string $uid,
-        ?bool $async = false,
-        ?string $primaryKey = null,
-        ?array $rankingRules = [],
-        ?array $stopWords = [],
-        ?string $distinctAttribute = null,
-        ?array $facetedAttributes = [],
-        ?array $searchableAttributes = [],
-        ?array $displayedAttributes = [],
-        ?array $synonyms = []
+        private readonly string $uid,
+        private readonly bool $async = false,
+        private readonly ?string $primaryKey = null,
+        /**
+         * @var array<int, string>
+         */
+        private readonly array $rankingRules = [],
+        /**
+         * @var array<int, string>
+         */
+        private readonly array $stopWords = [],
+        private readonly ?string $distinctAttribute = null,
+        /**
+         * @var array<int, string>
+         */
+        private readonly array $facetedAttributes = [],
+        /**
+         * @var array<int, string>
+         */
+        private readonly array $searchableAttributes = [],
+        /**
+         * @var array<int, string>
+         */
+        private readonly array $displayedAttributes = [],
+        /**
+         * @var array<string, array>
+         */
+        private readonly array $synonyms = []
     ) {
-        $this->uid = $uid;
-        $this->async = $async;
-        $this->primaryKey = $primaryKey;
-        $this->rankingRules = $rankingRules;
-        $this->stopWords = $stopWords;
-        $this->distinctAttribute = $distinctAttribute;
-        $this->facetedAttributes = $facetedAttributes;
-        $this->searchableAttributes = $searchableAttributes;
-        $this->displayedAttributes = $displayedAttributes;
-        $this->synonyms = $synonyms;
     }
 
     public function getUid(): string
@@ -119,9 +77,6 @@ final class IndexMetadata implements IndexMetadataInterface
         return $this->distinctAttribute;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getFacetedAttributes(): array
     {
         return $this->facetedAttributes;

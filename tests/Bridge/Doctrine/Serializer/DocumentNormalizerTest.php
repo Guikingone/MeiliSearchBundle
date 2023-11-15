@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Bridge\Doctrine\Serializer;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use MeiliSearchBundle\Bridge\Doctrine\Annotation\Document;
-use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReader;
+use ArrayAccess;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Document;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Reader\DocumentReader;
 use MeiliSearchBundle\Bridge\Doctrine\Serializer\DocumentNormalizer;
 use MeiliSearchBundle\Exception\InvalidDocumentConfigurationException;
 use PHPUnit\Framework\TestCase;
@@ -22,7 +22,7 @@ final class DocumentNormalizerTest extends TestCase
 {
     public function testNormalizationIsSupported(): void
     {
-        $reader = new DocumentReader(new AnnotationReader());
+        $reader = new DocumentReader();
         $propertyAccessor = $this->createMock(PropertyAccessorInterface::class);
 
         $normalizer = new DocumentNormalizer($reader, new ObjectNormalizer(), $propertyAccessor);
@@ -32,7 +32,7 @@ final class DocumentNormalizerTest extends TestCase
 
     public function testDocumentCannotBeNormalizedWithoutPrimaryKey(): void
     {
-        $reader = new DocumentReader(new AnnotationReader());
+        $reader = new DocumentReader();
         $normalizer = new DocumentNormalizer($reader, new ObjectNormalizer(), PropertyAccess::createPropertyAccessor());
 
         static::expectException(InvalidDocumentConfigurationException::class);
@@ -42,34 +42,26 @@ final class DocumentNormalizerTest extends TestCase
 
     public function testDocumentCanBeNormalized(): void
     {
-        $reader = new DocumentReader(new AnnotationReader());
+        $reader = new DocumentReader();
         $normalizer = new DocumentNormalizer($reader, new ObjectNormalizer(), PropertyAccess::createPropertyAccessor());
 
+        /** @var array{mixed}|ArrayAccess $data */
         $data = $normalizer->normalize(new BarDocument());
         static::assertArrayHasKey('id', $data);
     }
 }
 
-/**
- * @Document(index="foo", primaryKey="id")
- */
+#[Document(index: 'foo', primaryKey: 'id')]
 final class FooDocument
 {
 }
 
-/**
- * @Document(index="foo", primaryKey="id")
- */
+#[Document(index: 'foo', primaryKey: 'id')]
 final class BarDocument
 {
-    /**
-     * @var string
-     */
-    private $id;
-
-    public function __construct()
-    {
-        $this->id = '1';
+    public function __construct(
+        private string $id = '1'
+    ) {
     }
 
     public function getId(): string

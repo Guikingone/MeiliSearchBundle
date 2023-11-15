@@ -6,21 +6,16 @@ namespace MeiliSearchBundle\Messenger\Handler;
 
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Messenger\AddIndexMessage;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class AddIndexMessageHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+final class AddIndexMessageHandler
 {
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    public function __construct(IndexOrchestratorInterface $indexOrchestrator)
+    public function __construct(private readonly IndexOrchestratorInterface $indexOrchestrator)
     {
-        $this->indexOrchestrator = $indexOrchestrator;
     }
 
     public function __invoke(AddIndexMessage $message): void

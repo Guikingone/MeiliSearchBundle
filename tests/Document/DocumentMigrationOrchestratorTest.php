@@ -25,7 +25,9 @@ final class DocumentMigrationOrchestratorTest extends TestCase
         $entryPoint->expects(self::once())->method('getDocuments')->with(self::equalTo('foo'))->willReturn([]);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('The documents from "foo" cannot be migrated as the document list is empty'));
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('The documents from "foo" cannot be migrated as the document list is empty')
+        );
 
         $orchestrator = new DocumentMigrationOrchestrator($entryPoint, $dumpOrchestrator, $logger);
         $orchestrator->migrate('foo', 'bar');
@@ -45,25 +47,33 @@ final class DocumentMigrationOrchestratorTest extends TestCase
             [
                 'id' => 2,
                 'title' => 'bar',
-            ]
-        ]);
-        $entryPoint->expects(self::once())->method('addDocuments')->with(self::equalTo('bar'), self::equalTo([
-            [
-                'id' => 1,
-                'title' => 'foo',
             ],
-            [
-                'id' => 2,
-                'title' => 'bar',
-            ]
-        ]))->willThrowException(new RuntimeException('An error occurred'));
+        ]);
+        $entryPoint->expects(self::once())->method('addDocuments')->with(
+            self::equalTo('bar'),
+            self::equalTo([
+                [
+                    'id' => 1,
+                    'title' => 'foo',
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'bar',
+                ],
+            ])
+        )->willThrowException(new RuntimeException('An error occurred'));
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('info');
-        $logger->expects(self::once())->method('critical')->with(self::equalTo('The documents cannot be migrated, a dump has been created before trying to add the new documents'), self::equalTo([
-            'error' => 'An error occurred',
-            'index' => 'bar',
-        ]));
+        $logger->expects(self::once())->method('critical')->with(
+            self::equalTo(
+                'The documents cannot be migrated, a dump has been created before trying to add the new documents'
+            ),
+            self::equalTo([
+                'error' => 'An error occurred',
+                'index' => 'bar',
+            ])
+        );
 
         $orchestrator = new DocumentMigrationOrchestrator($entryPoint, $dumpOrchestrator, $logger);
 
@@ -88,25 +98,31 @@ final class DocumentMigrationOrchestratorTest extends TestCase
             [
                 'id' => 2,
                 'title' => 'bar',
-            ]
-        ]);
-        $entryPoint->expects(self::once())->method('addDocuments')->with(self::equalTo('bar'), self::equalTo([
-            [
-                'id' => 1,
-                'title' => 'foo',
             ],
-            [
-                'id' => 2,
-                'title' => 'bar',
-            ]
-        ]));
+        ]);
+        $entryPoint->expects(self::once())->method('addDocuments')->with(
+            self::equalTo('bar'),
+            self::equalTo([
+                [
+                    'id' => 1,
+                    'title' => 'foo',
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'bar',
+                ],
+            ])
+        );
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('critical');
-        $logger->expects(self::once())->method('info')->with(self::equalTo('The documents have been migrated'), self::equalTo([
-            'index' => 'foo',
-            'nextIndex' => 'bar',
-        ]));
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('The documents have been migrated'),
+            self::equalTo([
+                'index' => 'foo',
+                'nextIndex' => 'bar',
+            ])
+        );
 
         $orchestrator = new DocumentMigrationOrchestrator($entryPoint, $dumpOrchestrator, $logger);
         $orchestrator->migrate('foo', 'bar');
@@ -127,25 +143,31 @@ final class DocumentMigrationOrchestratorTest extends TestCase
             [
                 'id' => 2,
                 'title' => 'bar',
-            ]
-        ]);
-        $entryPoint->expects(self::once())->method('addDocuments')->with(self::equalTo('bar'), self::equalTo([
-            [
-                'id' => 1,
-                'title' => 'foo',
             ],
-            [
-                'id' => 2,
-                'title' => 'bar',
-            ]
-        ]));
+        ]);
+        $entryPoint->expects(self::once())->method('addDocuments')->with(
+            self::equalTo('bar'),
+            self::equalTo([
+                [
+                    'id' => 1,
+                    'title' => 'foo',
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'bar',
+                ],
+            ])
+        );
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('critical');
-        $logger->expects(self::once())->method('info')->with(self::equalTo('The documents have been migrated'), self::equalTo([
-            'index' => 'foo',
-            'nextIndex' => 'bar',
-        ]));
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('The documents have been migrated'),
+            self::equalTo([
+                'index' => 'foo',
+                'nextIndex' => 'bar',
+            ])
+        );
 
         $orchestrator = new DocumentMigrationOrchestrator($entryPoint, $dumpOrchestrator, $logger);
         $orchestrator->migrate('foo', 'bar', true);

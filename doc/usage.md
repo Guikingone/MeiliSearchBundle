@@ -30,7 +30,7 @@ _Note: You can find more information about the configurations keys in [the confi
 This bundle provides two approaches when it comes to loading documents:
 
 - Using `DataProvider's` which are responsible for fetching data from "external" source and returning an array
-- Using the `Document` annotation on Doctrine entities and letting the bundle handle the "CRUD" aspect.
+- Using the `Document` attribute on Doctrine entities and letting the bundle handle the "CRUD" aspect.
 
 ### Without Doctrine
 
@@ -68,15 +68,14 @@ php bin/console meili:warm-documents
 
 ### With Doctrine
 
-In order to load documents from entities, this bundle provides a [Document](../src/Bridge/Doctrine/Annotation/Document.php) annotation: 
-
+In order to load documents from entities, this bundle provides a [Document](../src/Bridge/Doctrine/Attribute/Document.php) attribute:
 
 ```php
 <?php
 
 namespace App\Entity;
 
-use MeiliSearchBundle\Bridge\Doctrine\Annotation as MeiliSearch;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute as MeiliSearch;
 // ...
 
 /**

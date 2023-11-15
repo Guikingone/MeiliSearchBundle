@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -12,14 +12,12 @@ use MeiliSearch\Endpoints\Indexes;
 interface IndexOrchestratorInterface
 {
     /**
-     * @param string                         $uid
-     * @param string|null                    $primaryKey
-     * @param array<string, string|int|bool> $config
+     * @param string|null $primaryKey
+     * @param array<string, string|int|bool> $configuration
      */
-    public function addIndex(string $uid, ?string $primaryKey = null, array $config = []): void;
+    public function addIndex(string $uid, ?string $primaryKey = null, array $configuration = []): void;
 
     /**
-     * @param string                         $uid
      * @param array<string, string|int|bool> $configuration
      */
     public function update(string $uid, array $configuration = []): void;
@@ -29,17 +27,8 @@ interface IndexOrchestratorInterface
      */
     public function getIndexes(): IndexListInterface;
 
-    /**
-     * @param string $uid
-     *
-     * @return Indexes
-     */
+
     public function getIndex(string $uid): Indexes;
 
-    public function removeIndexes(): void;
-
-    /**
-     * @param string $uid
-     */
     public function removeIndex(string $uid): void;
 }

@@ -24,14 +24,20 @@ final class SearchExpressionLanguageTest extends TestCase
     {
         $expressionLanguage = new SearchExpressionLanguage();
 
-        static::assertSame('IN "foo" ON "bar" WHERE "title > 2" MAX 0', $expressionLanguage->compile('search("foo", "bar", "title > 2")'));
+        static::assertSame(
+            'IN "foo" ON "bar" WHERE "title > 2" MAX 0',
+            $expressionLanguage->compile('search("foo", "bar", "title > 2")')
+        );
     }
 
     public function testSearchExpressionLanguageCanCompileSearchWithMax(): void
     {
         $expressionLanguage = new SearchExpressionLanguage();
 
-        static::assertSame('IN "foo" ON "bar" WHERE "" MAX 2', $expressionLanguage->compile('search("foo", "bar", "", 2)'));
+        static::assertSame(
+            'IN "foo" ON "bar" WHERE "" MAX 2',
+            $expressionLanguage->compile('search("foo", "bar", "", 2)')
+        );
     }
 
     public function testSearchExpressionLanguageCanHandleSearch(): void

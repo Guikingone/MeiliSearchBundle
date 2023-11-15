@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Health;
 
-use MeiliSearch\Client;
+use Meilisearch\Client;
 use MeiliSearchBundle\Health\HealthEntryPoint;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +17,7 @@ final class HealthEntryPointTest extends TestCase
     {
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('stats')->willReturn([
-            'databaseSize'=> 102400,
+            'databaseSize' => 102400,
             'lastUpdate' => null,
             'indexes' => [],
         ]);
@@ -31,7 +31,7 @@ final class HealthEntryPointTest extends TestCase
     {
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('stats')->willReturn([
-            'databaseSize'=> 102400,
+            'databaseSize' => 102400,
             'lastUpdate' => null,
             'indexes' => [
                 'bar' => [

@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Search;
 
-use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Event\PostSearchEvent;
 use MeiliSearchBundle\Event\PreSearchEvent;
 use MeiliSearchBundle\Exception\RuntimeException;
+use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Result\ResultBuilderInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
+
 use function sprintf;
 
 /**
@@ -22,48 +23,25 @@ use function sprintf;
 final class SearchEntryPoint implements SearchEntryPointInterface
 {
     private const INDEX = 'index';
+
     private const ERROR = 'error';
+
     private const HITS = 'hits';
+
     private const QUERY = 'query';
+
     private const OPTIONS = 'options';
 
-    /**
-     * @var EventDispatcherInterface|null
-     */
-    private $eventDispatcher;
-
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var ResultBuilderInterface|null
-     */
-    private $resultBuilder;
-
-    /**
-     * @var string|null
-     */
-    private $prefix;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        IndexOrchestratorInterface $indexOrchestrator,
-        ?ResultBuilderInterface $resultBuilder = null,
-        ?EventDispatcherInterface $eventDispatcher = null,
+        private readonly IndexOrchestratorInterface $indexOrchestrator,
+        private readonly ?ResultBuilderInterface $resultBuilder = null,
+        private readonly ?EventDispatcherInterface $eventDispatcher = null,
         ?LoggerInterface $logger = null,
-        ?string $prefix = null
+        private readonly ?string $prefix = null
     ) {
-        $this->indexOrchestrator = $indexOrchestrator;
-        $this->resultBuilder = $resultBuilder;
-        $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger ?: new NullLogger();
-        $this->prefix = $prefix;
     }
 
     /**
@@ -72,7 +50,9 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     public function search(string $index, string $query, array $options = []): SearchResultInterface
     {
         try {
-            $index = $this->indexOrchestrator->getIndex(null === $this->prefix ? $index : sprintf('%s%s', $this->prefix, $index));
+            $index = $this->indexOrchestrator->getIndex(
+                null === $this->prefix ? $index : sprintf('%s%s', $this->prefix, $index)
+            );
         } catch (Throwable $throwable) {
             $this->logger->error('The search cannot occur as an error occurred when fetching the index', [
                 self::INDEX => $index,
@@ -82,11 +62,13 @@ final class SearchEntryPoint implements SearchEntryPointInterface
             throw $throwable;
         }
 
-        $this->dispatch(new PreSearchEvent([
-            self::INDEX => $index,
-            self::QUERY => $query,
-            self::OPTIONS => $options,
-        ]));
+        $this->dispatch(
+            new PreSearchEvent([
+                self::INDEX => $index,
+                self::QUERY => $query,
+                self::OPTIONS => $options,
+            ])
+        );
 
         $this->logger->info('A query has been made', [
             self::INDEX => $index,
@@ -94,6 +76,9 @@ final class SearchEntryPoint implements SearchEntryPointInterface
         ]);
 
         try {
+            /**
+             * @var array{hits: array{int, array{mixed}}, offset: int, limit: int, nbHits: int, exhaustiveNbHits: bool, processingTimeMs: int, query: string} $result
+             */
             $result = $index->search($query, $options);
         } catch (Throwable $throwable) {
             $this->logger->error('The query has failed', [
@@ -125,9 +110,13 @@ final class SearchEntryPoint implements SearchEntryPointInterface
     private function buildModels(array &$results): void
     {
         foreach ($results as $key => $hit) {
-            if (null !== $this->resultBuilder && $this->resultBuilder->support($hit)) {
-                $results[$key] = $this->resultBuilder->build($hit);
+            if (null === $this->resultBuilder) {
+                continue;
             }
+            if (!$this->resultBuilder->support($hit)) {
+                continue;
+            }
+            $results[$key] = $this->resultBuilder->build($hit);
         }
     }
 

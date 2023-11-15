@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Command;
 
-use MeiliSearch\Endpoints\Indexes;
-use MeiliSearchBundle\Index\IndexListInterface;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Command\ListIndexesCommand;
+use MeiliSearchBundle\Index\IndexListInterface;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -30,7 +30,9 @@ final class ListIndexesCommandTest extends TestCase
     public function testCommandCannotListIndexesWithException(): void
     {
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('getIndexes')->willThrowException(new RuntimeException('An error occurred'));
+        $orchestrator->expects(self::once())->method('getIndexes')->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $command = new ListIndexesCommand($orchestrator);
         $tester = new CommandTester($command);

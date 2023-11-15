@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.8/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
          backupGlobals="false"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
@@ -12,13 +11,11 @@
          convertWarningsToExceptions="true"
          bootstrap="vendor/autoload.php"
          verbose="true">
-
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory>src/</directory>
-        </whitelist>
-    </filter>
-
+        </include>
+    </coverage>
     <testsuites>
         <testsuite name="MeiliSearchBundle Test Suite">
             <directory>tests/</directory>

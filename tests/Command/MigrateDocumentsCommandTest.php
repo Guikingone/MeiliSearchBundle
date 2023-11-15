@@ -25,15 +25,24 @@ final class MigrateDocumentsCommandTest extends TestCase
         static::assertNotEmpty($command->getDefinition());
         static::assertTrue($command->getDefinition()->hasArgument('oldIndex'));
         static::assertTrue($command->getDefinition()->getArgument('oldIndex')->isRequired());
-        static::assertSame('The name of the index from the documents must be migrated', $command->getDefinition()->getArgument('oldIndex')->getDescription());
+        static::assertSame(
+            'The name of the index from the documents must be migrated',
+            $command->getDefinition()->getArgument('oldIndex')->getDescription()
+        );
         static::assertTrue($command->getDefinition()->hasOption('index'));
         static::assertSame('i', $command->getDefinition()->getOption('index')->getShortcut());
         static::assertTrue($command->getDefinition()->getOption('index')->isValueRequired());
-        static::assertSame('The name of the index where the documents must be migrated', $command->getDefinition()->getOption('index')->getDescription());
+        static::assertSame(
+            'The name of the index where the documents must be migrated',
+            $command->getDefinition()->getOption('index')->getDescription()
+        );
         static::assertTrue($command->getDefinition()->hasOption('remove'));
         static::assertSame('r', $command->getDefinition()->getOption('remove')->getShortcut());
         static::assertFalse($command->getDefinition()->getOption('remove')->isValueRequired());
-        static::assertSame('If the documents must be removed from the old index', $command->getDefinition()->getOption('remove')->getDescription());
+        static::assertSame(
+            'If the documents must be removed from the old index',
+            $command->getDefinition()->getOption('remove')->getDescription()
+        );
     }
 
     public function testCommandCannotMigrateWithException(): void
@@ -41,8 +50,7 @@ final class MigrateDocumentsCommandTest extends TestCase
         $orchestrator = $this->createMock(DocumentMigrationOrchestratorInterface::class);
         $orchestrator->expects(self::once())->method('migrate')
             ->with(self::equalTo('foo'), self::equalTo('bar'), self::equalTo(false))
-            ->willThrowException(new RuntimeException('An error occurred'))
-        ;
+            ->willThrowException(new RuntimeException('An error occurred'));
 
         $command = new MigrateDocumentsCommand($orchestrator);
         $tester = new CommandTester($command);
@@ -59,7 +67,11 @@ final class MigrateDocumentsCommandTest extends TestCase
     public function testCommandCanMigrate(): void
     {
         $orchestrator = $this->createMock(DocumentMigrationOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('migrate')->with(self::equalTo('foo'), self::equalTo('bar'), self::equalTo(false));
+        $orchestrator->expects(self::once())->method('migrate')->with(
+            self::equalTo('foo'),
+            self::equalTo('bar'),
+            self::equalTo(false)
+        );
 
         $command = new MigrateDocumentsCommand($orchestrator);
         $tester = new CommandTester($command);
@@ -75,7 +87,11 @@ final class MigrateDocumentsCommandTest extends TestCase
     public function testCommandCanMigrateWithRemove(): void
     {
         $orchestrator = $this->createMock(DocumentMigrationOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('migrate')->with(self::equalTo('foo'), self::equalTo('bar'), self::equalTo(true));
+        $orchestrator->expects(self::once())->method('migrate')->with(
+            self::equalTo('foo'),
+            self::equalTo('bar'),
+            self::equalTo(true)
+        );
 
         $command = new MigrateDocumentsCommand($orchestrator);
         $tester = new CommandTester($command);

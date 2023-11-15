@@ -12,14 +12,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class PostSearchEvent extends Event implements SearchEventInterface
 {
-    /**
-     * @var SearchResultInterface
-     */
-    private $result;
-
-    public function __construct(SearchResultInterface $result)
+    public function __construct(private readonly SearchResultInterface $result)
     {
-        $this->result = $result;
     }
 
     public function getResult(): SearchResultInterface

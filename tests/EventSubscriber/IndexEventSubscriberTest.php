@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\EventSubscriber;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\Index\IndexRemovedEvent;
@@ -113,9 +113,12 @@ final class IndexEventSubscriberTest extends TestCase
         $index->expects(self::once())->method('getUid')->willReturn('foo');
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] An index has been retrieved'), [
-            'index' => 'foo',
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] An index has been retrieved'),
+            [
+                'index' => 'foo',
+            ]
+        );
 
         $event = new IndexRetrievedEvent($index);
 

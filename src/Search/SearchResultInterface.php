@@ -27,13 +27,11 @@ interface SearchResultInterface extends Countable, IteratorAggregate
      *
      * The method DOES not trigger a new search.
      *
-     * @param callable $callback
      *
-     * @return SearchResultInterface
      */
     public function filter(callable $callback): SearchResultInterface;
 
-    public function getHit(int $key, $default = null);
+    public function getHit(int $key, mixed $default = null): mixed;
 
     public function getHits(): array;
 

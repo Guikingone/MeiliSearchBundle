@@ -10,36 +10,49 @@ namespace MeiliSearchBundle\Update;
 interface UpdateInterface
 {
     /**
-     * @param string              $status
-     * @param int                 $updateId
-     * @param array<string,mixed> $type
-     * @param float               $duration
-     * @param string              $enqueuedAt
-     * @param string              $processedAt
-     *
-     * @return UpdateInterface
+     * @param int|null $canceledBy
+     * @param array<string,mixed> $details
+     * @param array<string,string>|null $error
      */
     public static function create(
+        int $uid,
+        string $indexUid,
         string $status,
-        int $updateId,
-        array $type,
-        float $duration,
+        string $type,
+        int|null $canceledBy,
+        array $details,
+        array|null $error,
+        string $duration,
         string $enqueuedAt,
-        string $processedAt
+        string $startedAt,
+        string $finishedAt,
     ): UpdateInterface;
+
+    public function getUid(): int;
+
+    public function getIndexUid(): string;
 
     public function getStatus(): string;
 
-    public function getUpdateId(): int;
+    public function getType(): string;
+
+    public function getCanceledBy(): ?int;
 
     /**
      * @return array<string,mixed>
      */
-    public function getType(): array;
+    public function getDetails(): array;
 
-    public function getDuration(): float;
+    /**
+     * @return array<string,string>|null
+     */
+    public function getError(): ?array;
+
+    public function getDuration(): string;
 
     public function getEnqueuedAt(): string;
 
-    public function getProcessedAt(): string;
+    public function getStartedAt(): string;
+
+    public function getFinishedAt(): string;
 }

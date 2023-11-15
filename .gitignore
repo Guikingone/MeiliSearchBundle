@@ -3,6 +3,7 @@ docker-compose.override.yml
 
 # Composer
 vendor
+composer.lock
 
 # Meili
 docker/meili/data.ms
@@ -13,7 +14,15 @@ summary.log
 
 # PHPStan
 .php_cs.cache
+phpstan.neon
 
 # PHPUnit
+phpunit.xml
 .phpunit.result.cache
 reports
+
+# Infection
+core.*
+
+# PHP-CS-FIXER
+.php-cs-fixer.cache

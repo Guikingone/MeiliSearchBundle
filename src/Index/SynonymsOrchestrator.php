@@ -20,31 +20,18 @@ use Throwable;
 final class SynonymsOrchestrator implements SynonymsOrchestratorInterface
 {
     private const ERROR_LOG_KEY = 'error';
+
     private const INDEX = 'index';
+
     private const UPDATE_KEY = 'updateId';
 
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    /**
-     * @var EventDispatcherInterface|null
-     */
-    private $eventDispatcher;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        IndexOrchestratorInterface $indexOrchestrator,
-        ?EventDispatcherInterface $eventDispatcher = null,
+        private readonly IndexOrchestratorInterface $indexOrchestrator,
+        private readonly ?EventDispatcherInterface $eventDispatcher = null,
         ?LoggerInterface $logger = null
     ) {
-        $this->indexOrchestrator = $indexOrchestrator;
-        $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -68,7 +55,7 @@ final class SynonymsOrchestrator implements SynonymsOrchestratorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<non-empty-string, array<int, non-empty-string>> $synonyms
      */
     public function updateSynonyms(string $uid, array $synonyms): void
     {

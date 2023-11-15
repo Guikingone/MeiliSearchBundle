@@ -5,63 +5,34 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Index\IndexSynchronizerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
+
 use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
+#[AsCommand(
+    name: 'meili:warm-indexes',
+    description: 'Allow to warm the indexes defined in the configuration',
+)]
 final class WarmIndexesCommand extends Command
 {
     /**
-     * @var array<string, array>
-     */
-    private $indexes;
-
-    /**
-     * @var IndexSynchronizerInterface
-     */
-    private $indexSynchronizer;
-
-    /**
-     * @var string|null
-     */
-    private $prefix;
-
-    /**
-     * @var string|null
-     */
-    protected static $defaultName = 'meili:warm-indexes';
-
-    /**
-     * @param array<string, array>       $indexes
-     * @param IndexSynchronizerInterface $indexSynchronizer
-     * @param string|null                $prefix
+     * @param array<string, array> $indexes
+     * @param string|null $prefix
      */
     public function __construct(
-        array $indexes,
-        IndexSynchronizerInterface $indexSynchronizer,
-        ?string $prefix = null
+        private readonly array $indexes,
+        private readonly IndexSynchronizerInterface $indexSynchronizer,
+        private readonly ?string $prefix = null
     ) {
-        $this->indexes = $indexes;
-        $this->indexSynchronizer = $indexSynchronizer;
-        $this->prefix = $prefix;
-
         parent::__construct();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('Allow to warm the indexes defined in the configuration')
-        ;
     }
 
     /**
@@ -82,7 +53,7 @@ final class WarmIndexesCommand extends Command
         } catch (Throwable $throwable) {
             $io->error([
                 'The indexes cannot be warmed!',
-                sprintf('Error: "%s"', $throwable->getMessage())
+                sprintf('Error: "%s"', $throwable->getMessage()),
             ]);
 
             return 1;

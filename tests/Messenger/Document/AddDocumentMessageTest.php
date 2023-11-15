@@ -29,6 +29,7 @@ final class AddDocumentMessageTest extends TestCase
 
 final class Bar
 {
-    public $id;
-    public $key;
+    public int $id;
+
+    public string $key;
 }

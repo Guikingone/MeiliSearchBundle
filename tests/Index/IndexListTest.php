@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Index\IndexList;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +22,7 @@ final class IndexListTest extends TestCase
         $secondIndex->expects(self::once())->method('getUid')->willReturn('bar');
 
         $list = new IndexList([$index, $secondIndex]);
-        static::assertSame(2, $list->count());
+        static::assertCount(2, $list);
     }
 
     public function testIndexCountCanBeRetrieved(): void
@@ -32,10 +32,10 @@ final class IndexListTest extends TestCase
 
         $list = new IndexList();
 
-        static::assertSame(0, $list->count());
+        static::assertCount(0, $list);
 
         $list->add($index);
-        static::assertSame(1, $list->count());
+        static::assertCount(1, $list);
     }
 
     public function testIndexCanBeFound(): void
@@ -59,13 +59,13 @@ final class IndexListTest extends TestCase
         $list = new IndexList();
         $list->remove('foo');
 
-        static::assertSame(0, $list->count());
+        static::assertCount(0, $list);
 
         $list->add($index);
-        static::assertSame(1, $list->count());
+        static::assertCount(1, $list);
 
         $list->remove('foo');
-        static::assertSame(0, $list->count());
+        static::assertCount(0, $list);
     }
 
     public function testIndexCanBeFiltered(): void

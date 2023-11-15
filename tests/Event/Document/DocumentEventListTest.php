@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event\Document;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Document\DocumentEventInterface;
 use MeiliSearchBundle\Event\Document\DocumentEventList;
 use MeiliSearchBundle\Event\Document\PostDocumentCreationEvent;
@@ -12,7 +12,6 @@ use MeiliSearchBundle\Event\Document\PostDocumentDeletionEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentRetrievedEvent;
 use MeiliSearchBundle\Event\Document\PostDocumentUpdateEvent;
 use PHPUnit\Framework\TestCase;
-use function count;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -28,7 +27,7 @@ final class DocumentEventListTest extends TestCase
         $list->add($event);
 
         static::assertNotEmpty($list->getEvents());
-        static::assertSame(1, $list->count());
+        static::assertCount(1, $list);
     }
 
     public function testPostDocumentCreationEventCanBeRetrieved(): void
@@ -44,7 +43,7 @@ final class DocumentEventListTest extends TestCase
         $list->add($secondEvent);
 
         static::assertNotEmpty($list->getPostDocumentCreationEvent());
-        static::assertSame(1, count($list->getPostDocumentCreationEvent()));
+        static::assertCount(1, $list->getPostDocumentCreationEvent());
     }
 
     public function testPostDocumentDeletionEventCanBeRetrieved(): void
@@ -58,7 +57,7 @@ final class DocumentEventListTest extends TestCase
         $list->add($secondEvent);
 
         static::assertNotEmpty($list->getPostDocumentDeletionEvent());
-        static::assertSame(1, count($list->getPostDocumentDeletionEvent()));
+        static::assertCount(1, $list->getPostDocumentDeletionEvent());
     }
 
     public function testPostDocumentRetrievedEventCanBeRetrieved(): void
@@ -74,7 +73,7 @@ final class DocumentEventListTest extends TestCase
         $list->add($secondEvent);
 
         static::assertNotEmpty($list->getPostDocumentRetrievedEvent());
-        static::assertSame(1, count($list->getPostDocumentRetrievedEvent()));
+        static::assertCount(1, $list->getPostDocumentRetrievedEvent());
     }
 
     public function testPostDocumentUpdateEventCanBeRetrieved(): void
@@ -88,6 +87,6 @@ final class DocumentEventListTest extends TestCase
         $list->add($secondEvent);
 
         static::assertNotEmpty($list->getPostDocumentUpdateEvent());
-        static::assertSame(1, count($list->getPostDocumentUpdateEvent()));
+        static::assertCount(1, $list->getPostDocumentUpdateEvent());
     }
 }

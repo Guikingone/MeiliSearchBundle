@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Index;
 
 use Generator;
-use MeiliSearch\Client;
-use MeiliSearch\Endpoints\Indexes;
-use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
+use Meilisearch\Client;
+use Meilisearch\Contracts\IndexesResults;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Exception\RuntimeException as InternalRuntimeException;
+use MeiliSearchBundle\Exception\RuntimeException as MeiliSeachBundleRuntimeException;
 use MeiliSearchBundle\Index\IndexListInterface;
 use MeiliSearchBundle\Index\IndexOrchestrator;
-use MeiliSearchBundle\Exception\RuntimeException as MeiliSeachBundleRuntimeException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -33,7 +33,9 @@ final class IndexOrchestratorTest extends TestCase
         $logger->expects(self::once())->method('error');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('createIndex')->willThrowException(new ClientException(new MockResponse([], ['http_code' => 400])));
+        $client->expects(self::once())->method('createIndex')->willThrowException(
+            new ClientException(new MockResponse([], ['http_code' => 400]))
+        );
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
@@ -45,6 +47,9 @@ final class IndexOrchestratorTest extends TestCase
 
     public function testIndexCanBeAdded(): void
     {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch');
+
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('error');
 
@@ -52,28 +57,27 @@ final class IndexOrchestratorTest extends TestCase
         $index->expects(self::never())->method('getUid')->willReturn('test');
         $index->expects(self::never())->method('getPrimaryKey')->willReturn('test');
 
-        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $eventDispatcher->expects(self::once())->method('dispatch')->with(new IndexCreatedEvent([
-            'uid' => 'test',
-            'primaryKey' => 'test',
-        ], $index));
-
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('createIndex')->with(self::equalTo('test'), [
             'primaryKey' => 'test',
-        ])->willReturn($index);
+        ])->willReturn([
+            'taskUid' => 0,
+        ]);
+
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
         $orchestrator->addIndex('test', 'test');
     }
 
     /**
+     * @param array<string, string|int|bool> $configuration
      * @dataProvider provideConfiguration
      */
     public function testIndexCanBeAddedWithConfiguration(array $configuration, string $method): void
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $eventDispatcher->expects(self::once())->method('dispatch');
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch');
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('error');
@@ -86,7 +90,11 @@ final class IndexOrchestratorTest extends TestCase
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('createIndex')->with(self::equalTo('test'), [
             'primaryKey' => 'test',
-        ])->willReturn($index);
+        ])->willReturn([
+            'taskUid' => 0,
+        ]);
+
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
         $orchestrator->addIndex('test', 'test', $configuration);
@@ -105,7 +113,9 @@ final class IndexOrchestratorTest extends TestCase
         $index->expects(self::never())->method('getPrimaryKey')->willReturn('test');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('createIndex')->willReturn($index);
+        $client->expects(self::once())->method('createIndex')->willReturn([
+            'taskUid' => 0,
+        ]);
 
         $orchestrator = new IndexOrchestrator($client, null, $logger);
         $orchestrator->addIndex('test', 'test');
@@ -120,13 +130,14 @@ final class IndexOrchestratorTest extends TestCase
         $logger->expects(self::exactly(2))->method('error');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new RuntimeException('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new RuntimeException('An error occurred'));
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
         static::expectException(RuntimeException::class);
         static::expectExceptionCode(0);
         static::expectExceptionMessage('An error occurred');
+        /* @phpstan-ignore-next-line */
         $orchestrator->update('foo', ['synonyms' => ['xmen' => ['wolverine']]]);
     }
 
@@ -137,20 +148,25 @@ final class IndexOrchestratorTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('info');
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The index cannot be updated, error: "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('The index cannot be updated, error: "An error occurred"')
+        );
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('updateSynonyms')->willThrowException(new RuntimeException('An error occurred'));
+        $index->expects(self::once())->method('updateSynonyms')->willThrowException(
+            new RuntimeException('An error occurred')
+        );
         $index->expects(self::once())->method('getPrimaryKey')->willReturn('id');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
         static::expectException(InternalRuntimeException::class);
         static::expectExceptionMessage('An error occurred');
         static::expectExceptionCode(0);
+        /* @phpstan-ignore-next-line */
         $orchestrator->update('test', ['synonyms' => ['xmen' => ['wolverine']]]);
     }
 
@@ -168,9 +184,10 @@ final class IndexOrchestratorTest extends TestCase
         $index->expects(self::once())->method('getPrimaryKey')->willReturn('id');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
+        /* @phpstan-ignore-next-line */
         $orchestrator->update('test', ['synonyms' => ['xmen' => ['wolverine']]]);
     }
 
@@ -188,13 +205,14 @@ final class IndexOrchestratorTest extends TestCase
         $index->expects(self::once())->method('update')->with(['primaryKey' => 'id']);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
         $orchestrator->update('test', ['primaryKey' => 'id']);
     }
 
     /**
+     * @param array<string, string|int|bool> $configuration
      * @dataProvider provideConfiguration
      */
     public function testIndexCanBeUpdatedWithConfiguration(array $configuration, string $method): void
@@ -211,7 +229,7 @@ final class IndexOrchestratorTest extends TestCase
         $index->expects(self::once())->method('getPrimaryKey')->willReturn('id');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
         $orchestrator->update('test', $configuration);
@@ -223,7 +241,9 @@ final class IndexOrchestratorTest extends TestCase
         $logger->expects(self::once())->method('error');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getAllIndexes')->willThrowException(new RuntimeException('An error occurred'));
+        $client->expects(self::once())->method('getIndexes')->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $orchestrator = new IndexOrchestrator($client, null, $logger);
 
@@ -239,7 +259,9 @@ final class IndexOrchestratorTest extends TestCase
         $logger->expects(self::once())->method('error');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->with(self::equalTo('foo'))->willThrowException(new RuntimeException('An error occurred'));
+        $client->expects(self::once())->method('index')->with(self::equalTo('foo'))->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $orchestrator = new IndexOrchestrator($client, null, $logger);
 
@@ -259,7 +281,7 @@ final class IndexOrchestratorTest extends TestCase
         ]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->with(self::equalTo('foo'))->willReturn($indexes);
+        $client->expects(self::once())->method('index')->with(self::equalTo('foo'))->willReturn($indexes);
 
         $orchestrator = new IndexOrchestrator($client, $eventDispatcher, $logger);
 
@@ -275,7 +297,7 @@ final class IndexOrchestratorTest extends TestCase
             "uid" => "movies",
             "primaryKey" => "movie_id",
             "createdAt" => "2019-11-20T09:40:33.711324Z",
-            "updatedAt" => "2019-11-20T10:16:42.761858Z"
+            "updatedAt" => "2019-11-20T10:16:42.761858Z",
         ]);
         $firstIndexes->expects(self::once())->method('getUid')->willReturn('foo');
 
@@ -284,15 +306,21 @@ final class IndexOrchestratorTest extends TestCase
             "uid" => "movie_reviews",
             "primaryKey" => null,
             "createdAt" => "2019-11-20T09:40:33.711324Z",
-            "updatedAt" => "2019-11-20T10:16:42.761858Z"
+            "updatedAt" => "2019-11-20T10:16:42.761858Z",
         ]);
         $secondIndexes->expects(self::once())->method('getUid')->willReturn('bar');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getAllIndexes')->willReturn([
-            $firstIndexes,
-            $secondIndexes,
-        ]);
+        $client->expects(self::once())->method('getIndexes')->willReturn(
+            new IndexesResults([
+                'results' => [
+                    $firstIndexes,
+                    $secondIndexes,
+                ],
+                'offset' => 0,
+                'limit' => 20,
+            ])
+        );
 
         $orchestrator = new IndexOrchestrator($client);
 
@@ -310,7 +338,9 @@ final class IndexOrchestratorTest extends TestCase
         $logger->expects(self::once())->method('error');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('deleteIndex')->willThrowException(new RuntimeException('An error occurred'));
+        $client->expects(self::once())->method('deleteIndex')->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $orchestrator = new IndexOrchestrator($client, null, $logger);
 
@@ -335,36 +365,6 @@ final class IndexOrchestratorTest extends TestCase
         $orchestrator->removeIndex('test');
     }
 
-    public function testIndexesCannotBeDeletedWithException(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The indexes cannot be deleted, error: "An error occurred".'));
-        $logger->expects(self::never())->method('info');
-
-        $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('deleteAllIndexes')->willThrowException(new RuntimeException('An error occurred'));
-
-        $orchestrator = new IndexOrchestrator($client, null, $logger);
-
-        static::expectException(RuntimeException::class);
-        static::expectExceptionMessage('An error occurred');
-        static::expectExceptionCode(0);
-        $orchestrator->removeIndexes();
-    }
-
-    public function testIndexesCanBeDeleted(): void
-    {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('error');
-        $logger->expects(self::once())->method('info')->with(self::equalTo('The indexes have been deleted'));
-
-        $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('deleteAllIndexes');
-
-        $orchestrator = new IndexOrchestrator($client, null, $logger);
-        $orchestrator->removeIndexes();
-    }
-
     public function provideConfiguration(): Generator
     {
         yield 'Displayed attributes' => [
@@ -377,10 +377,21 @@ final class IndexOrchestratorTest extends TestCase
         ];
         yield 'Attributes for faceting' => [
             ['facetedAttributes' => ['id', 'title']],
-            'updateAttributesForFaceting',
+            'updateFaceting',
         ];
         yield 'Ranking rules' => [
-            ['rankingRulesAttributes' => ['typo', 'words', 'proximity', 'attribute', 'wordsPosition', 'exactness', 'asc(release_date)', 'desc(rank)']],
+            [
+                'rankingRulesAttributes' => [
+                    'typo',
+                    'words',
+                    'proximity',
+                    'attribute',
+                    'wordsPosition',
+                    'exactness',
+                    'asc(release_date)',
+                    'desc(rank)',
+                ],
+            ],
             'updateRankingRules',
         ];
         yield 'Stop words' => [

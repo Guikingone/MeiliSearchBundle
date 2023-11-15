@@ -1,4 +1,4 @@
-FROM php:7.2-cli
+FROM php:8.1-cli
 
 ENV APP_DIR=/srv/app \
     BUILD_SCRIPTS_DIR=/build-scripts
@@ -7,12 +7,12 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        zip=3.0-* \
        unzip=6.0-* \
-       git=1:2.20.* \
-       libzip-dev=1.5.* \
-       wget=1.20.1-1.1 \
+       git=1:2.39.* \
+       libzip-dev=1.7.* \
+       wget=1.21.* \
        gpg=2.2.* \
        zlib1g-dev=1:1.2.* \
-    && pecl install xdebug \
+    && pecl install xdebug-3.2.2 \
     && docker-php-ext-install opcache zip \
     && docker-php-ext-enable xdebug opcache zip \
     && apt-get clean \

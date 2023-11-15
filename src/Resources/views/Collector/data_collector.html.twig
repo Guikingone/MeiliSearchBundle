@@ -34,31 +34,31 @@
 
     <h4>{{- 'Searches' -}}</h4>
     {% if searches['count'] is same as(0) %}
-    <div class="empty">
-        <p>{{- 'No searches made' -}}</p>
-    </div>
+        <div class="empty">
+            <p>{{- 'No searches made' -}}</p>
+        </div>
     {% else %}
         <div class="sf-tabs">
             <div class="tab">
                 <div class="tab-content">
                     <table class="{{ class|default('') }}">
                         <thead>
-                            <tr>
-                                <th scope="col" class="key">{{- 'Query' -}}</th>
-                                <th scope="col" class="key">{{- 'Hits' -}}</th>
-                                <th scope="col" class="key">{{- 'Processing time (ms)' -}}</th>
-                            </tr>
+                        <tr>
+                            <th scope="col" class="key">{{- 'Query' -}}</th>
+                            <th scope="col" class="key">{{- 'Hits' -}}</th>
+                            <th scope="col" class="key">{{- 'Processing time (ms)' -}}</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for search in searches['searches'] %}
-                                {% set result = search.getResult() %}
+                        {% for search in searches['searches'] %}
+                            {% set result = search.getResult() %}
 
-                                <tr>
-                                    <th class="colored font-normal">{{- result.query -}}</th>
-                                    <th class="colored font-normal">{{- result.nbHits -}}</th>
-                                    <th class="colored font-normal">{{- result.processingTimeMs -}}</th>
-                                </tr>
-                            {% endfor %}
+                            <tr>
+                                <th class="colored font-normal">{{- result.query -}}</th>
+                                <th class="colored font-normal">{{- result.nbHits -}}</th>
+                                <th class="colored font-normal">{{- result.processingTimeMs -}}</th>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>

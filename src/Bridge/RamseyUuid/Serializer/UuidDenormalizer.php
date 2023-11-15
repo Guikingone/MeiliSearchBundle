@@ -7,6 +7,7 @@ namespace MeiliSearchBundle\Bridge\RamseyUuid\Serializer;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+
 use function is_a;
 use function is_string;
 

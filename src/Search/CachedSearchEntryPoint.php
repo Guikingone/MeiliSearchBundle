@@ -8,6 +8,7 @@ use MeiliSearchBundle\Cache\SearchResultCacheOrchestratorInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+
 use function sprintf;
 use function strtolower;
 
@@ -16,28 +17,13 @@ use function strtolower;
  */
 final class CachedSearchEntryPoint implements SearchEntryPointInterface
 {
-    /**
-     * @var SearchResultCacheOrchestratorInterface
-     */
-    private $cacheOrchestrator;
-
-    /**
-     * @var SearchEntryPointInterface
-     */
-    private $searchEntryPoint;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        SearchResultCacheOrchestratorInterface $cacheOrchestrator,
-        SearchEntryPointInterface $searchEntryPoint,
+        private readonly SearchResultCacheOrchestratorInterface $cacheOrchestrator,
+        private readonly SearchEntryPointInterface $searchEntryPoint,
         ?LoggerInterface $logger = null
     ) {
-        $this->cacheOrchestrator = $cacheOrchestrator;
-        $this->searchEntryPoint = $searchEntryPoint;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -50,8 +36,10 @@ final class CachedSearchEntryPoint implements SearchEntryPointInterface
 
         try {
             return $this->cacheOrchestrator->get($cacheItemKey);
-        } catch (Throwable $throwable) {
-            $this->logger->error('An undefined SearchResult has been queried, a fallback to the MeiliSearch API has been made');
+        } catch (Throwable) {
+            $this->logger->error(
+                'An undefined SearchResult has been queried, a fallback to the MeiliSearch API has been made'
+            );
 
             $result = $this->searchEntryPoint->search($index, $query, $options);
             $this->cacheOrchestrator->add($cacheItemKey, $result);

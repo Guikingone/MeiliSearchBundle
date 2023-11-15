@@ -1,0 +1,12 @@
+parameters:
+    level: 8
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - src
+        - tests
+    ignoreErrors:
+      - '#^Method [a-zA-Z0-9\\_]+::[a-zA-Z0-9\\_]+\(\) has parameter \$[a-zA-Z0-9\\_]+ with no value type specified in iterable type array.$#'
+      - '#^Method [a-zA-Z0-9\\_]+::[a-zA-Z0-9\\_]+\(\) return type has no value type specified in iterable type array.$#'
+      - '#^Property [a-zA-Z0-9\\_]+::\$[a-zA-Z0-9\\_]+ type has no value type specified in iterable type array.$#'
+      - '#^Constructor of class MeiliSearchBundle\\Index\\IndexSynchronizer has an unused parameter \$settingsEntryPoint.$#'

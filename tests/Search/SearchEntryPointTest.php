@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Search;
 
 use Exception;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\PostSearchEvent;
 use MeiliSearchBundle\Event\PreSearchEvent;
 use MeiliSearchBundle\Exception\RuntimeException;
@@ -16,7 +16,6 @@ use MeiliSearchBundle\Search\SearchResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use function array_merge;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -35,7 +34,9 @@ final class SearchEntryPointTest extends TestCase
         );
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $orchestrator->expects(self::once())->method('getIndex')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
@@ -100,7 +101,7 @@ final class SearchEntryPointTest extends TestCase
             "nbHits" => 2,
             "exhaustiveNbHits" => false,
             "processingTimeMs" => 35,
-            "query" => 'bar'
+            "query" => 'bar',
         ]);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
@@ -112,7 +113,7 @@ final class SearchEntryPointTest extends TestCase
         $result = $searchEntryPoint->search('foo', 'bar');
 
         static::assertNotEmpty($result->getHits());
-        static::assertSame(2, $result->count());
+        static::assertCount(2, $result);
         static::assertSame(20, $result->getLimit());
         static::assertSame(0, $result->getOffset());
         static::assertSame('bar', $result->getQuery());
@@ -145,7 +146,7 @@ final class SearchEntryPointTest extends TestCase
             "nbHits" => 2,
             "exhaustiveNbHits" => false,
             "processingTimeMs" => 35,
-            "query" => 'bar'
+            "query" => 'bar',
         ]);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
@@ -162,7 +163,7 @@ final class SearchEntryPointTest extends TestCase
         $result = $searchEntryPoint->search('foo', 'bar');
 
         static::assertNotEmpty($result->getHits());
-        static::assertSame(2, $result->count());
+        static::assertCount(2, $result);
         static::assertSame(20, $result->getLimit());
         static::assertSame(0, $result->getOffset());
         static::assertSame('bar', $result->getQuery());
@@ -187,7 +188,7 @@ final class SearchEntryPointTest extends TestCase
             "nbHits" => 2,
             "exhaustiveNbHits" => false,
             "processingTimeMs" => 35,
-            "query" => 'bar'
+            "query" => 'bar',
         ]);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
@@ -196,35 +197,37 @@ final class SearchEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $eventDispatcher->expects(self::exactly(2))->method('dispatch')->withConsecutive(
-            [
-                new PreSearchEvent([
-                    'index' => $index,
-                    'query' => 'bar',
-                    'options' => [],
-                ]),
-            ],
-            [
-                new PostSearchEvent(SearchResult::create(
-                    [
-                        [
-                            'id' => 1,
-                            'title' => 'bar',
-                        ],
-                        [
-                            'id' => 2,
-                            'title' => 'foo',
-                        ],
-                    ],
-                    0,
-                    20,
-                    2,
-                    false,
-                    35,
-                    'bar'
-                )),
-            ]
-        );
+        $matcher = $this->exactly(2);
+        $eventDispatcher->expects(self::exactly(2))->method('dispatch')
+            ->willReturnCallback(function () use ($matcher, $index) {
+                return match ($matcher->getInvocationCount()) {
+                    0 => new PreSearchEvent([
+                        'index' => $index,
+                        'query' => 'bar',
+                        'options' => [],
+                    ]),
+                    default => new PostSearchEvent(
+                        SearchResult::create(
+                            [
+                                [
+                                    'id' => 1,
+                                    'title' => 'bar',
+                                ],
+                                [
+                                    'id' => 2,
+                                    'title' => 'foo',
+                                ],
+                            ],
+                            0,
+                            20,
+                            2,
+                            false,
+                            35,
+                            'bar'
+                        )
+                    ),
+                };
+            });
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('info')->with(self::equalTo('A query has been made'), [
@@ -236,7 +239,7 @@ final class SearchEntryPointTest extends TestCase
         $result = $searchEntryPoint->search('foo', 'bar');
 
         static::assertNotEmpty($result->getHits());
-        static::assertSame(2, $result->count());
+        static::assertCount(2, $result);
         static::assertSame(20, $result->getLimit());
         static::assertSame(0, $result->getOffset());
         static::assertSame('bar', $result->getQuery());

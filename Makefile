@@ -1,5 +1,5 @@
 DOCKER 		   = @docker
-DOCKER_COMPOSE = @docker-compose
+DOCKER_COMPOSE = @docker compose
 PHP            = $(DOCKER_COMPOSE) run --rm php
 
 .DEFAULT_GOAL := help
@@ -11,48 +11,56 @@ help:
 ## Project
 ##---------------------------------------------------------------------------
 
-.PHONY: boot up down vendor
+.PHONY: boot up shell down vendor
 
 boot: ## Launch the project
 boot: up vendor
 
 up: ## Up the containers
 up: docker-compose.yml
-	$(DOCKER_COMPOSE) up -d --remove-orphans
+	$(DOCKER_COMPOSE) up -d --build --remove-orphans
 
 down: ## Down the containers
 down: docker-compose.yml
 	$(DOCKER_COMPOSE) down
 
+shell: ## Get in container shell
+shell: docker-compose.yml
+	$(PHP) /bin/bash
+
 vendor: ## Install the dependencies
-vendor: composer.json composer.lock
+vendor: composer.json
 	$(PHP) composer install
 
 ##
 ## Tools
 ##---------------------------------------------------------------------------
 
-.PHONY: php-cs-fixer php-cs-fixer-dry phpstan rector-dry rector
+.PHONY: php-cs-fixer php-cs-fixer-dry phpstan phpstan-baseline rector-dry rector
 
-php-cs-fixer: ## Run PHP-CS-FIXER and fix the errors
-php-cs-fixer:
-	$(PHP) vendor/bin/php-cs-fixer fix .
+phpcs: ## Run PHP-CS-FIXER and fix the errors
+phpcs:
+	$(PHP) vendor/bin/php-cs-fixer -v fix
 
-php-cs-fixer-dry: ## Run PHP-CS-FIXER in --dry-run mode
-php-cs-fixer-dry:
-	$(PHP) vendor/bin/php-cs-fixer fix . --dry-run
+phpcs-dry: ## Run PHP-CS-FIXER in --dry-run mode
+phpcs-dry:
+	$(PHP) vendor/bin/php-cs-fixer -v --dry-run --diff fix
 
 phpstan: ## Run PHPStan (the configuration must be defined in phpstan.neon)
-phpstan: phpstan.neon
-	$(DOCKER) run --rm -v $(PWD):/app phpstan/phpstan analyse /app/src
+phpstan: phpstan.neon.dist
+	$(PHP) vendor/bin/phpstan analyse --memory-limit=-1
 
-rector-dry: ## Run Rector in --dry-run mode
-rector-dry: rector.php
-	$(PHP) vendor/bin/rector process --dry-run --config rector.php
+phpstan-baseline: ## Run PHPStan generate baseline
+phpstan-baseline: phpstan.neon.dist
+	$(PHP) vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline --memory-limit=-1
 
 rector: ## Run Rector
 rector: rector.php
-	$(PHP) vendor/bin/rector process --config rector.php
+	$(PHP) vendor/bin/rector process
+
+rector-dry: ## Run Rector in --dry-run mode
+rector-dry: rector.php
+	$(PHP) vendor/bin/rector process --dry-run
 
 ##
 ## Tests
@@ -65,5 +73,5 @@ tests: phpunit.xml.dist
 	$(PHP) vendor/bin/phpunit tests
 
 infection: ## Launch Infection
-infection: infection.json.dist
-	$(PHP) vendor/bin/infection --min-covered-msi=90 --min-msi=80
+infection: infection.json5.dist
+	$(PHP) vendor/bin/infection --threads=max

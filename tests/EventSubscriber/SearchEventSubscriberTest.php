@@ -23,7 +23,10 @@ final class SearchEventSubscriberTest extends TestCase
     {
         static::assertArrayHasKey(PostSearchEvent::class, SearchEventSubscriber::getSubscribedEvents());
         static::assertArrayHasKey(PreSearchEvent::class, SearchEventSubscriber::getSubscribedEvents());
-        static::assertInstanceOf(MeiliSearchEventSubscriberInterface::class, new SearchEventSubscriber(new SearchEventList()));
+        static::assertInstanceOf(
+            MeiliSearchEventSubscriberInterface::class,
+            new SearchEventSubscriber(new SearchEventList())
+        );
     }
 
     public function testSubscriberCanListenPostSearchWithoutLogger(): void
@@ -79,9 +82,12 @@ final class SearchEventSubscriberTest extends TestCase
     public function testSubscriberCanListenPreSearch(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] A search is about to be made'), [
-            'configuration' => [],
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] A search is about to be made'),
+            [
+                'configuration' => [],
+            ]
+        );
 
         $event = new PreSearchEvent([]);
 

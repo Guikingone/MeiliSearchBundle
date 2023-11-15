@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Event\Document;
 
 use Countable;
+
 use function array_filter;
 use function count;
 
@@ -16,7 +17,7 @@ final class DocumentEventList implements DocumentEventListInterface, Countable
     /**
      * @var array<int, DocumentEventInterface>
      */
-    private $events = [];
+    private array $events = [];
 
     public function add(DocumentEventInterface $event): void
     {
@@ -28,9 +29,10 @@ final class DocumentEventList implements DocumentEventListInterface, Countable
      */
     public function getPostDocumentCreationEvent(): array
     {
-        return array_filter($this->events, function (DocumentEventInterface $event): bool {
-            return $event instanceof PostDocumentCreationEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (DocumentEventInterface $event): bool => $event instanceof PostDocumentCreationEvent
+        );
     }
 
     /**
@@ -38,9 +40,10 @@ final class DocumentEventList implements DocumentEventListInterface, Countable
      */
     public function getPostDocumentDeletionEvent(): array
     {
-        return array_filter($this->events, function (DocumentEventInterface $event): bool {
-            return $event instanceof PostDocumentDeletionEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (DocumentEventInterface $event): bool => $event instanceof PostDocumentDeletionEvent
+        );
     }
 
     /**
@@ -48,9 +51,10 @@ final class DocumentEventList implements DocumentEventListInterface, Countable
      */
     public function getPostDocumentRetrievedEvent(): array
     {
-        return array_filter($this->events, function (DocumentEventInterface $event): bool {
-            return $event instanceof PostDocumentRetrievedEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (DocumentEventInterface $event): bool => $event instanceof PostDocumentRetrievedEvent
+        );
     }
 
     /**
@@ -58,9 +62,10 @@ final class DocumentEventList implements DocumentEventListInterface, Countable
      */
     public function getPostDocumentUpdateEvent(): array
     {
-        return array_filter($this->events, function (DocumentEventInterface $event): bool {
-            return $event instanceof PostDocumentUpdateEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (DocumentEventInterface $event): bool => $event instanceof PostDocumentUpdateEvent
+        );
     }
 
     /**

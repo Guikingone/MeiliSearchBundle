@@ -6,6 +6,7 @@ namespace MeiliSearchBundle\ExpressionLanguage;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage as BaseExpressionLanguage;
+
 use function array_unshift;
 
 /**

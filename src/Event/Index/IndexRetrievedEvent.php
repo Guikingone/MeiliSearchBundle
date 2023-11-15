@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -12,14 +12,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class IndexRetrievedEvent extends Event implements IndexEventInterface
 {
-    /**
-     * @var Indexes
-     */
-    private $index;
-
-    public function __construct(Indexes $index)
+    public function __construct(private readonly Indexes $index)
     {
-        $this->index = $index;
     }
 
     public function getIndex(): Indexes

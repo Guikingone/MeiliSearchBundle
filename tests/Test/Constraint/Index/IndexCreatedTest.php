@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Constraint\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
 use MeiliSearchBundle\Event\Index\IndexEventList;
 use MeiliSearchBundle\Test\Constraint\Index\IndexCreated;

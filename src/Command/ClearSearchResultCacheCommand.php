@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Cache\SearchResultCacheOrchestratorInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,33 +15,15 @@ use Throwable;
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
+#[AsCommand(
+    name: 'meili:clear-search-cache',
+    description: 'Allow to clear the cache used by the CachedSearchResultEntryPoint',
+)]
 final class ClearSearchResultCacheCommand extends Command
 {
-    /**
-     * @var SearchResultCacheOrchestratorInterface
-     */
-    private $searchResultCacheOrchestrator;
-
-    /**
-     * @var string|null
-     */
-    protected static $defaultName = 'meili:clear-search-cache';
-
-    public function __construct(SearchResultCacheOrchestratorInterface $searchResultCacheOrchestrator)
+    public function __construct(private readonly SearchResultCacheOrchestratorInterface $searchResultCacheOrchestrator)
     {
-        $this->searchResultCacheOrchestrator = $searchResultCacheOrchestrator;
-
         parent::__construct();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('Allow to clear the cache used by the CachedSearchResultEntryPoint')
-        ;
     }
 
     /**

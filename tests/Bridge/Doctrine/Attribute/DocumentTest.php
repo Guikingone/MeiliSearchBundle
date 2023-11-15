@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\MeiliSearchBundle\Bridge\Doctrine\Annotation;
+namespace Tests\MeiliSearchBundle\Bridge\Doctrine\Attribute;
 
-use MeiliSearchBundle\Bridge\Doctrine\Annotation\Document;
-use MeiliSearchBundle\Exception\InvalidDocumentConfigurationException;
+use ArgumentCountError;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Document;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -15,60 +16,60 @@ final class DocumentTest extends TestCase
 {
     public function testDocumentCanBeConfiguredWithInvalidConfigurationAndMissingIndex(): void
     {
-        static::expectException(InvalidDocumentConfigurationException::class);
-        static::expectExceptionMessage('The index must be defined');
-        new Document([
-            'primaryKey' => 'id',
-        ]);
+        static::expectException(ArgumentCountError::class);
+        static::expectExceptionMessage('($index) not passed');
+        /* @phpstan-ignore-next-line */
+        new Document(
+            primaryKey: 'id',
+        );
     }
 
     public function testDocumentCanBeConfiguredWithMissingPrimaryKey(): void
     {
-        $document = new Document([
-            'index' => 'foo',
-        ]);
+        $document = new Document(
+            index: 'foo',
+        );
 
         static::assertNull($document->getPrimaryKey());
     }
 
     public function testDocumentCanBeConfiguredWithNullPrimaryKey(): void
     {
-        $document = new Document([
-            'index' => 'foo',
-            'primaryKey' => null,
-        ]);
+        $document = new Document(
+            index: 'foo',
+            primaryKey: null,
+        );
 
         static::assertNull($document->getPrimaryKey());
     }
 
     public function testDocumentCanBeConfiguredWithInvalidConfigurationOnPrimaryKey(): void
     {
-        static::expectException(InvalidDocumentConfigurationException::class);
         static::expectExceptionMessage('The primaryKey is not valid');
-        new Document([
-            'index' => 'foo',
-            'primaryKey' => '@##',
-        ]);
+        new Document(
+            index: 'foo',
+            primaryKey: '@##',
+        );
     }
 
     public function testDocumentCanBeConfiguredWithInvalidConfigurationOnModel(): void
     {
-        static::expectException(InvalidDocumentConfigurationException::class);
-        static::expectExceptionMessage('The model key must be a bool, given "string"');
-        new Document([
-            'index' => 'foo',
-            'primaryKey' => 'id',
-            'model' => 'true',
-        ]);
+        static::expectException(TypeError::class);
+        static::expectExceptionMessage('($model) must be of type bool, string given');
+        new Document(
+            index: 'foo',
+            primaryKey: 'id',
+            model: 'true', /** @phpstan-ignore-line */
+        );
     }
 
     public function testDocumentCanBeConfiguredWithValidConfiguration(): void
     {
-        $document = new Document([
-            'index' => 'foo',
-            'primaryKey' => 'id',
-            'model' => true,
-        ]);
+        $document = new Document(
+            index: 'foo',
+            primaryKey: 'id',
+            model: true,
+        );
 
         static::assertSame('foo', $document->getIndex());
         static::assertSame('id', $document->getPrimaryKey());
@@ -77,10 +78,10 @@ final class DocumentTest extends TestCase
 
     public function testDocumentCanBeConfiguredWithValidConfigurationAndWithoutModel(): void
     {
-        $document = new Document([
-            'index' => 'foo',
-            'primaryKey' => 'id',
-        ]);
+        $document = new Document(
+            index: 'foo',
+            primaryKey: 'id',
+        );
 
         static::assertSame('foo', $document->getIndex());
         static::assertSame('id', $document->getPrimaryKey());

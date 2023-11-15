@@ -117,12 +117,16 @@ final class SearchTest extends TestCase
     {
         $search = new Search();
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The value must be numeric when using a numeric related operator, given "string"');
+        static::expectExceptionMessage(
+            'The value must be numeric when using a numeric related operator, given "string"'
+        );
         static::expectExceptionCode(0);
         $search->in('foo')->where('id', '<', '[]');
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The value must be numeric when using a numeric related operator, given "string"');
+        static::expectExceptionMessage(
+            'The value must be numeric when using a numeric related operator, given "string"'
+        );
         static::expectExceptionCode(0);
         Search::within('foo')->where('id', '<', '[]');
     }
@@ -133,14 +137,18 @@ final class SearchTest extends TestCase
         $search->in('foo')->where('id', '=', 1);
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::where() cannot be used on an existing search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::where() cannot be used on an existing search'
+        );
         static::expectExceptionCode(0);
         $search->where('id', '=', 2);
 
         $search = Search::within('foo')->where('id', '=', 1);
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::where() cannot be used on an existing search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::where() cannot be used on an existing search'
+        );
         static::expectExceptionCode(0);
         $search->where('id', '=', 2);
     }
@@ -223,12 +231,16 @@ final class SearchTest extends TestCase
         $search = new Search();
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::andWhere() cannot be used on an empty search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::andWhere() cannot be used on an empty search'
+        );
         static::expectExceptionCode(0);
         $search->in('foo')->andWhere('title', '!=', 'Random');
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::andWhere() cannot be used on an empty search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::andWhere() cannot be used on an empty search'
+        );
         static::expectExceptionCode(0);
         Search::within('foo')->andWhere('title', '!=', 'Random');
     }
@@ -248,12 +260,16 @@ final class SearchTest extends TestCase
         $search = new Search();
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::orWhere() cannot be used on an empty search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::orWhere() cannot be used on an empty search'
+        );
         static::expectExceptionCode(0);
         $search->in('foo')->orWhere('title', '!==', 'Random');
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::orWhere() cannot be used on an empty search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::orWhere() cannot be used on an empty search'
+        );
         static::expectExceptionCode(0);
         Search::within('foo')->orWhere('title', '!==', 'Random');
     }
@@ -305,12 +321,16 @@ final class SearchTest extends TestCase
         $search = new Search();
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::andNot() cannot be used on an empty search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::andNot() cannot be used on an empty search'
+        );
         static::expectExceptionCode(0);
         $search->in('foo')->andNot('id', '=', 1);
 
         static::expectException(InvalidSearchConfigurationException::class);
-        static::expectExceptionMessage('The MeiliSearchBundle\Search\Search::andNot() cannot be used on an empty search');
+        static::expectExceptionMessage(
+            'The MeiliSearchBundle\Search\Search::andNot() cannot be used on an empty search'
+        );
         static::expectExceptionCode(0);
         Search::within('foo')->andNot('id', '=', 1);
     }

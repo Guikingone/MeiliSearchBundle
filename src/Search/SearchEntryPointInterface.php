@@ -12,8 +12,6 @@ interface SearchEntryPointInterface
     /**
      * The core entrypoint for searching in documents.
      *
-     * @param string               $index
-     * @param string               $query
      * @param array<string, mixed> $options
      *
      * @return SearchResultInterface<string, mixed>

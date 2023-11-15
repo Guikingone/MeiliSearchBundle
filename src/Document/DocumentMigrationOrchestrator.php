@@ -8,6 +8,7 @@ use MeiliSearchBundle\Dump\DumpOrchestratorInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+
 use function sprintf;
 
 /**
@@ -15,44 +16,33 @@ use function sprintf;
  */
 final class DocumentMigrationOrchestrator implements DocumentMigrationOrchestratorInterface
 {
-    /**
-     * @var DocumentEntryPointInterface
-     */
-    private $documentEntryPoint;
+    private readonly LoggerInterface $logger;
 
     /**
-     * @var DumpOrchestratorInterface
-     */
-    private $dumpOrchestrator;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @param DocumentEntryPointInterface $documentEntryPoint
-     * @param DumpOrchestratorInterface   $dumpOrchestrator
-     * @param LoggerInterface|null        $logger
+     * @param LoggerInterface|null $logger
      */
     public function __construct(
-        DocumentEntryPointInterface $documentEntryPoint,
-        DumpOrchestratorInterface $dumpOrchestrator,
+        private readonly DocumentEntryPointInterface $documentEntryPoint,
+        private readonly DumpOrchestratorInterface $dumpOrchestrator,
         ?LoggerInterface $logger = null
     ) {
-        $this->documentEntryPoint = $documentEntryPoint;
-        $this->dumpOrchestrator = $dumpOrchestrator;
         $this->logger = $logger ?: new NullLogger();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function migrate(string $oldIndexUid, string $newIndexUid, bool $removeOldIndexDocuments = false): void
-    {
-        $oldIndexDocuments = $this->documentEntryPoint->getDocuments($oldIndexUid);
+    public function migrate(
+        string $oldIndexUid,
+        string $newIndexUid,
+        bool $removeOldIndexDocuments = false,
+        array $options = []
+    ): void {
+        $oldIndexDocuments = $this->documentEntryPoint->getDocuments($oldIndexUid, $options);
         if (empty($oldIndexDocuments)) {
-            $this->logger->info(sprintf('The documents from "%s" cannot be migrated as the document list is empty', $oldIndexUid));
+            $this->logger->info(
+                sprintf('The documents from "%s" cannot be migrated as the document list is empty', $oldIndexUid)
+            );
 
             return;
         }
@@ -62,10 +52,13 @@ final class DocumentMigrationOrchestrator implements DocumentMigrationOrchestrat
         try {
             $this->documentEntryPoint->addDocuments($newIndexUid, $oldIndexDocuments);
         } catch (Throwable $throwable) {
-            $this->logger->critical('The documents cannot be migrated, a dump has been created before trying to add the new documents', [
-                'error' => $throwable->getMessage(),
-                'index' => $newIndexUid,
-            ]);
+            $this->logger->critical(
+                'The documents cannot be migrated, a dump has been created before trying to add the new documents',
+                [
+                    'error' => $throwable->getMessage(),
+                    'index' => $newIndexUid,
+                ]
+            );
 
             throw $throwable;
         }

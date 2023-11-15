@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexCreatedEvent;
 use MeiliSearchBundle\Event\Index\IndexEventInterface;
 use MeiliSearchBundle\Event\Index\IndexEventList;
@@ -13,7 +13,6 @@ use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use MeiliSearchBundle\Event\Index\PostSettingsUpdateEvent;
 use MeiliSearchBundle\Event\Index\PreSettingsUpdateEvent;
 use PHPUnit\Framework\TestCase;
-use function count;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -29,7 +28,7 @@ final class IndexEventListTest extends TestCase
         $list->add($event);
 
         static::assertNotEmpty($list->getEvents());
-        static::assertSame(1, $list->count());
+        static::assertCount(1, $list);
     }
 
     public function testIndexCreatedEventCanBeRetrieved(): void
@@ -45,7 +44,7 @@ final class IndexEventListTest extends TestCase
         $list->add($indexRemovedEvent);
 
         static::assertNotEmpty($list->getIndexCreatedEvents());
-        static::assertSame(1, count($list->getIndexCreatedEvents()));
+        static::assertCount(1, $list->getIndexCreatedEvents());
         static::assertNotContains($indexRemovedEvent, $list->getIndexCreatedEvents());
         static::assertSame([$event], $list->getIndexCreatedEvents());
     }

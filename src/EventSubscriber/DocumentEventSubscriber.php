@@ -23,24 +23,17 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 final class DocumentEventSubscriber implements EventSubscriberInterface
 {
     private const DOCUMENT_LOG_KEY = 'document';
+
     private const INDEX_LOG_KEY = 'index';
+
     private const UPDATE_LOG_KEY = 'update';
 
-    /**
-     * @var DocumentEventListInterface
-     */
-    private $documentEventList;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        DocumentEventListInterface $documentEventList,
+        private readonly DocumentEventListInterface $documentEventList,
         ?LoggerInterface $logger = null
     ) {
-        $this->documentEventList = $documentEventList;
         $this->logger = $logger ?: new NullLogger();
     }
 

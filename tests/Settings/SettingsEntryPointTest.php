@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Settings;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Settings\SettingsEntryPoint;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,9 @@ final class SettingsEntryPointTest extends TestCase
         ]);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('getIndex')->willThrowException(new RuntimeException('An error occurred'));
+        $orchestrator->expects(self::once())->method('getIndex')->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $entryPoint = new SettingsEntryPoint($orchestrator, $logger);
 
@@ -48,7 +50,7 @@ final class SettingsEntryPointTest extends TestCase
                 'attribute',
                 'wordsPosition',
                 'exactness',
-                'desc(release_date)'
+                'desc(release_date)',
             ],
             'attributesForFaceting' => ['genre'],
             'distinctAttribute' => null,
@@ -58,7 +60,7 @@ final class SettingsEntryPointTest extends TestCase
                 'description',
                 'release_date',
                 'rank',
-                'poster'
+                'poster',
             ],
             'stopWords' => null,
             'synonyms' => [
@@ -94,7 +96,9 @@ final class SettingsEntryPointTest extends TestCase
             'poster',
         ], $settings->getDisplayedAttributes());
         static::assertNull($settings->getStopWords());
-        static::assertArrayHasKey('wolverine', $settings->getSynonyms());
-        static::assertArrayHasKey('logan', $settings->getSynonyms());
+        /** @var array<string, array<int, string>> $synonyms */
+        $synonyms = $settings->getSynonyms();
+        static::assertArrayHasKey('wolverine', $synonyms);
+        static::assertArrayHasKey('logan', $synonyms);
     }
 }
