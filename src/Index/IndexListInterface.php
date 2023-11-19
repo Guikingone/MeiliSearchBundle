@@ -7,7 +7,7 @@ namespace MeiliSearchBundle\Index;
 use Closure;
 use Countable;
 use IteratorAggregate;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -25,9 +25,7 @@ interface IndexListInterface extends Countable, IteratorAggregate
      *
      * The method DOES not trigger a new request.
      *
-     * @param Closure $filter
      *
-     * @return IndexListInterface
      */
     public function filter(Closure $filter): IndexListInterface;
 

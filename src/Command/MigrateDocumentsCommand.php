@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Command;
 
 use MeiliSearchBundle\Document\DocumentMigrationOrchestratorInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,27 +13,20 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
+
 use function sprintf;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
+#[AsCommand(
+    name: 'meili:migrate-documents',
+    description: 'Migrate the documents from an index to another one',
+)]
 final class MigrateDocumentsCommand extends Command
 {
-    /**
-     * @var DocumentMigrationOrchestratorInterface
-     */
-    private $migrationOrchestrator;
-
-    /**
-     * @var string|null
-     */
-    protected static $defaultName = 'meili:migrate-documents';
-
-    public function __construct(DocumentMigrationOrchestratorInterface $migrationOrchestrator)
+    public function __construct(private readonly DocumentMigrationOrchestratorInterface $migrationOrchestrator)
     {
-        $this->migrationOrchestrator = $migrationOrchestrator;
-
         parent::__construct();
     }
 
@@ -42,13 +36,25 @@ final class MigrateDocumentsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Migrate the documents from an index to another one')
             ->setDefinition([
-                new InputArgument('oldIndex', InputArgument::REQUIRED, 'The name of the index from the documents must be migrated'),
-                new InputOption('index', 'i', InputOption::VALUE_REQUIRED, 'The name of the index where the documents must be migrated'),
-                new InputOption('remove', 'r', InputOption::VALUE_OPTIONAL|InputOption::VALUE_NONE, 'If the documents must be removed from the old index'),
-            ])
-        ;
+                new InputArgument(
+                    'oldIndex',
+                    InputArgument::REQUIRED,
+                    'The name of the index from the documents must be migrated'
+                ),
+                new InputOption(
+                    'index',
+                    'i',
+                    InputOption::VALUE_REQUIRED,
+                    'The name of the index where the documents must be migrated'
+                ),
+                new InputOption(
+                    'remove',
+                    'r',
+                    InputOption::VALUE_OPTIONAL | InputOption::VALUE_NONE,
+                    'If the documents must be removed from the old index'
+                ),
+            ]);
     }
 
     /**
@@ -67,7 +73,7 @@ final class MigrateDocumentsCommand extends Command
         } catch (Throwable $throwable) {
             $style->error([
                 'The documents cannot be migrated!',
-                sprintf('Error: "%s"', $throwable->getMessage())
+                sprintf('Error: "%s"', $throwable->getMessage()),
             ]);
 
             return 1;

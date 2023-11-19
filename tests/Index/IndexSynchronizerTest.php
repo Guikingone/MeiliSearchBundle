@@ -25,7 +25,11 @@ final class IndexSynchronizerTest extends TestCase
         $settingsEntryPoint = $this->createMock(SettingsEntryPointInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('The indexes cannot be created as the instance and the local storage are already synchronized'));
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo(
+                'The indexes cannot be created as the instance and the local storage are already synchronized'
+            )
+        );
 
         $list = $this->createMock(IndexListInterface::class);
         $list->expects(self::once())->method('count')->willReturn(2);
@@ -41,7 +45,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
         $synchronizer->createIndexes([]);
     }
 
@@ -51,16 +61,21 @@ final class IndexSynchronizerTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('info');
-        $logger->expects(self::once())->method('critical')->with(self::equalTo('An error occurred when creating the indexes'), [
-            'error' => 'An error occurred',
-        ]);
+        $logger->expects(self::once())->method('critical')->with(
+            self::equalTo('An error occurred when creating the indexes'),
+            [
+                'error' => 'An error occurred',
+            ]
+        );
 
         $list = $this->createMock(IndexListInterface::class);
         $list->expects(self::once())->method('count')->willReturn(2);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::exactly(2))->method('getIndexes')->willReturn($list);
-        $orchestrator->expects(self::once())->method('addIndex')->willThrowException(new RuntimeException('An error occurred'));
+        $orchestrator->expects(self::once())->method('addIndex')->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::once())->method('count')->willReturn(1);
@@ -72,7 +87,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
@@ -98,16 +119,20 @@ final class IndexSynchronizerTest extends TestCase
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::exactly(2))->method('getIndexes')->willReturn($list);
-        $orchestrator->expects(self::once())->method('addIndex')->with(self::equalTo('foo'), self::equalTo('id'), self::equalTo([
-            'primaryKey' => 'id',
-            'rankingRules' => [],
-            'stopWords' => [],
-            'distinctAttribute' => null,
-            'facetedAttributes' => [],
-            'searchableAttributes' => [],
-            'displayedAttributes' => [],
-            'synonyms' => [],
-        ]));
+        $orchestrator->expects(self::once())->method('addIndex')->with(
+            self::equalTo('foo'),
+            self::equalTo('id'),
+            self::equalTo([
+                'primaryKey' => 'id',
+                'rankingRules' => [],
+                'stopWords' => [],
+                'distinctAttribute' => null,
+                'facetedAttributes' => [],
+                'searchableAttributes' => [],
+                'displayedAttributes' => [],
+                'synonyms' => [],
+            ])
+        );
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::once())->method('count')->willReturn(1);
@@ -115,8 +140,7 @@ final class IndexSynchronizerTest extends TestCase
             ->with(
                 self::equalTo('foo'),
                 new IndexMetadata('foo', false, 'id', [], [], null, [], [], [], [])
-            )
-        ;
+            );
         $metadataRegistry->expects(self::once())->method('toArray')->willReturn([
             'foo' => new IndexMetadata('foo', false, 'id', [], [], null, [], [], [], []),
         ]);
@@ -124,7 +148,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         $synchronizer->createIndexes([
             'foo' => [
@@ -147,16 +177,20 @@ final class IndexSynchronizerTest extends TestCase
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::exactly(2))->method('getIndexes')->willReturn($list);
-        $orchestrator->expects(self::once())->method('addIndex')->with(self::equalTo('_ms_foo'), self::equalTo('id'), self::equalTo([
-            'primaryKey' => 'id',
-            'rankingRules' => [],
-            'stopWords' => [],
-            'distinctAttribute' => null,
-            'facetedAttributes' => [],
-            'searchableAttributes' => [],
-            'displayedAttributes' => [],
-            'synonyms' => [],
-        ]));
+        $orchestrator->expects(self::once())->method('addIndex')->with(
+            self::equalTo('_ms_foo'),
+            self::equalTo('id'),
+            self::equalTo([
+                'primaryKey' => 'id',
+                'rankingRules' => [],
+                'stopWords' => [],
+                'distinctAttribute' => null,
+                'facetedAttributes' => [],
+                'searchableAttributes' => [],
+                'displayedAttributes' => [],
+                'synonyms' => [],
+            ])
+        );
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::once())->method('count')->willReturn(1);
@@ -164,8 +198,7 @@ final class IndexSynchronizerTest extends TestCase
             ->with(
                 self::equalTo('_ms_foo'),
                 new IndexMetadata('_ms_foo', false, 'id', [], [], null, [], [], [], [])
-            )
-        ;
+            );
         $metadataRegistry->expects(self::once())->method('toArray')->willReturn([
             'foo' => new IndexMetadata('_ms_foo', false, 'id', [], [], null, [], [], [], []),
         ]);
@@ -173,7 +206,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         $synchronizer->createIndexes([
             'foo' => [
@@ -188,22 +227,28 @@ final class IndexSynchronizerTest extends TestCase
         $settingsEntryPoint = $this->createMock(SettingsEntryPointInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('critical')->with(self::equalTo('An error occurred when updating the indexes'), self::equalTo([
-            'error' => 'An error occurred',
-        ]));
+        $logger->expects(self::once())->method('critical')->with(
+            self::equalTo('An error occurred when updating the indexes'),
+            self::equalTo([
+                'error' => 'An error occurred',
+            ])
+        );
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::never())->method('getIndexes');
-        $orchestrator->expects(self::once())->method('update')->with(self::equalTo('_ms_foo'), self::equalTo([
-            'primaryKey' => 'id',
-            'rankingRules' => [],
-            'stopWords' => [],
-            'distinctAttribute' => null,
-            'facetedAttributes' => [],
-            'searchableAttributes' => [],
-            'displayedAttributes' => [],
-            'synonyms' => [],
-        ]))->willThrowException(new RuntimeException('An error occurred'));
+        $orchestrator->expects(self::once())->method('update')->with(
+            self::equalTo('_ms_foo'),
+            self::equalTo([
+                'primaryKey' => 'id',
+                'rankingRules' => [],
+                'stopWords' => [],
+                'distinctAttribute' => null,
+                'facetedAttributes' => [],
+                'searchableAttributes' => [],
+                'displayedAttributes' => [],
+                'synonyms' => [],
+            ])
+        )->willThrowException(new RuntimeException('An error occurred'));
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::never())->method('count');
@@ -211,13 +256,18 @@ final class IndexSynchronizerTest extends TestCase
             ->with(
                 self::equalTo('_ms_foo'),
                 new IndexMetadata('_ms_foo', false, 'id', [], [], null, [], [], [], [])
-            )
-        ;
+            );
         $metadataRegistry->expects(self::once())->method('toArray')->willReturn([
             'foo' => new IndexMetadata('_ms_foo', false, 'id', [], [], null, [], [], [], []),
         ]);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::expectException(RuntimeException::class);
         static::expectExceptionCode(0);
@@ -239,16 +289,19 @@ final class IndexSynchronizerTest extends TestCase
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::never())->method('getIndexes');
-        $orchestrator->expects(self::once())->method('update')->with(self::equalTo('_ms_foo'), self::equalTo([
-            'primaryKey' => 'id',
-            'rankingRules' => [],
-            'stopWords' => [],
-            'distinctAttribute' => null,
-            'facetedAttributes' => [],
-            'searchableAttributes' => [],
-            'displayedAttributes' => [],
-            'synonyms' => [],
-        ]));
+        $orchestrator->expects(self::once())->method('update')->with(
+            self::equalTo('_ms_foo'),
+            self::equalTo([
+                'primaryKey' => 'id',
+                'rankingRules' => [],
+                'stopWords' => [],
+                'distinctAttribute' => null,
+                'facetedAttributes' => [],
+                'searchableAttributes' => [],
+                'displayedAttributes' => [],
+                'synonyms' => [],
+            ])
+        );
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::never())->method('count');
@@ -256,13 +309,18 @@ final class IndexSynchronizerTest extends TestCase
             ->with(
                 self::equalTo('_ms_foo'),
                 new IndexMetadata('_ms_foo', false, 'id', [], [], null, [], [], [], [])
-            )
-        ;
+            );
         $metadataRegistry->expects(self::once())->method('toArray')->willReturn([
             'foo' => new IndexMetadata('_ms_foo', false, 'id', [], [], null, [], [], [], []),
         ]);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         $synchronizer->updateIndexes([
             'foo' => [
@@ -281,16 +339,19 @@ final class IndexSynchronizerTest extends TestCase
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
         $orchestrator->expects(self::never())->method('getIndexes');
-        $orchestrator->expects(self::once())->method('update')->with(self::equalTo('foo'), self::equalTo([
-            'primaryKey' => 'id',
-            'rankingRules' => [],
-            'stopWords' => [],
-            'distinctAttribute' => null,
-            'facetedAttributes' => [],
-            'searchableAttributes' => [],
-            'displayedAttributes' => [],
-            'synonyms' => [],
-        ]));
+        $orchestrator->expects(self::once())->method('update')->with(
+            self::equalTo('foo'),
+            self::equalTo([
+                'primaryKey' => 'id',
+                'rankingRules' => [],
+                'stopWords' => [],
+                'distinctAttribute' => null,
+                'facetedAttributes' => [],
+                'searchableAttributes' => [],
+                'displayedAttributes' => [],
+                'synonyms' => [],
+            ])
+        );
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::never())->method('count');
@@ -298,13 +359,18 @@ final class IndexSynchronizerTest extends TestCase
             ->with(
                 self::equalTo('foo'),
                 new IndexMetadata('foo', false, 'id', [], [], null, [], [], [], [])
-            )
-        ;
+            );
         $metadataRegistry->expects(self::once())->method('toArray')->willReturn([
             'foo' => new IndexMetadata('foo', false, 'id', [], [], null, [], [], [], []),
         ]);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         $synchronizer->updateIndexes([
             'foo' => [
@@ -313,55 +379,15 @@ final class IndexSynchronizerTest extends TestCase
         ]);
     }
 
-    public function testSynchronizerCannotDropIndexesWithException(): void
-    {
-        $settingsEntryPoint = $this->createMock(SettingsEntryPointInterface::class);
-        $entryPoint = $this->createMock(HealthEntryPointInterface::class);
-
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndexes')->willThrowException(new RuntimeException('An error occurred'));
-
-        $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $metadataRegistry->expects(self::never())->method('clear');
-
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('critical')->with(self::equalTo('The indexes cannot be dropped'), [
-            'error' => 'An error occurred',
-        ]);
-
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
-
-        static::expectException(RuntimeException::class);
-        static::expectExceptionMessage('An error occurred');
-        static::expectExceptionCode(0);
-        $synchronizer->dropIndexes();
-    }
-
-    public function testSynchronizerCanDropIndexes(): void
-    {
-        $settingsEntryPoint = $this->createMock(SettingsEntryPointInterface::class);
-        $entryPoint = $this->createMock(HealthEntryPointInterface::class);
-
-        $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndexes');
-
-        $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
-        $metadataRegistry->expects(self::once())->method('clear');
-
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::never())->method('critical');
-
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
-        $synchronizer->dropIndexes();
-    }
-
     public function testSynchronizerCannotDropIndexWithException(): void
     {
         $settingsEntryPoint = $this->createMock(SettingsEntryPointInterface::class);
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
 
         $orchestrator = $this->createMock(IndexOrchestratorInterface::class);
-        $orchestrator->expects(self::once())->method('removeIndex')->with(self::equalTo('foo'))->willThrowException(new RuntimeException('An error occurred'));
+        $orchestrator->expects(self::once())->method('removeIndex')->with(self::equalTo('foo'))->willThrowException(
+            new RuntimeException('An error occurred')
+        );
 
         $metadataRegistry = $this->createMock(IndexMetadataRegistryInterface::class);
         $metadataRegistry->expects(self::never())->method('remove')->with(self::equalTo('foo'));
@@ -372,7 +398,13 @@ final class IndexSynchronizerTest extends TestCase
             'error' => 'An error occurred',
         ]);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::expectException(RuntimeException::class);
         static::expectExceptionMessage('An error occurred');
@@ -394,7 +426,13 @@ final class IndexSynchronizerTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('critical');
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
         $synchronizer->dropIndex('foo');
     }
 
@@ -408,7 +446,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(false);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::assertFalse($synchronizer->isSynchronized());
     }
@@ -425,7 +469,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::assertFalse($synchronizer->isSynchronized());
     }
@@ -447,7 +497,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::assertFalse($synchronizer->isSynchronized());
     }
@@ -469,7 +525,13 @@ final class IndexSynchronizerTest extends TestCase
         $entryPoint = $this->createMock(HealthEntryPointInterface::class);
         $entryPoint->expects(self::once())->method('isUp')->willReturn(true);
 
-        $synchronizer = new IndexSynchronizer($orchestrator, $metadataRegistry, $entryPoint, $settingsEntryPoint, $logger);
+        $synchronizer = new IndexSynchronizer(
+            $orchestrator,
+            $metadataRegistry,
+            $entryPoint,
+            $settingsEntryPoint,
+            $logger
+        );
 
         static::assertTrue($synchronizer->isSynchronized());
     }

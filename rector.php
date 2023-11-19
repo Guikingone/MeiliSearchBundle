@@ -2,45 +2,49 @@
 
 declare(strict_types=1);
 
-use Rector\Core\Configuration\Option;
+use Rector\CodeQuality\Rector\BooleanAnd\SimplifyEmptyArrayCheckRector;
+use Rector\CodeQuality\Rector\Empty_\SimplifyEmptyCheckOnEmptyArrayRector;
+use Rector\CodeQuality\Rector\Identical\SimplifyBoolIdenticalTrueRector;
+use Rector\CodingStyle\Rector\FuncCall\CountArrayToEmptyArrayComparisonRector;
+use Rector\Config\RectorConfig;
+use Rector\Core\ValueObject\PhpVersion;
+use Rector\EarlyReturn\Rector\If_\ChangeNestedIfsToEarlyReturnRector;
+use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Rector\Strict\Rector\Empty_\DisallowedEmptyRuleFixerRector;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $parameters = $containerConfigurator->parameters();
-
-    $parameters->set(Option::PHP_VERSION_FEATURES, '7.2');
-    $parameters->set(Option::AUTO_IMPORT_NAMES, true);
-
-    $parameters->set(Option::PATHS, [
+return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->phpVersion(phpVersion: PhpVersion::PHP_72);
+    $rectorConfig->importNames();
+    $rectorConfig->disableParallel();
+    $rectorConfig->importShortClasses();
+    $rectorConfig->paths([
         __DIR__ . '/src',
-        __DIR__ . '/tests',
     ]);
-
-    $parameters->set(Option::EXCLUDE_PATHS, [
+    $rectorConfig->autoloadPaths(autoloadPaths: [
+        __DIR__ . '/vendor/autoload.php',
+    ]);
+    $rectorConfig->skip([
         __DIR__ . '/vendor',
         __DIR__ . '/src/Test',
     ]);
 
-    $parameters->set(Option::AUTOLOAD_PATHS, [
-        __DIR__ . '/vendor/autoload.php',
-    ]);
-
-    $parameters->set(Option::SETS, [
-        SetList::PHP_70,
-        SetList::PHP_71,
-        SetList::PHP_72,
+    $rectorConfig->sets([
+        SetList::CODING_STYLE,
+        SetList::CODE_QUALITY,
+        SetList::INSTANCEOF,
+        SetList::EARLY_RETURN,
         SetList::DEAD_CODE,
-        //SetList::CODING_STYLE,
-        //SetList::CODING_STYLE_ADVANCED,
-        SetList::PERFORMANCE,
-        //SetList::PHPUNIT_CODE_QUALITY,
-        SetList::PHPSTAN,
-        SetList::SOLID,
-        SetList::TWIG_20,
-        SetList::TWIG_UNDERSCORE_TO_NAMESPACE,
         SetList::TYPE_DECLARATION,
+        LevelSetList::UP_TO_PHP_81,
     ]);
 
-    $parameters->set(Option::ENABLE_CACHE, true);
+    $rectorConfig->skip(criteria: [
+        SimplifyBoolIdenticalTrueRector::class,
+        SimplifyEmptyArrayCheckRector::class,
+        SimplifyEmptyCheckOnEmptyArrayRector::class,
+        CountArrayToEmptyArrayComparisonRector::class,
+        DisallowedEmptyRuleFixerRector::class,
+        ChangeNestedIfsToEarlyReturnRector::class,
+    ]);
 };

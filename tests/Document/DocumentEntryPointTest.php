@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Document;
 
+use ArrayAccess;
 use Exception;
 use Generator;
 use InvalidArgumentException;
-use MeiliSearch\Client;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Client;
+use Meilisearch\Contracts\DocumentsQuery;
+use Meilisearch\Contracts\DocumentsResults;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidDenormalizer;
 use MeiliSearchBundle\Bridge\RamseyUuid\Serializer\UuidNormalizer;
 use MeiliSearchBundle\Document\DocumentEntryPoint;
@@ -26,6 +29,7 @@ use stdClass;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+
 use function implode;
 
 /**
@@ -41,13 +45,15 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
+        $logger->expects(self::once())->method('error')->with(
+            'The document cannot be created, error: "An error occurred"'
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::never())->method('addDocuments');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -68,13 +74,15 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
+        $logger->expects(self::once())->method('error')->with(
+            'The document cannot be created, error: "An error occurred"'
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('addDocuments')->willThrowException(new Exception('An error occurred'));
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -103,10 +111,10 @@ final class DocumentEntryPointTest extends TestCase
                 'id' => 1,
                 'title' => 'foo',
             ],
-        ], null)->willReturn(['updateId' => 1]);
+        ], null)->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
         $orchestrator->addDocument('test', [
@@ -132,10 +140,10 @@ final class DocumentEntryPointTest extends TestCase
                 'title' => 'foo',
                 'model' => stdClass::class,
             ],
-        ], 'id')->willReturn(['updateId' => 1]);
+        ], 'id')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
         $orchestrator->addDocument('test', [
@@ -152,13 +160,15 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
+        $logger->expects(self::once())->method('error')->with(
+            'The document cannot be created, error: "An error occurred"'
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::never())->method('addDocuments');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -179,7 +189,9 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with('The document cannot be created, error: "An error occurred"');
+        $logger->expects(self::once())->method('error')->with(
+            'The document cannot be created, error: "An error occurred"'
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('addDocuments')->with([
@@ -190,7 +202,7 @@ final class DocumentEntryPointTest extends TestCase
         ])->willThrowException(new Exception('An error occurred'));
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -221,10 +233,10 @@ final class DocumentEntryPointTest extends TestCase
                 'id' => 1,
                 'title' => 'foo',
             ],
-        ], null)->willReturn(['updateId' => 1]);
+        ], null)->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
         $orchestrator->addDocuments('test', [
@@ -246,7 +258,7 @@ final class DocumentEntryPointTest extends TestCase
         $index->expects(self::never())->method('getDocument');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
@@ -267,7 +279,7 @@ final class DocumentEntryPointTest extends TestCase
         $index->expects(self::once())->method('getDocument')->willThrowException(new Exception('An error occurred'));
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
@@ -291,20 +303,23 @@ final class DocumentEntryPointTest extends TestCase
         ]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $matcher = $this->exactly(2);
         $eventDispatcher->expects(self::exactly(2))->method('dispatch')
-            ->withConsecutive(
-                [new PreDocumentRetrievedEvent($index, 'test')],
-                [new PostDocumentRetrievedEvent($index, [
-                    'id' => 'foo',
-                    'value' => 'foo',
-                ])]
-            )
-        ;
+            ->willReturnCallback(function () use ($matcher, $index) {
+                return match ($matcher->getInvocationCount()) {
+                    0 => new PreDocumentRetrievedEvent($index, 'test'),
+                    default => new PostDocumentRetrievedEvent($index, [
+                        'id' => 'foo',
+                        'value' => 'foo',
+                    ])
+                };
+            });
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher);
+        /** @var array{mixed}|ArrayAccess $document */
         $document = $orchestrator->getDocument('test', 'test');
 
         static::assertArrayHasKey('id', $document);
@@ -326,7 +341,7 @@ final class DocumentEntryPointTest extends TestCase
         ]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
         $document = $orchestrator->getDocument('test', 'test');
@@ -339,13 +354,15 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The documents cannot be retrieved, error: "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('The documents cannot be retrieved, error: "An error occurred"')
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::never())->method('getDocuments');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
@@ -366,7 +383,7 @@ final class DocumentEntryPointTest extends TestCase
         $index->expects(self::never())->method('getDocuments');
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::never())->method('getIndex');
+        $client->expects(self::never())->method('index');
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
@@ -387,23 +404,28 @@ final class DocumentEntryPointTest extends TestCase
         $logger->expects(self::never())->method('error');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getDocuments')->with(self::equalTo($options))->willReturn([
-            [
-                'id' => 1,
-                'value' => 'foo',
-            ],
-            [
-                'id' => 2,
-                'value' => 'foo',
-            ],
-        ]);
+        $index->expects(self::once())->method('getDocuments')->with(self::equalTo($options[1]))->willReturn(
+            new DocumentsResults([
+                'results' => [
+                    [
+                        'id' => 1,
+                        'value' => 'foo',
+                    ],
+                    [
+                        'id' => 2,
+                        'value' => 'foo',
+                    ],
+                ],
+                'offset' => 1,
+                'limit' => 20,
+            ])
+        );
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
-
-        static::assertNotEmpty($orchestrator->getDocuments('test', $options));
+        static::assertNotEmpty($orchestrator->getDocuments('test', $options[0]));
     }
 
     public function testDocumentsCanBeReturned(): void
@@ -414,19 +436,25 @@ final class DocumentEntryPointTest extends TestCase
         $logger->expects(self::never())->method('error');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getDocuments')->willReturn([
-            [
-                'id' => 1,
-                'value' => 'foo',
-            ],
-            [
-                'id' => 2,
-                'value' => 'foo',
-            ],
-        ]);
+        $index->expects(self::once())->method('getDocuments')->willReturn(
+            new DocumentsResults([
+                'results' => [
+                    [
+                        'id' => 1,
+                        'value' => 'foo',
+                    ],
+                    [
+                        'id' => 2,
+                        'value' => 'foo',
+                    ],
+                ],
+                'offset' => 0,
+                'limit' => 20,
+            ])
+        );
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
 
@@ -441,21 +469,27 @@ final class DocumentEntryPointTest extends TestCase
         $logger->expects(self::never())->method('error');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getDocuments')->willReturn([
-            [
-                'id' => 1,
-                'value' => 'foo',
-                'model' => FooModel::class,
-            ],
-            [
-                'id' => 2,
-                'value' => 'foo',
-                'model' => FooModel::class,
-            ],
-        ]);
+        $index->expects(self::once())->method('getDocuments')->willReturn(
+            new DocumentsResults([
+                'results' => [
+                    [
+                        'id' => 1,
+                        'value' => 'foo',
+                        'model' => FooModel::class,
+                    ],
+                    [
+                        'id' => 2,
+                        'value' => 'foo',
+                        'model' => FooModel::class,
+                    ],
+                ],
+                'offset' => 0,
+                'limit' => 20,
+            ])
+        );
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
         $documents = $orchestrator->getDocuments('test');
@@ -470,31 +504,39 @@ final class DocumentEntryPointTest extends TestCase
      */
     public function testDocumentsCanBeReturnedWithModelsThatUseUuid(): void
     {
-        $resultBuilder = new ResultBuilder(new Serializer([
-            new ObjectNormalizer(),
-            new UuidNormalizer(),
-            new UuidDenormalizer(),
-        ]));
+        $resultBuilder = new ResultBuilder(
+            new Serializer([
+                new ObjectNormalizer(),
+                new UuidNormalizer(),
+                new UuidDenormalizer(),
+            ])
+        );
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('error');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getDocuments')->willReturn([
-            [
-                'id' => (Uuid::uuid4())->toString(),
-                'value' => 'foo',
-                'model' => BarModel::class,
-            ],
-            [
-                'id' => (Uuid::uuid4())->toString(),
-                'value' => 'foo',
-                'model' => BarModel::class,
-            ],
-        ]);
+        $index->expects(self::once())->method('getDocuments')->willReturn(
+            new DocumentsResults([
+                'results' => [
+                    [
+                        'id' => (Uuid::uuid4())->toString(),
+                        'value' => 'foo',
+                        'model' => BarModel::class,
+                    ],
+                    [
+                        'id' => (Uuid::uuid4())->toString(),
+                        'value' => 'foo',
+                        'model' => BarModel::class,
+                    ],
+                ],
+                'offset' => 0,
+                'limit' => 20,
+            ])
+        );
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
         $documents = $orchestrator->getDocuments('test');
@@ -525,7 +567,7 @@ final class DocumentEntryPointTest extends TestCase
         ]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -554,10 +596,10 @@ final class DocumentEntryPointTest extends TestCase
                 'id' => 1,
                 'value' => 'foo',
             ],
-        ])->willReturn(['updateId' => 1]);
+        ])->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
         $orchestrator->updateDocument('test', [
@@ -582,10 +624,10 @@ final class DocumentEntryPointTest extends TestCase
                 'id' => 1,
                 'value' => 'foo',
             ],
-        ])->willReturn(['updateId' => 1]);
+        ])->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher);
         $orchestrator->updateDocument('test', [
@@ -597,7 +639,9 @@ final class DocumentEntryPointTest extends TestCase
     public function testDocumentCannotBeRemovedWithInvalidIndex(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The document cannot be removed, error: "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('The document cannot be removed, error: "An error occurred"')
+        );
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::never())->method('dispatch');
@@ -605,10 +649,10 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::never())->method('deleteDocument')->willReturn(['updateId' => 1]);
+        $index->expects(self::never())->method('deleteDocument')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -627,21 +671,23 @@ final class DocumentEntryPointTest extends TestCase
             'id' => 1,
             'value' => 'foo',
         ]);
-        $index->expects(self::once())->method('deleteDocument')->willReturn(['updateId' => 1]);
+        $index->expects(self::once())->method('deleteDocument')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $matcher = $this->exactly(2);
         $eventDispatcher->expects(self::exactly(2))->method('dispatch')
-            ->withConsecutive(
-                [new PreDocumentDeletionEvent($index, [
-                    'id' => 1,
-                    'value' => 'foo',
-                ])],
-                [new PostDocumentDeletionEvent(1)]
-            )
-        ;
+            ->willReturnCallback(function () use ($matcher, $index) {
+                return match ($matcher->getInvocationCount()) {
+                    0 => new PreDocumentDeletionEvent($index, [
+                        'id' => 1,
+                        'value' => 'foo',
+                    ]),
+                    default => new PostDocumentDeletionEvent(1)
+                };
+            });
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher);
         $orchestrator->removeDocument('foo', 1);
@@ -655,17 +701,19 @@ final class DocumentEntryPointTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('info')->with(self::equalTo('A set of documents has been removed'), [
             'documents' => implode(', ', [1, 2, 3]),
-            'update_identifier' => 1,
+            'task_uid' => 1,
         ]);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('The documents cannot be removed, error: "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('The documents cannot be removed, error: "An error occurred"')
+        );
 
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::never())->method('deleteDocuments')->willReturn(['updateId' => 1]);
+        $index->expects(self::never())->method('deleteDocuments')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
+        $client->expects(self::once())->method('index')->willThrowException(new Exception('An error occurred'));
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
 
@@ -683,16 +731,16 @@ final class DocumentEntryPointTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('info')->with(self::equalTo('A set of documents has been removed'), [
             'documents' => implode(', ', [1, 2, 3]),
-            'update_identifier' => 1,
+            'task_uid' => 1,
         ]);
 
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('deleteDocuments')->willReturn(['updateId' => 1]);
+        $index->expects(self::once())->method('deleteDocuments')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, $eventDispatcher, $logger);
         $orchestrator->removeSetOfDocuments('foo', [1, 2, 3]);
@@ -703,10 +751,10 @@ final class DocumentEntryPointTest extends TestCase
         $resultBuilder = $this->createMock(ResultBuilderInterface::class);
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('deleteDocuments')->willReturn(['updateId' => 1]);
+        $index->expects(self::once())->method('deleteDocuments')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder);
         $orchestrator->removeSetOfDocuments('foo', [1, 2, 3]);
@@ -720,10 +768,12 @@ final class DocumentEntryPointTest extends TestCase
         $logger->expects(self::once())->method('error');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('deleteAllDocuments')->willThrowException(new Exception('An error occurred'));
+        $index->expects(self::once())->method('deleteAllDocuments')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
 
@@ -741,10 +791,10 @@ final class DocumentEntryPointTest extends TestCase
         $logger->expects(self::never())->method('error');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('deleteAllDocuments')->willReturn(['updateId' => 1]);
+        $index->expects(self::once())->method('deleteAllDocuments')->willReturn(['taskUid' => 1]);
 
         $client = $this->createMock(Client::class);
-        $client->expects(self::once())->method('getIndex')->willReturn($index);
+        $client->expects(self::once())->method('index')->willReturn($index);
 
         $orchestrator = new DocumentEntryPoint($client, $resultBuilder, null, $logger);
         $orchestrator->removeDocuments('test');
@@ -754,17 +804,26 @@ final class DocumentEntryPointTest extends TestCase
     {
         yield 'offset' => [
             [
-                'offset' => 1,
+                [
+                    'offset' => 1,
+                ],
+                (new DocumentsQuery())->setOffset(1),
             ],
         ];
         yield 'limit' => [
             [
-                'limit' => 1,
+                [
+                    'limit' => 1,
+                ],
+                (new DocumentsQuery())->setLimit(1),
             ],
         ];
-        yield 'attributesToReceive' => [
+        yield 'fields' => [
             [
-                'attributesToReceive' => ['id', 'title'],
+                [
+                    'fields' => ['id', 'title'],
+                ],
+                (new DocumentsQuery())->setFields(['id', 'title']),
             ],
         ];
     }

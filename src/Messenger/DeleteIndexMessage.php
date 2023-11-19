@@ -9,14 +9,8 @@ namespace MeiliSearchBundle\Messenger;
  */
 final class DeleteIndexMessage implements MessageInterface
 {
-    /**
-     * @var string
-     */
-    private $index;
-
-    public function __construct(string $index)
+    public function __construct(private readonly string $index)
     {
-        $this->index = $index;
     }
 
     public function getIndex(): string

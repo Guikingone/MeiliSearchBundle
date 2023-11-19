@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Synonyms;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -13,25 +13,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class PreUpdateSynonymsEvent extends Event
 {
     /**
-     * @var Indexes
-     */
-    private $index;
-
-    /**
-     * @var array<string,array>
-     */
-    private $synonyms;
-
-    /**
-     * @param Indexes             $index
      * @param array<string,array> $synonyms
      */
-    public function __construct(
-        Indexes $index,
-        array $synonyms
-    ) {
-        $this->index = $index;
-        $this->synonyms = $synonyms;
+    public function __construct(private readonly Indexes $index, private readonly array $synonyms)
+    {
     }
 
     public function getIndex(): Indexes

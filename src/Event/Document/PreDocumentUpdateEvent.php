@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Document;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -12,20 +12,13 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class PreDocumentUpdateEvent extends Event
 {
-    /**
-     * @var Indexes
-     */
-    private $index;
-
-    /**
-     * @var array<string,mixed>
-     */
-    private $document;
-
-    public function __construct(Indexes $index, array $document)
-    {
-        $this->index = $index;
-        $this->document = $document;
+    public function __construct(
+        private readonly Indexes $index,
+        /**
+         * @var array<string,mixed>
+         */
+        private readonly array $document
+    ) {
     }
 
     public function getIndex(): Indexes

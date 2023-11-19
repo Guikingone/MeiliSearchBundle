@@ -8,6 +8,7 @@ use MeiliSearchBundle\Exception\InvalidArgumentException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Serializer\SerializerInterface;
+
 use function count;
 use function file_get_contents;
 use function sprintf;
@@ -21,25 +22,13 @@ final class IndexMetadataRegistry implements IndexMetadataRegistryInterface
 {
     private const FILE_PATH_PREFIX = '_ms_bundle_';
 
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
+    private readonly string $path;
 
-    /**
-     * @var string
-     */
-    private $path;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    public function __construct(Filesystem $filesystem, SerializerInterface $serializer, ?string $path = null)
-    {
-        $this->filesystem = $filesystem;
-        $this->serializer = $serializer;
+    public function __construct(
+        private readonly Filesystem $filesystem,
+        private readonly SerializerInterface $serializer,
+        ?string $path = null
+    ) {
         $this->path = $path ?: sys_get_temp_dir();
     }
 

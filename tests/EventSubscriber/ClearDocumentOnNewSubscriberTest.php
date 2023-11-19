@@ -16,8 +16,14 @@ final class ClearDocumentOnNewSubscriberTest extends TestCase
 {
     public function testSubscriberIsConfigured(): void
     {
-        static::assertArrayHasKey(PostDocumentCreationEvent::class, ClearDocumentOnNewSubscriber::getSubscribedEvents());
-        static::assertSame('onDocumentCreated', ClearDocumentOnNewSubscriber::getSubscribedEvents()[PostDocumentCreationEvent::class]);
+        static::assertArrayHasKey(
+            PostDocumentCreationEvent::class,
+            ClearDocumentOnNewSubscriber::getSubscribedEvents()
+        );
+        static::assertSame(
+            'onDocumentCreated',
+            ClearDocumentOnNewSubscriber::getSubscribedEvents()[PostDocumentCreationEvent::class]
+        );
     }
 
     public function testCacheCanBeCleared(): void

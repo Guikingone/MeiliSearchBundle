@@ -32,7 +32,7 @@ final class FooDataProvider implements DocumentDataProviderInterface
     }
 
     /**
-     * @return array<string, int|string>
+     * {@inheritdoc}
      */
     public function getDocument(): array
     {

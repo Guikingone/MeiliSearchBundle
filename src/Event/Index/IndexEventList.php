@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Event\Index;
 
 use Countable;
+
 use function array_filter;
 use function count;
 
@@ -16,7 +17,7 @@ final class IndexEventList implements IndexEventListInterface, Countable
     /**
      * @var array<int, IndexEventInterface>
      */
-    private $events = [];
+    private array $events = [];
 
     public function add(IndexEventInterface $index): void
     {
@@ -28,9 +29,10 @@ final class IndexEventList implements IndexEventListInterface, Countable
      */
     public function getIndexCreatedEvents(): array
     {
-        return array_filter($this->events, function (IndexEventInterface $index): bool {
-            return $index instanceof IndexCreatedEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (IndexEventInterface $index): bool => $index instanceof IndexCreatedEvent
+        );
     }
 
     /**
@@ -38,9 +40,10 @@ final class IndexEventList implements IndexEventListInterface, Countable
      */
     public function getIndexRemovedEvents(): array
     {
-        return array_filter($this->events, function (IndexEventInterface $index): bool {
-            return $index instanceof IndexRemovedEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (IndexEventInterface $index): bool => $index instanceof IndexRemovedEvent
+        );
     }
 
     /**
@@ -48,9 +51,10 @@ final class IndexEventList implements IndexEventListInterface, Countable
      */
     public function getIndexRetrievedEvents(): array
     {
-        return array_filter($this->events, function (IndexEventInterface $index): bool {
-            return $index instanceof IndexRetrievedEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (IndexEventInterface $index): bool => $index instanceof IndexRetrievedEvent
+        );
     }
 
     /**
@@ -58,9 +62,10 @@ final class IndexEventList implements IndexEventListInterface, Countable
      */
     public function getPostSettingsUpdateEvents(): array
     {
-        return array_filter($this->events, function (IndexEventInterface $index): bool {
-            return $index instanceof PostSettingsUpdateEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (IndexEventInterface $index): bool => $index instanceof PostSettingsUpdateEvent
+        );
     }
 
     /**
@@ -68,9 +73,10 @@ final class IndexEventList implements IndexEventListInterface, Countable
      */
     public function getPreSettingsUpdateEvents(): array
     {
-        return array_filter($this->events, function (IndexEventInterface $index): bool {
-            return $index instanceof PreSettingsUpdateEvent;
-        });
+        return array_filter(
+            $this->events,
+            static fn (IndexEventInterface $index): bool => $index instanceof PreSettingsUpdateEvent
+        );
     }
 
     /**

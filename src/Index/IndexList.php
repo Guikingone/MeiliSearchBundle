@@ -6,7 +6,8 @@ namespace MeiliSearchBundle\Index;
 
 use ArrayIterator;
 use Closure;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
+
 use function array_filter;
 use function array_key_exists;
 use function array_walk;
@@ -17,10 +18,7 @@ use function count;
  */
 final class IndexList implements IndexListInterface
 {
-    /**
-     * @var array<string, Indexes>
-     */
-    private $indexes = [];
+    private array $indexes = [];
 
     public function __construct(array $indexes = [])
     {

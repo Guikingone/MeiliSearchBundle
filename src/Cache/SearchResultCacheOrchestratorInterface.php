@@ -14,19 +14,15 @@ use Psr\Cache\InvalidArgumentException;
 interface SearchResultCacheOrchestratorInterface
 {
     /**
-     * @param string                                       $searchResultIdentifier
-     * @param SearchResultInterface<SearchResultInterface> $searchResult
-     *
      * @throws InvalidArgumentException
+     * @param SearchResultInterface<SearchResultInterface> $searchResult
      */
     public function add(string $searchResultIdentifier, SearchResultInterface $searchResult): void;
 
     /**
-     * @param string $searchResultIdentifier
-     *
-     * @return SearchResultInterface<string, mixed>
      *
      * @throws InvalidArgumentException
+     * @return SearchResultInterface<string, mixed>
      */
     public function get(string $searchResultIdentifier): SearchResultInterface;
 

@@ -6,6 +6,7 @@ namespace MeiliSearchBundle\Test\Constraint;
 
 use MeiliSearchBundle\Event\SearchEventListInterface;
 use PHPUnit\Framework\Constraint\Constraint;
+
 use function count;
 use function sprintf;
 
@@ -14,11 +15,9 @@ use function sprintf;
  */
 final class Search extends Constraint
 {
-    private $expectedCount;
-
-    public function __construct(int $expectedCount)
-    {
-        $this->expectedCount = $expectedCount;
+    public function __construct(
+        private int $expectedCount
+    ) {
     }
 
     /**
@@ -26,7 +25,12 @@ final class Search extends Constraint
      */
     public function toString(): string
     {
-        return sprintf('%s search%s %s been made', $this->expectedCount, $this->expectedCount > 1 ? 'es' : '', $this->expectedCount > 1 ? 'have' : 'has');
+        return sprintf(
+            '%s search%s %s been made',
+            $this->expectedCount,
+            $this->expectedCount > 1 ? 'es' : '',
+            $this->expectedCount > 1 ? 'have' : 'has'
+        );
     }
 
     /**

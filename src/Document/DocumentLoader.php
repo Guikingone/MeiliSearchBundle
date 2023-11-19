@@ -14,6 +14,7 @@ use MeiliSearchBundle\Loader\LoaderInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+
 use function array_replace;
 use function sprintf;
 use function usort;
@@ -23,28 +24,16 @@ use function usort;
  */
 final class DocumentLoader implements LoaderInterface
 {
-    /**
-     * @var DocumentEntryPointInterface
-     */
-    private $orchestrator;
-
-    /**
-     * @var iterable|DocumentDataProviderInterface[]|EmbeddedDocumentDataProviderInterface[]|PrimaryKeyOverrideDataProviderInterface[]
-     */
-    private $documentProviders;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        DocumentEntryPointInterface $orchestrator,
-        iterable $documentProviders = [],
+        private readonly DocumentEntryPointInterface $orchestrator,
+        /**
+         * @var iterable|DocumentDataProviderInterface[]|EmbeddedDocumentDataProviderInterface[]|PrimaryKeyOverrideDataProviderInterface[]
+         */
+        private readonly iterable $documentProviders = [],
         ?LoggerInterface $logger = null
     ) {
-        $this->orchestrator = $orchestrator;
-        $this->documentProviders = $documentProviders;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -61,10 +50,12 @@ final class DocumentLoader implements LoaderInterface
 
         foreach ($providers as $provider) {
             try {
+                /** @var array<string, bool|int|string> $document */
+                $document = $provider->getDocument();
                 if ($provider instanceof EmbeddedDocumentDataProviderInterface) {
                     $this->orchestrator->addDocuments(
                         $provider->support(),
-                        $provider->getDocument(),
+                        $document,
                         $provider instanceof PrimaryKeyOverrideDataProviderInterface ? $provider->getPrimaryKey() : null
                     );
 
@@ -73,7 +64,7 @@ final class DocumentLoader implements LoaderInterface
 
                 $this->orchestrator->addDocument(
                     $provider->support(),
-                    $provider->getDocument(),
+                    $document,
                     $provider instanceof PrimaryKeyOverrideDataProviderInterface ? $provider->getPrimaryKey() : null,
                     $provider instanceof ModelDataProviderInterface ? $provider->getModel() : null
                 );
@@ -104,10 +95,17 @@ final class DocumentLoader implements LoaderInterface
             $providers[] = $provider;
         }
 
-        usort($providers, function (PriorityDataProviderInterface $provider, PriorityDataProviderInterface $nextProvider): bool {
-            return $provider->getPriority() > $nextProvider->getPriority();
-        });
+        usort(
+            $providers,
+            static fn (
+                PriorityDataProviderInterface $provider,
+                PriorityDataProviderInterface $nextProvider
+            ): int => $provider->getPriority() <=> $nextProvider->getPriority()
+        );
 
-        return array_replace($providers, $defaultProviders);
+        /** @var array<int, DocumentDataProviderInterface> $filteredProviders */
+        $filteredProviders = array_replace($providers, $defaultProviders);
+
+        return $filteredProviders;
     }
 }

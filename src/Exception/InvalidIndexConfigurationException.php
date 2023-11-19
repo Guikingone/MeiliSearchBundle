@@ -13,17 +13,14 @@ use Throwable;
 final class InvalidIndexConfigurationException extends InvalidArgumentException implements ExceptionInterface
 {
     /**
-     * @var string|null
-     */
-    private $context;
-
-    /**
      * {@inheritdoc}
      */
-    public function __construct($message = "", $code = 0, Throwable $previous = null, string $context = null)
-    {
-        $this->context = $context;
-
+    public function __construct(
+        string $message = "",
+        int $code = 0,
+        Throwable $previous = null,
+        private readonly ?string $context = null
+    ) {
         parent::__construct($message, $code, $previous);
     }
 

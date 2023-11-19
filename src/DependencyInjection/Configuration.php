@@ -8,6 +8,7 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+
 use function interface_exists;
 
 /**
@@ -22,6 +23,7 @@ final class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('meili_search');
 
+        /* @phpstan-ignore-next-line */
         $treeBuilder
             ->getRootNode()
                 ->children()
@@ -38,7 +40,7 @@ final class Configuration implements ConfigurationInterface
                     ->arrayNode('cache')
                         ->validate()
                             ->always()
-                            ->then(function (array $cacheConfiguration): array {
+                            ->then(static function (array $cacheConfiguration): array {
                                 switch ($cacheConfiguration) {
                                     case $cacheConfiguration['enabled'] && !interface_exists(AdapterInterface::class):
                                         throw new InvalidConfigurationException('The cache cannot be enabled without the "symfony/cache" package');

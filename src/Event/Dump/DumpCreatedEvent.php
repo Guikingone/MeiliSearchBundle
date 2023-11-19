@@ -11,14 +11,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class DumpCreatedEvent extends Event
 {
-    /**
-     * @var string
-     */
-    private $uid;
-
-    public function __construct(string $uid)
+    public function __construct(private readonly string $uid)
     {
-        $this->uid = $uid;
     }
 
     public function getUid(): string

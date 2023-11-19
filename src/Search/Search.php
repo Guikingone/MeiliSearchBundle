@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Search;
 
 use MeiliSearchBundle\Exception\InvalidSearchConfigurationException;
+
 use function count;
 use function explode;
 use function gettype;
@@ -15,7 +16,6 @@ use function is_numeric;
 use function is_string;
 use function preg_match;
 use function sprintf;
-use function strpos;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -23,48 +23,35 @@ use function strpos;
 final class Search
 {
     private const FILTERS_OPERATORS = ['=', '!=', '>', '>=', '<', '<='];
+
     private const NUMERICAL_FILTERS_OPERATORS = ['>', '>=', '<', '<='];
 
     private const PRIMARY = 'root';
+
     public const AND = 'AND';
+
     public const OR = 'OR';
+
     public const NOT = 'NOT';
+
     public const AND_NOT = 'AND NOT';
 
-    /**
-     * @var string
-     */
-    private $index;
+    private ?string $index = null;
+
+    private int $limit = 20;
+
+    private int $offset = 0;
+
+    private ?string $query = null;
 
     /**
-     * @var int
+     * @var array<int|string, array>
      */
-    private $limit = 20;
+    private array $filters = [];
 
-    /**
-     * @var int
-     */
-    private $offset = 0;
+    private ?string $computedFilters = null;
 
-    /**
-     * @var string
-     */
-    private $query;
-
-    /**
-     * @var array<string, array>
-     */
-    private $filters = [];
-
-    /**
-     * @var string|null
-     */
-    private $computedFilters;
-
-    /**
-     * @var bool
-     */
-    private $match = false;
+    private bool $match = false;
 
     /**
      * @var string
@@ -79,7 +66,7 @@ final class Search
     /**
      * @var array<int, array>
      */
-    private $facetFilters;
+    private ?array $facetFilters = [];
 
     public static function within(string $index): self
     {
@@ -109,7 +96,7 @@ final class Search
 
     public function query(string $query): self
     {
-        if (preg_match('#\s#', $query) && false === strpos('"', $query)) {
+        if (preg_match('#\s#', $query) && !str_contains('"', $query)) {
             throw new InvalidSearchConfigurationException('A compound query must be enclosed via double-quotes');
         }
 
@@ -132,21 +119,30 @@ final class Search
         return $this;
     }
 
-    public function where(string $field, string $operator, $value, bool $isolated = false, string $criteria = self::PRIMARY): self
-    {
+    public function where(
+        string $field,
+        string $operator,
+        mixed $value,
+        bool $isolated = false,
+        string $criteria = self::PRIMARY
+    ): self {
         if (!in_array($operator, self::FILTERS_OPERATORS)) {
             throw new InvalidSearchConfigurationException('The given operator is not supported');
         }
 
         if (in_array($operator, self::NUMERICAL_FILTERS_OPERATORS) && !is_numeric($value)) {
-            throw new InvalidSearchConfigurationException(sprintf(
-                'The value must be numeric when using a numeric related operator, given "%s"',
-                gettype($value)
-            ));
+            throw new InvalidSearchConfigurationException(
+                sprintf(
+                    'The value must be numeric when using a numeric related operator, given "%s"',
+                    gettype($value)
+                )
+            );
         }
 
         if (self::PRIMARY === $criteria && count($this->filters) !== 0) {
-            throw new InvalidSearchConfigurationException(sprintf('The %s() cannot be used on an existing search', __METHOD__));
+            throw new InvalidSearchConfigurationException(
+                sprintf('The %s() cannot be used on an existing search', __METHOD__)
+            );
         }
 
         $value = (is_string($value) && preg_match('#\s#', $value)) ? sprintf('"%s"', $value) : $value;
@@ -166,15 +162,21 @@ final class Search
             return $this;
         }
 
-        $this->computedFilters .= $isolated ? '(' . sprintf('%s %s ', $field, $operator) . $value . ')' : sprintf('%s %s ', $field, $operator) . $value;
+        $this->computedFilters .= $isolated ? '(' . sprintf('%s %s ', $field, $operator) . $value . ')' : sprintf(
+            '%s %s ',
+            $field,
+            $operator
+        ) . $value;
 
         return $this;
     }
 
-    public function andWhere(string $field, string $operator, $value, bool $isolated = false): self
+    public function andWhere(string $field, string $operator, mixed $value, bool $isolated = false): self
     {
         if (count($this->filters) === 0) {
-            throw new InvalidSearchConfigurationException(sprintf('The %s() cannot be used on an empty search', __METHOD__));
+            throw new InvalidSearchConfigurationException(
+                sprintf('The %s() cannot be used on an empty search', __METHOD__)
+            );
         }
 
         $this->where(sprintf(' %s %s', self::AND, $field), $operator, $value, $isolated, self::AND);
@@ -182,10 +184,12 @@ final class Search
         return $this;
     }
 
-    public function orWhere(string $field, string $operator, $value, bool $isolated = false): self
+    public function orWhere(string $field, string $operator, mixed $value, bool $isolated = false): self
     {
         if (count($this->filters) === 0) {
-            throw new InvalidSearchConfigurationException(sprintf('The %s() cannot be used on an empty search', __METHOD__));
+            throw new InvalidSearchConfigurationException(
+                sprintf('The %s() cannot be used on an empty search', __METHOD__)
+            );
         }
 
         $this->where(sprintf(' %s %s', self::OR, $field), $operator, $value, $isolated, self::OR);
@@ -193,17 +197,19 @@ final class Search
         return $this;
     }
 
-    public function not(string $field, string $operator, $value, bool $isolated = false): self
+    public function not(string $field, string $operator, mixed $value, bool $isolated = false): self
     {
         $this->where(sprintf('%s %s', self::NOT, $field), $operator, $value, $isolated, self::NOT);
 
         return $this;
     }
 
-    public function andNot(string $field, string $operator, $value, bool $isolated = false): self
+    public function andNot(string $field, string $operator, mixed $value, bool $isolated = false): self
     {
         if (count($this->filters) === 0) {
-            throw new InvalidSearchConfigurationException(sprintf('The %s() cannot be used on an empty search', __METHOD__));
+            throw new InvalidSearchConfigurationException(
+                sprintf('The %s() cannot be used on an empty search', __METHOD__)
+            );
         }
 
         $this->where(sprintf(' %s %s %s', self::AND, self::NOT, $field), $operator, $value, $isolated, self::AND_NOT);
@@ -222,8 +228,7 @@ final class Search
     {
         $this->retrievedAttributes = empty($retrievedAttributes)
             ? $this->retrievedAttributes
-            : implode(',', $retrievedAttributes)
-        ;
+            : implode(',', $retrievedAttributes);
 
         return $this;
     }
@@ -271,7 +276,7 @@ final class Search
         return $this;
     }
 
-    public function paginate(string $field, string $operator, $value, int $limit): self
+    public function paginate(string $field, string $operator, mixed $value, int $limit): self
     {
         empty($this->filters) ? $this->where($field, $operator, $value) : $this->andWhere($field, $operator, $value);
 
@@ -280,12 +285,12 @@ final class Search
         return $this;
     }
 
-    public function getIndex(): string
+    public function getIndex(): ?string
     {
         return $this->index;
     }
 
-    public function getQuery(): string
+    public function getQuery(): ?string
     {
         return $this->query;
     }

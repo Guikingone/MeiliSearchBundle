@@ -12,28 +12,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class AddIndexMessage implements MessageInterface
 {
     /**
-     * @var string
-     */
-    private $uid;
-
-    /**
-     * @var string|null
-     */
-    private $primaryKey;
-
-    /**
      * @var array<mixed,mixed>
      */
-    private $configuration;
+    private readonly array $configuration;
 
     public function __construct(
-        string $uid,
-        ?string $primaryKey = null,
+        private readonly string $uid,
+        private readonly ?string $primaryKey = null,
         array $configuration = []
     ) {
-        $this->uid = $uid;
-        $this->primaryKey = $primaryKey;
-
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
 

@@ -22,13 +22,18 @@ final class ClearSearchResultCacheCommandTest extends TestCase
         $command = new ClearSearchResultCacheCommand($searchResultCacheOrchestrator);
 
         static::assertSame('meili:clear-search-cache', $command->getName());
-        static::assertSame('Allow to clear the cache used by the CachedSearchResultEntryPoint', $command->getDescription());
+        static::assertSame(
+            'Allow to clear the cache used by the CachedSearchResultEntryPoint',
+            $command->getDescription()
+        );
     }
 
     public function testCommandCannotClearOnError(): void
     {
         $searchResultCacheOrchestrator = $this->createMock(SearchResultCacheOrchestratorInterface::class);
-        $searchResultCacheOrchestrator->expects(self::once())->method('clear')->willThrowException(new RuntimeException('The cache pool cannot be cleared'));
+        $searchResultCacheOrchestrator->expects(self::once())->method('clear')->willThrowException(
+            new RuntimeException('The cache pool cannot be cleared')
+        );
 
         $command = new ClearSearchResultCacheCommand($searchResultCacheOrchestrator);
 

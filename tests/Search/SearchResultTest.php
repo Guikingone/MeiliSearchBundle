@@ -7,6 +7,7 @@ namespace Tests\MeiliSearchBundle\Search;
 use MeiliSearchBundle\Search\SearchResult;
 use PHPUnit\Framework\TestCase;
 use Traversable;
+
 use function array_key_exists;
 
 /**
@@ -57,7 +58,7 @@ final class SearchResultTest extends TestCase
         static::assertNull($result->getExhaustiveFacetsCount());
         static::assertArrayHasKey('facetsDistribution', $result->toArray());
         static::assertEmpty($result->getFacetsDistribution());
-        static::assertSame(1, $result->count());
+        static::assertCount(1, $result);
         static::assertSame(2, $result->getLastIdentifier());
     }
 }

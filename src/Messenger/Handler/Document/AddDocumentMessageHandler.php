@@ -6,21 +6,16 @@ namespace MeiliSearchBundle\Messenger\Handler\Document;
 
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Messenger\Document\AddDocumentMessage;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class AddDocumentMessageHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+final class AddDocumentMessageHandler
 {
-    /**
-     * @var DocumentEntryPointInterface
-     */
-    private $documentOrchestrator;
-
-    public function __construct(DocumentEntryPointInterface $documentOrchestrator)
+    public function __construct(private readonly DocumentEntryPointInterface $documentOrchestrator)
     {
-        $this->documentOrchestrator = $documentOrchestrator;
     }
 
     public function __invoke(AddDocumentMessage $message): void

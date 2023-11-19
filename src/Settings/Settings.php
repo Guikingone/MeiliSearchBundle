@@ -12,37 +12,34 @@ final class Settings
     /**
      * @var array<int, string>
      */
-    private $rankingRules;
+    private $rankingRules = [];
 
     /**
      * @var array<int, string>
      */
-    private $attributesForFaceting;
+    private $attributesForFaceting = [];
 
-    /**
-     * @var string|null
-     */
-    private $distinctAttribute;
+    private ?string $distinctAttribute = null;
 
     /**
      * @var array<int, string>
      */
-    private $searchableAttributes;
+    private $searchableAttributes = [];
 
     /**
      * @var array<int, string>
      */
-    private $displayedAttributes;
+    private $displayedAttributes = [];
 
     /**
      * @var array<int, string>
      */
-    private $stopWords;
+    private $stopWords = [];
 
     /**
      * @var array<string, array<int, string>>|null
      */
-    private $synonyms;
+    private ?array $synonyms = null;
 
     public static function create(array $settings): self
     {
@@ -75,9 +72,6 @@ final class Settings
         return $this->attributesForFaceting;
     }
 
-    /**
-     * @return string|null
-     */
     public function getDistinctAttribute(): ?string
     {
         return $this->distinctAttribute;

@@ -12,16 +12,9 @@ use Throwable;
 interface DumpOrchestratorInterface
 {
     /**
+     * @throws Throwable
      * @return array<string, string>
      *
-     * @throws Throwable
      */
     public function create(): array;
-
-    /**
-     * @return array<string, string>
-     *
-     * @throws Throwable
-     */
-    public function getStatus(string $dump): array;
 }

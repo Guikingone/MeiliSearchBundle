@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\Event;
 
-use MeiliSearchBundle\Search\SearchResult;
 use MeiliSearchBundle\Event\PostSearchEvent;
+use MeiliSearchBundle\Search\SearchResult;
 use PHPUnit\Framework\TestCase;
 
 /**

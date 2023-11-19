@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -12,22 +12,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class PostSettingsUpdateEvent extends Event implements IndexEventInterface
 {
-    /**
-     * @var Indexes
-     */
-    private $index;
-
-    /**
-     * @var int
-     */
-    private $update;
-
-    public function __construct(
-        Indexes $index,
-        int $update
-    ) {
-        $this->index = $index;
-        $this->update = $update;
+    public function __construct(private readonly Indexes $index, private readonly int $update)
+    {
     }
 
     public function getIndex(): Indexes

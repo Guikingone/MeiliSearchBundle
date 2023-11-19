@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Search;
 
 use ArrayIterator;
+
 use function array_filter;
-use function array_key_exists;
 use function count;
 use function end;
 use function is_array;
@@ -19,47 +19,26 @@ final class SearchResult implements SearchResultInterface
     /**
      * @var array<int, array>
      */
-    private $hits = [];
+    private array $hits = [];
 
-    /**
-     * @var int
-     */
-    private $offset;
+    private int $offset;
 
-    /**
-     * @var int
-     */
-    private $limit;
+    private int $limit;
 
-    /**
-     * @var int
-     */
-    private $nbHits;
+    private int $nbHits;
 
-    /**
-     * @var bool
-     */
-    private $exhaustiveNbHits = false;
+    private bool $exhaustiveNbHits = false;
 
-    /**
-     * @var int
-     */
-    private $processingTimeMs;
+    private int $processingTimeMs;
 
-    /**
-     * @var string
-     */
-    private $query;
+    private string $query;
 
-    /**
-     * @var bool|null
-     */
-    private $exhaustiveFacetsCount;
+    private ?bool $exhaustiveFacetsCount = null;
 
     /**
      * @var array<string, mixed>
      */
-    private $facetsDistribution;
+    private array $facetsDistribution = [];
 
     /**
      * @var mixed
@@ -107,7 +86,7 @@ final class SearchResult implements SearchResultInterface
         return $this;
     }
 
-    public function getHit(int $key, $default = null)
+    public function getHit(int $key, mixed $default = null): mixed
     {
         return $this->hits[$key] ?? $default;
     }
@@ -166,7 +145,7 @@ final class SearchResult implements SearchResultInterface
     /**
      * @return mixed
      */
-    public function getLastIdentifier()
+    public function getLastIdentifier(): mixed
     {
         return $this->lastIdentifier;
     }
@@ -219,6 +198,6 @@ final class SearchResult implements SearchResultInterface
             return;
         }
 
-        $this->lastIdentifier = array_key_exists('id', $lastHit) ? $lastHit['id'] : null;
+        $this->lastIdentifier = $lastHit['id'] ?? null;
     }
 }

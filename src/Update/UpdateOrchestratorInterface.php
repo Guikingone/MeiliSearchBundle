@@ -12,21 +12,15 @@ use Throwable;
 interface UpdateOrchestratorInterface
 {
     /**
-     * @param string $index
-     * @param int    $updateId
-     *
-     * @return UpdateInterface
      *
      * @throws Throwable
      */
     public function getUpdate(string $index, int $updateId): UpdateInterface;
 
     /**
-     * @param string $uid
-     *
-     * @return array<int, UpdateInterface>
      *
      * @throws Throwable
+     * @return array<int, UpdateInterface>
      */
     public function getUpdates(string $uid): array;
 }

@@ -12,15 +12,12 @@ use Throwable;
  */
 final class RuntimeException extends InternalRuntimeException implements ExceptionInterface
 {
-    /**
-     * @var string|null
-     */
-    private $context;
-
-    public function __construct($message = "", $code = 0, Throwable $previous = null, ?string $context = null)
-    {
-        $this->context = $context;
-
+    public function __construct(
+        string $message = "",
+        int $code = 0,
+        Throwable $previous = null,
+        private readonly ?string $context = null
+    ) {
         parent::__construct($message, $code, $previous);
     }
 

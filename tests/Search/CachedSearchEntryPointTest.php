@@ -25,7 +25,9 @@ final class CachedSearchEntryPointTest extends TestCase
         $searchResult = $this->createMock(SearchResultInterface::class);
 
         $cacheOrchestrator = $this->createMock(SearchResultCacheOrchestratorInterface::class);
-        $cacheOrchestrator->expects(self::once())->method('get')->with(self::equalTo('foo_random'))->willReturn($searchResult);
+        $cacheOrchestrator->expects(self::once())->method('get')->with(self::equalTo('foo_random'))->willReturn(
+            $searchResult
+        );
 
         $entryPoint = $this->createMock(SearchEntryPointInterface::class);
         $entryPoint->expects(self::never())->method('search');
@@ -42,7 +44,9 @@ final class CachedSearchEntryPointTest extends TestCase
         $searchResult = $this->createMock(SearchResultInterface::class);
 
         $cacheOrchestrator = $this->createMock(SearchResultCacheOrchestratorInterface::class);
-        $cacheOrchestrator->expects(self::once())->method('get')->with(self::equalTo('foo_random'))->willReturn($searchResult);
+        $cacheOrchestrator->expects(self::once())->method('get')->with(self::equalTo('foo_random'))->willReturn(
+            $searchResult
+        );
 
         $entryPoint = $this->createMock(SearchEntryPointInterface::class);
         $entryPoint->expects(self::never())->method('search');
@@ -57,7 +61,9 @@ final class CachedSearchEntryPointTest extends TestCase
         $logger->expects(self::never())->method('error');
 
         $cacheOrchestrator = $this->createMock(SearchResultCacheOrchestratorInterface::class);
-        $cacheOrchestrator->expects(self::once())->method('get')->willThrowException(new InvalidArgumentException('The desired search result cannot be found'));
+        $cacheOrchestrator->expects(self::once())->method('get')->willThrowException(
+            new InvalidArgumentException('The desired search result cannot be found')
+        );
         $cacheOrchestrator->expects(self::once())->method('add');
 
         $searchResult = $this->createMock(SearchResultInterface::class);
@@ -77,7 +83,9 @@ final class CachedSearchEntryPointTest extends TestCase
         $logger->expects(self::once())->method('error');
 
         $cacheOrchestrator = $this->createMock(SearchResultCacheOrchestratorInterface::class);
-        $cacheOrchestrator->expects(self::once())->method('get')->willThrowException(new InvalidArgumentException('The desired search result cannot be found'));
+        $cacheOrchestrator->expects(self::once())->method('get')->willThrowException(
+            new InvalidArgumentException('The desired search result cannot be found')
+        );
         $cacheOrchestrator->expects(self::once())->method('add');
 
         $searchResult = $this->createMock(SearchResultInterface::class);

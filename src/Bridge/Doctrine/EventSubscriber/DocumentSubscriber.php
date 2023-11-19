@@ -7,7 +7,8 @@ namespace MeiliSearchBundle\Bridge\Doctrine\EventSubscriber;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use MeiliSearchBundle\Bridge\Doctrine\Annotation\Reader\DocumentReaderInterface;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Document;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute\Reader\DocumentReaderInterface;
 use MeiliSearchBundle\Document\DocumentEntryPointInterface;
 use MeiliSearchBundle\Messenger\Document\AddDocumentMessage;
 use MeiliSearchBundle\Messenger\Document\DeleteDocumentMessage;
@@ -15,58 +16,23 @@ use MeiliSearchBundle\Messenger\Document\UpdateDocumentMessage;
 use MeiliSearchBundle\Metadata\IndexMetadataRegistryInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
-use function get_class;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
 final class DocumentSubscriber implements EventSubscriber
 {
-    /**
-     * @var DocumentEntryPointInterface
-     */
-    private $documentEntryPoint;
-
-    /**
-     * @var DocumentReaderInterface
-     */
-    private $documentReader;
-
-    /**
-     * @var IndexMetadataRegistryInterface
-     */
-    private $indexMetadataRegistry;
-
-    /**
-     * @var MessageBusInterface|null
-     */
-    private $messageBus;
-
-    /**
-     * @var PropertyAccessorInterface
-     */
-    private $propertyAccessor;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
     public function __construct(
-        DocumentEntryPointInterface $documentEntryPoint,
-        DocumentReaderInterface $documentReader,
-        IndexMetadataRegistryInterface $indexMetadataRegistry,
-        PropertyAccessorInterface $propertyAccessor,
-        SerializerInterface $serializer,
-        ?MessageBusInterface $messageBus = null
+        private readonly DocumentEntryPointInterface $documentEntryPoint,
+        private readonly DocumentReaderInterface $documentReader,
+        private readonly IndexMetadataRegistryInterface $indexMetadataRegistry,
+        private readonly PropertyAccessorInterface $propertyAccessor,
+        /** @var Serializer $serializer */
+        private readonly SerializerInterface $serializer,
+        private readonly ?MessageBusInterface $messageBus = null
     ) {
-        $this->documentEntryPoint = $documentEntryPoint;
-        $this->documentReader = $documentReader;
-        $this->indexMetadataRegistry = $indexMetadataRegistry;
-        $this->propertyAccessor = $propertyAccessor;
-        $this->serializer = $serializer;
-        $this->messageBus = $messageBus;
     }
 
     /**
@@ -88,17 +54,21 @@ final class DocumentSubscriber implements EventSubscriber
             return;
         }
 
+        /** @var Document $configuration */
         $configuration = $this->documentReader->getConfiguration($document);
+        /** @var array<string, mixed> $documentBody */
         $documentBody = $this->serializer->normalize($document);
 
         $indexMetadata = $this->indexMetadataRegistry->get($configuration->getIndex());
         if ($indexMetadata->isAsync() && null !== $this->messageBus) {
-            $this->messageBus->dispatch(new AddDocumentMessage(
-                $indexMetadata->getUid(),
-                $documentBody,
-                $indexMetadata->getPrimaryKey(),
-                $configuration->getModel() ? get_class($document) : null
-            ));
+            $this->messageBus->dispatch(
+                new AddDocumentMessage(
+                    $indexMetadata->getUid(),
+                    $documentBody,
+                    $indexMetadata->getPrimaryKey(),
+                    $configuration->getModel() ? $document::class : null
+                )
+            );
 
             return;
         }
@@ -107,7 +77,7 @@ final class DocumentSubscriber implements EventSubscriber
             $indexMetadata->getUid(),
             $documentBody,
             $indexMetadata->getPrimaryKey(),
-            $configuration->getModel() ? get_class($document) : null
+            $configuration->getModel() ? $document::class : null
         );
     }
 
@@ -118,16 +88,20 @@ final class DocumentSubscriber implements EventSubscriber
             return;
         }
 
+        /** @var Document $configuration */
         $configuration = $this->documentReader->getConfiguration($document);
+        /** @var array<string, bool|int|string> $documentBody */
         $documentBody = $this->serializer->normalize($document);
 
         $indexMetadata = $this->indexMetadataRegistry->get($configuration->getIndex());
         if ($indexMetadata->isAsync() && null !== $this->messageBus) {
-            $this->messageBus->dispatch(new UpdateDocumentMessage(
-                $configuration->getIndex(),
-                $documentBody,
-                $configuration->getPrimaryKey()
-            ));
+            $this->messageBus->dispatch(
+                new UpdateDocumentMessage(
+                    $configuration->getIndex(),
+                    $documentBody,
+                    $configuration->getPrimaryKey()
+                )
+            );
 
             return;
         }
@@ -146,6 +120,7 @@ final class DocumentSubscriber implements EventSubscriber
             return;
         }
 
+        /** @var Document $configuration */
         $configuration = $this->documentReader->getConfiguration($document);
         $identifier = $this->propertyAccessor->getValue(
             $document,
@@ -154,10 +129,12 @@ final class DocumentSubscriber implements EventSubscriber
 
         $indexMetadata = $this->indexMetadataRegistry->get($configuration->getIndex());
         if ($indexMetadata->isAsync() && null !== $this->messageBus) {
-            $this->messageBus->dispatch(new DeleteDocumentMessage(
-                $configuration->getIndex(),
-                $identifier
-            ));
+            $this->messageBus->dispatch(
+                new DeleteDocumentMessage(
+                    $configuration->getIndex(),
+                    $identifier
+                )
+            );
 
             return;
         }

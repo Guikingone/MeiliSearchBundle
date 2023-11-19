@@ -12,29 +12,23 @@ use Throwable;
 interface SynonymsOrchestratorInterface
 {
     /**
-     * @param string $uid
-     *
-     * @return array<string,array>
      *
      * @throws Throwable
      *
      * {@see https://docs.meilisearch.com/references/synonyms.html#get-synonyms}
+     * @return array<string,array>
      */
     public function getSynonyms(string $uid): array;
 
     /**
-     * @param string              $uid
-     * @param array<string,array> $synonyms
-     *
      * @throws Throwable
      *
      * {@see https://docs.meilisearch.com/references/synonyms.html#update-synonyms}
+     * @param array<string,array> $synonyms
      */
     public function updateSynonyms(string $uid, array $synonyms): void;
 
     /**
-     * @param string $uid
-     *
      * @throws Throwable
      *
      * {@see https://docs.meilisearch.com/references/synonyms.html#reset-synonyms}

@@ -11,17 +11,15 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class PreSearchEvent extends Event implements SearchEventInterface
 {
-    /**
-     * @var array<string,mixed>
-     */
-    private $configuration;
-
-    public function __construct(array $configuration)
-    {
-        $this->configuration = $configuration;
+    public function __construct(
+        /**
+         * @var array<string,mixed>
+         */
+        private array $configuration
+    ) {
     }
 
-    public function getSpecificConfiguration(string $key, $default = null)
+    public function getSpecificConfiguration(string $key, mixed $default = null): mixed
     {
         return $this->configuration[$key] ?? $default;
     }

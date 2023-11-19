@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Tests\MeiliSearchBundle\Update;
 
 use Exception;
-use MeiliSearch\Client;
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Client;
+use Meilisearch\Contracts\TasksResults;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Update\Update;
 use MeiliSearchBundle\Update\UpdateInterface;
 use MeiliSearchBundle\Update\UpdateOrchestrator;
@@ -33,7 +34,9 @@ final class UpdateOrchestratorTest extends TestCase
     public function testUpdateCannotBeRetrievedWithExceptionAndLogger(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when trying to fetch the index, error "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when trying to fetch the index, error "An error occurred"')
+        );
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
@@ -47,16 +50,27 @@ final class UpdateOrchestratorTest extends TestCase
     public function testUpdateCanBeRetrieved(): void
     {
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getUpdateStatus')->willReturn([
+        $index->expects(self::once())->method('getTask')->willReturn([
+            'uid' => 1,
+            'indexUid' => 'movies',
             'status' => 'processed',
-            'updateId' => 1,
-            'type' => [
-                "name" => "DocumentsAddition",
-                "number" => 4,
+            'type' => 'documentAdditionOrUpdate',
+            'canceledBy' => null,
+            'details' => [
+                'rankingRules' => [
+                    'typo',
+                    'ranking:desc',
+                    'words',
+                    'proximity',
+                    'attribute',
+                    'exactness',
+                ],
             ],
-            'duration' => 0.076980613,
-            'enqueuedAt' => '2019-12-07T21:16:09.623944Z',
-            'processedAt' => '2019-12-07T21:16:09.623944Z',
+            'error' => null,
+            'duration' => 'PT0.000400211S',
+            'enqueuedAt' => '2023-11-11T22:00:00.00000003Z',
+            'startedAt' => '2023-11-11T22:00:01.00000003Z',
+            'finishedAt' => '2023-11-11T22:00:02.00000003Z',
         ]);
 
         $logger = $this->createMock(LoggerInterface::class);
@@ -88,7 +102,9 @@ final class UpdateOrchestratorTest extends TestCase
     public function testUpdatesCannotBeRetrievedWithExceptionAndLogger(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with(self::equalTo('An error occurred when trying to fetch the index, error "An error occurred"'));
+        $logger->expects(self::once())->method('error')->with(
+            self::equalTo('An error occurred when trying to fetch the index, error "An error occurred"')
+        );
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willThrowException(new Exception('An error occurred'));
@@ -106,7 +122,7 @@ final class UpdateOrchestratorTest extends TestCase
         $logger->expects(self::never())->method('info');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getAllUpdateStatus')->willReturn([]);
+        $index->expects(self::once())->method('getTasks')->willReturn(new TasksResults(['results' => []]));
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willReturn($index);
@@ -127,7 +143,7 @@ final class UpdateOrchestratorTest extends TestCase
         );
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getAllUpdateStatus')->willReturn([]);
+        $index->expects(self::once())->method('getTasks')->willReturn(new TasksResults(['results' => []]));
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willReturn($index);
@@ -145,30 +161,44 @@ final class UpdateOrchestratorTest extends TestCase
         $logger->expects(self::never())->method('info');
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getAllUpdateStatus')->willReturn([
-            [
-                "status" => "processed",
-                "updateId" => 1,
-                "type" => [
-                    "name" => "DocumentsAddition",
-                    "number" => 4,
+        $index->expects(self::once())->method('getTasks')->willReturn(
+            new TasksResults([
+                'results' => [
+                    [
+                        'uid' => 1,
+                        'indexUid' => 'movies',
+                        'status' => 'processed',
+                        'type' => 'documentAdditionOrUpdate',
+                        'canceledBy' => null,
+                        'details' => [
+                            'receivedDocuments' => 1,
+                            'indexedDocuments' => 2,
+                        ],
+                        'error' => null,
+                        'duration' => 'PT0.000400211S',
+                        'enqueuedAt' => '2023-11-11T22:00:00.00000003Z',
+                        'startedAt' => '2023-11-11T22:00:01.00000003Z',
+                        'finishedAt' => '2023-11-11T22:00:02.00000003Z',
+                    ],
+                    [
+                        'uid' => 2,
+                        'indexUid' => 'movies',
+                        'status' => 'processed',
+                        'type' => 'documentAdditionOrUpdate',
+                        'canceledBy' => null,
+                        'details' => [
+                            'receivedDocuments' => 1,
+                            'indexedDocuments' => 2,
+                        ],
+                        'error' => null,
+                        'duration' => 'PT0.000400211S',
+                        'enqueuedAt' => '2023-11-12T22:00:00.00000003Z',
+                        'startedAt' => '2023-11-12T22:00:01.00000003Z',
+                        'finishedAt' => '2023-11-12T22:00:02.00000003Z',
+                    ],
                 ],
-                "duration" => 0.076980613,
-                "enqueuedAt" => "2019-12-07T21:16:09.623944Z",
-                "processedAt" => "2019-12-07T21:16:09.703509Z"
-            ],
-            [
-                "status" => "processed",
-                "updateId" => 1,
-                "type" => [
-                    "name" => "DocumentsAddition",
-                    "number" => 4,
-                ],
-                "duration" => 0.076980613,
-                "enqueuedAt" => "2019-12-08T21:16:09.623944Z",
-                "processedAt" => "2019-12-08T21:16:09.703509Z"
-            ],
-        ]);
+            ])
+        );
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willReturn($index);
@@ -191,30 +221,44 @@ final class UpdateOrchestratorTest extends TestCase
         );
 
         $index = $this->createMock(Indexes::class);
-        $index->expects(self::once())->method('getAllUpdateStatus')->willReturn([
-            [
-                "status" => "processed",
-                "updateId" => 1,
-                "type" => [
-                    "name" => "DocumentsAddition",
-                    "number" => 4,
+        $index->expects(self::once())->method('getTasks')->willReturn(
+            new TasksResults([
+                'results' => [
+                    [
+                        'uid' => 1,
+                        'indexUid' => 'movies',
+                        'status' => 'processed',
+                        'type' => 'documentAdditionOrUpdate',
+                        'canceledBy' => null,
+                        'details' => [
+                            'receivedDocuments' => 1,
+                            'indexedDocuments' => 2,
+                        ],
+                        'error' => null,
+                        'duration' => 'PT0.000400211S',
+                        'enqueuedAt' => '2023-11-11T22:00:00.00000003Z',
+                        'startedAt' => '2023-11-11T22:00:01.00000003Z',
+                        'finishedAt' => '2023-11-11T22:00:02.00000003Z',
+                    ],
+                    [
+                        'uid' => 2,
+                        'indexUid' => 'movies',
+                        'status' => 'processed',
+                        'type' => 'documentAdditionOrUpdate',
+                        'canceledBy' => null,
+                        'details' => [
+                            'receivedDocuments' => 1,
+                            'indexedDocuments' => 2,
+                        ],
+                        'error' => null,
+                        'duration' => 'PT0.000400211S',
+                        'enqueuedAt' => '2023-11-12T22:00:00.00000003Z',
+                        'startedAt' => '2023-11-12T22:00:01.00000003Z',
+                        'finishedAt' => '2023-11-12T22:00:02.00000003Z',
+                    ],
                 ],
-                "duration" => 0.076980613,
-                "enqueuedAt" => "2019-12-07T21:16:09.623944Z",
-                "processedAt" => "2019-12-07T21:16:09.703509Z"
-            ],
-            [
-                "status" => "processed",
-                "updateId" => 1,
-                "type" => [
-                    "name" => "DocumentsAddition",
-                    "number" => 4,
-                ],
-                "duration" => 0.076980613,
-                "enqueuedAt" => "2019-12-08T21:16:09.623944Z",
-                "processedAt" => "2019-12-08T21:16:09.703509Z"
-            ],
-        ]);
+            ])
+        );
 
         $client = $this->createMock(Client::class);
         $client->expects(self::once())->method('getIndex')->willReturn($index);

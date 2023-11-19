@@ -45,7 +45,10 @@ final class ConfigurationTest extends TestCase
         static::assertSame('id', $configuration['indexes']['foo']['primaryKey']);
         static::assertFalse($configuration['indexes']['foo']['async']);
         static::assertNotEmpty($configuration['indexes']['foo']['rankingRules']);
-        static::assertSame(['typo', 'words', 'proximity', 'attribute', 'wordsPosition', 'exactness'], $configuration['indexes']['foo']['rankingRules']);
+        static::assertSame(
+            ['typo', 'words', 'proximity', 'attribute', 'wordsPosition', 'exactness'],
+            $configuration['indexes']['foo']['rankingRules']
+        );
         static::assertEmpty($configuration['indexes']['foo']['stopWords']);
         static::assertNull($configuration['indexes']['foo']['distinctAttribute']);
         static::assertEmpty($configuration['indexes']['foo']['facetedAttributes']);
@@ -57,7 +60,10 @@ final class ConfigurationTest extends TestCase
         static::assertSame('title', $configuration['indexes']['bar']['primaryKey']);
         static::assertFalse($configuration['indexes']['bar']['async']);
         static::assertNotEmpty($configuration['indexes']['bar']['rankingRules']);
-        static::assertSame(['typo', 'words', 'proximity', 'attribute', 'wordsPosition', 'exactness'], $configuration['indexes']['bar']['rankingRules']);
+        static::assertSame(
+            ['typo', 'words', 'proximity', 'attribute', 'wordsPosition', 'exactness'],
+            $configuration['indexes']['bar']['rankingRules']
+        );
         static::assertEmpty($configuration['indexes']['bar']['stopWords']);
         static::assertNull($configuration['indexes']['bar']['distinctAttribute']);
         static::assertEmpty($configuration['indexes']['bar']['facetedAttributes']);
@@ -90,7 +96,7 @@ final class ConfigurationTest extends TestCase
 
         static::assertArrayHasKey('cache', $configuration);
         static::assertArrayHasKey('enabled', $configuration['cache']);
-        static::assertSame(false, $configuration['cache']['enabled']);
+        static::assertFalse($configuration['cache']['enabled']);
         static::assertArrayHasKey('pool', $configuration['cache']);
         static::assertSame('app', $configuration['cache']['pool']);
     }
@@ -108,7 +114,7 @@ final class ConfigurationTest extends TestCase
 
         static::assertArrayHasKey('cache', $configuration);
         static::assertArrayHasKey('enabled', $configuration['cache']);
-        static::assertSame(true, $configuration['cache']['enabled']);
+        static::assertTrue($configuration['cache']['enabled']);
         static::assertArrayHasKey('pool', $configuration['cache']);
         static::assertSame('app', $configuration['cache']['pool']);
     }
@@ -139,7 +145,7 @@ final class ConfigurationTest extends TestCase
 
         static::assertArrayHasKey('cache', $configuration);
         static::assertArrayHasKey('enabled', $configuration['cache']);
-        static::assertSame(true, $configuration['cache']['enabled']);
+        static::assertTrue($configuration['cache']['enabled']);
         static::assertArrayHasKey('pool', $configuration['cache']);
         static::assertSame('system', $configuration['cache']['pool']);
     }

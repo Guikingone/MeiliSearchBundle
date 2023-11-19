@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\EventSubscriber;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use MeiliSearchBundle\Event\Index\PostSettingsUpdateEvent;
 use MeiliSearchBundle\Event\Index\PreSettingsUpdateEvent;
@@ -20,19 +20,28 @@ final class SettingsEventSubscriberTest extends TestCase
     public function testSubscriberIsConfigured(): void
     {
         static::assertArrayHasKey(PostSettingsUpdateEvent::class, SettingsEventSubscriber::getSubscribedEvents());
-        static::assertSame('onPostSettingsUpdateEvent', SettingsEventSubscriber::getSubscribedEvents()[PostSettingsUpdateEvent::class]);
+        static::assertSame(
+            'onPostSettingsUpdateEvent',
+            SettingsEventSubscriber::getSubscribedEvents()[PostSettingsUpdateEvent::class]
+        );
 
         static::assertArrayHasKey(PreSettingsUpdateEvent::class, SettingsEventSubscriber::getSubscribedEvents());
-        static::assertSame('onPreSettingsUpdateEvent', SettingsEventSubscriber::getSubscribedEvents()[PreSettingsUpdateEvent::class]);
+        static::assertSame(
+            'onPreSettingsUpdateEvent',
+            SettingsEventSubscriber::getSubscribedEvents()[PreSettingsUpdateEvent::class]
+        );
     }
 
     public function testPostSettingsUpdateEventCanBeSubscribed(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] Settings have been updated'), [
-            'index' => 'foo',
-            'update' => 1,
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] Settings have been updated'),
+            [
+                'index' => 'foo',
+                'update' => 1,
+            ]
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('foo');
@@ -49,10 +58,13 @@ final class SettingsEventSubscriberTest extends TestCase
     public function testPreSettingsUpdateEventCanBeSubscribed(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] Settings are about to be updated'), [
-            'index' => 'foo',
-            'update' => ['rankingRules' => []],
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] Settings are about to be updated'),
+            [
+                'index' => 'foo',
+                'update' => ['rankingRules' => []],
+            ]
+        );
 
         $index = $this->createMock(Indexes::class);
         $index->expects(self::once())->method('getUid')->willReturn('foo');

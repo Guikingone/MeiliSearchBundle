@@ -12,6 +12,7 @@ use MeiliSearchBundle\Settings\SettingsEntryPointInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+
 use function array_filter;
 use function array_walk;
 use function sprintf;
@@ -21,42 +22,15 @@ use function sprintf;
  */
 final class IndexSynchronizer implements IndexSynchronizerInterface
 {
-    /**
-     * @var HealthEntryPointInterface
-     */
-    private $healthEntryPoint;
-
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    /**
-     * @var IndexMetadataRegistryInterface
-     */
-    private $indexMetadataRegistry;
-
-    /**
-     * @var SettingsEntryPointInterface
-     */
-    private $settingsEntryPoint;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        IndexOrchestratorInterface $indexOrchestrator,
-        IndexMetadataRegistryInterface $indexMetadataRegistry,
-        HealthEntryPointInterface $healthEntryPoint,
+        private readonly IndexOrchestratorInterface $indexOrchestrator,
+        private readonly IndexMetadataRegistryInterface $indexMetadataRegistry,
+        private readonly HealthEntryPointInterface $healthEntryPoint,
         SettingsEntryPointInterface $settingsEntryPoint,
         ?LoggerInterface $logger = null
     ) {
-        $this->indexOrchestrator = $indexOrchestrator;
-        $this->indexMetadataRegistry = $indexMetadataRegistry;
-        $this->healthEntryPoint = $healthEntryPoint;
-        $this->settingsEntryPoint = $settingsEntryPoint;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -66,7 +40,9 @@ final class IndexSynchronizer implements IndexSynchronizerInterface
     public function createIndexes(array $indexes, ?string $prefix = null): void
     {
         if ($this->isSynchronized() && null === $prefix) {
-            $this->logger->info('The indexes cannot be created as the instance and the local storage are already synchronized');
+            $this->logger->info(
+                'The indexes cannot be created as the instance and the local storage are already synchronized'
+            );
 
             return;
         }
@@ -74,9 +50,10 @@ final class IndexSynchronizer implements IndexSynchronizerInterface
         $this->handleMetadataIndexes($indexes, $prefix);
 
         $instanceIndexes = $this->indexOrchestrator->getIndexes();
-        $nonPersistedIndexes = array_filter($this->indexMetadataRegistry->toArray(), function (IndexMetadataInterface $indexMetadata) use ($instanceIndexes): bool {
-            return !$instanceIndexes->has($indexMetadata->getUid());
-        });
+        $nonPersistedIndexes = array_filter(
+            $this->indexMetadataRegistry->toArray(),
+            static fn (IndexMetadataInterface $indexMetadata): bool => !$instanceIndexes->has($indexMetadata->getUid())
+        );
 
         if (empty($nonPersistedIndexes)) {
             return;
@@ -120,24 +97,6 @@ final class IndexSynchronizer implements IndexSynchronizerInterface
 
             throw $throwable;
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function dropIndexes(): void
-    {
-        try {
-            $this->indexOrchestrator->removeIndexes();
-        } catch (Throwable $throwable) {
-            $this->logger->critical('The indexes cannot be dropped', [
-                'error' => $throwable->getMessage(),
-            ]);
-
-            throw $throwable;
-        }
-
-        $this->indexMetadataRegistry->clear();
     }
 
     /**
@@ -200,8 +159,7 @@ final class IndexSynchronizer implements IndexSynchronizerInterface
 
             $override ?
                 $this->indexMetadataRegistry->override($indexName, $indexMetadata)
-                : $this->indexMetadataRegistry->add($indexName, $indexMetadata)
-            ;
+                : $this->indexMetadataRegistry->add($indexName, $indexMetadata);
         });
     }
 }

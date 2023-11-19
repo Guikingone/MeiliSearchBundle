@@ -12,9 +12,11 @@
         "text": "infection.log",
         "summary": "summary.log"
     },
+    "minMsi": 80,
+    "minCoveredMsi": 90,
     "mutators": {
         "@default": true
     },
     "testFramework": "phpunit",
-    "testFrameworkOptions": "-vvv"
+    "testFrameworkOptions": "--verbose"
 }

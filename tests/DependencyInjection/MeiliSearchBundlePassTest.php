@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\DependencyInjection;
 
-use MeiliSearch\Client;
+use Meilisearch\Client;
+use MeiliSearchBundle\DependencyInjection\MeiliSearchBundlePass;
 use MeiliSearchBundle\Index\IndexOrchestrator;
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
-use MeiliSearchBundle\Index\TraceableIndexOrchestrator;
-use MeiliSearchBundle\DependencyInjection\MeiliSearchBundlePass;
+use MeiliSearchBundle\Index\SynonymsOrchestrator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -25,8 +25,8 @@ final class MeiliSearchBundlePassTest extends TestCase
 
         (new MeiliSearchBundlePass())->process($container);
 
-        static::assertTrue($container->getDefinition(TraceableIndexOrchestrator::class)->hasTag('kernel.reset'));
-        static::assertSame('reset', $container->getDefinition(TraceableIndexOrchestrator::class)->getTag('kernel.reset')[0]['method']);
+        static::assertTrue($container->getDefinition(SynonymsOrchestrator::class)->hasTag('kernel.reset'));
+        static::assertSame('reset', $container->getDefinition(SynonymsOrchestrator::class)->getTag('kernel.reset')[0]['method']);
     }
 
     private function getContainer(): ContainerBuilder
@@ -34,12 +34,15 @@ final class MeiliSearchBundlePassTest extends TestCase
         $client = $this->createMock(Client::class);
 
         $container = new ContainerBuilder();
-        $container->setDefinition(IndexOrchestrator::class, (new Definition(IndexOrchestrator::class, [
-            $client,
-        ])));
+        $container->setDefinition(
+            IndexOrchestrator::class,
+            (new Definition(IndexOrchestrator::class, [
+                $client,
+            ]))
+        );
         $container->setAlias(IndexOrchestratorInterface::class, IndexOrchestrator::class);
 
-        $container->register(TraceableIndexOrchestrator::class, TraceableIndexOrchestrator::class)
+        $container->register(SynonymsOrchestrator::class, SynonymsOrchestrator::class)
             ->setArguments([
                 new Reference(IndexOrchestratorInterface::class),
             ])

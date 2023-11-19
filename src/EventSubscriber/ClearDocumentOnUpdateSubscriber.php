@@ -13,14 +13,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 final class ClearDocumentOnUpdateSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var SearchResultCacheOrchestratorInterface
-     */
-    private $searchResultOrchestrator;
-
-    public function __construct(SearchResultCacheOrchestratorInterface $searchResultOrchestrator)
+    public function __construct(private readonly SearchResultCacheOrchestratorInterface $searchResultOrchestrator)
     {
-        $this->searchResultOrchestrator = $searchResultOrchestrator;
     }
 
     public function onDocumentUpdated(): void

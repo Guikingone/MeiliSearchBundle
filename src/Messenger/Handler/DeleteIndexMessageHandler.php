@@ -6,21 +6,16 @@ namespace MeiliSearchBundle\Messenger\Handler;
 
 use MeiliSearchBundle\Index\IndexOrchestratorInterface;
 use MeiliSearchBundle\Messenger\DeleteIndexMessage;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
  */
-final class DeleteIndexMessageHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+final class DeleteIndexMessageHandler
 {
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    public function __construct(IndexOrchestratorInterface $indexOrchestrator)
+    public function __construct(private readonly IndexOrchestratorInterface $indexOrchestrator)
     {
-        $this->indexOrchestrator = $indexOrchestrator;
     }
 
     public function __invoke(DeleteIndexMessage $message): void

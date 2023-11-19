@@ -32,7 +32,12 @@ final class ExceptionSubscriberTest extends TestCase
         $kernel = $this->createMock(KernelInterface::class);
         $request = $this->createMock(Request::class);
 
-        $event = new ExceptionEvent($kernel, $request, KernelInterface::MASTER_REQUEST, new Exception('An error occurred'));
+        $event = new ExceptionEvent(
+            $kernel,
+            $request,
+            KernelInterface::MASTER_REQUEST,
+            new Exception('An error occurred')
+        );
 
         $subscriber = new ExceptionSubscriber($logger);
         $subscriber->onException($event);
@@ -46,7 +51,12 @@ final class ExceptionSubscriberTest extends TestCase
         $kernel = $this->createMock(KernelInterface::class);
         $request = $this->createMock(Request::class);
 
-        $event = new ExceptionEvent($kernel, $request, KernelInterface::MASTER_REQUEST, new Exception('An error occurred'));
+        $event = new ExceptionEvent(
+            $kernel,
+            $request,
+            KernelInterface::MASTER_REQUEST,
+            new Exception('An error occurred')
+        );
 
         $subscriber = new ExceptionSubscriber();
         $subscriber->onException($event);
@@ -55,14 +65,22 @@ final class ExceptionSubscriberTest extends TestCase
     public function testSubscriberCanBeCalled(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('critical')->with(self::equalTo('[MeiliSearch] An error occurred: An error occurred'), [
-            'error' => 'An error occurred',
-        ]);
+        $logger->expects(self::once())->method('critical')->with(
+            self::equalTo('[MeiliSearch] An error occurred: An error occurred'),
+            [
+                'error' => 'An error occurred',
+            ]
+        );
 
         $kernel = $this->createMock(KernelInterface::class);
         $request = $this->createMock(Request::class);
 
-        $event = new ExceptionEvent($kernel, $request, KernelInterface::MASTER_REQUEST, new InvalidArgumentException('An error occurred'));
+        $event = new ExceptionEvent(
+            $kernel,
+            $request,
+            KernelInterface::MASTER_REQUEST,
+            new InvalidArgumentException('An error occurred')
+        );
 
         $subscriber = new ExceptionSubscriber($logger);
         $subscriber->onException($event);

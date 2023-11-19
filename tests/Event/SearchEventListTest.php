@@ -10,7 +10,6 @@ use MeiliSearchBundle\Event\SearchEventInterface;
 use MeiliSearchBundle\Event\SearchEventList;
 use MeiliSearchBundle\Search\SearchResultInterface;
 use PHPUnit\Framework\TestCase;
-use function count;
 
 /**
  * @author Guillaume Loulier <contact@guillaumeloulier.fr>
@@ -26,7 +25,7 @@ final class SearchEventListTest extends TestCase
         $list->add($event);
 
         static::assertNotEmpty($list->getEvents());
-        static::assertSame(1, $list->count());
+        static::assertCount(1, $list);
     }
 
     public function testPostSearchEventCanBeRetrieved(): void
@@ -42,7 +41,7 @@ final class SearchEventListTest extends TestCase
         $list->add($secondEvent);
 
         static::assertNotEmpty($list->getPostSearchEvents());
-        static::assertSame(1, count($list->getPostSearchEvents()));
+        static::assertCount(1, $list->getPostSearchEvents());
     }
 
     public function testPreSearchEventCanBeRetrieved(): void
@@ -56,6 +55,6 @@ final class SearchEventListTest extends TestCase
         $list->add($secondEvent);
 
         static::assertNotEmpty($list->getPreSearchEvents());
-        static::assertSame(1, count($list->getPreSearchEvents()));
+        static::assertCount(1, $list->getPreSearchEvents());
     }
 }

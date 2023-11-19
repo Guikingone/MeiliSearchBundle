@@ -10,6 +10,7 @@ use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+
 use function sprintf;
 
 /**
@@ -17,10 +18,7 @@ use function sprintf;
  */
 final class ExceptionSubscriber implements EventSubscriberInterface, MeiliSearchEventSubscriberInterface
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(?LoggerInterface $logger = null)
     {

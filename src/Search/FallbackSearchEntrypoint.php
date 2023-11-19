@@ -13,22 +13,13 @@ use Throwable;
  */
 final class FallbackSearchEntrypoint implements SearchEntryPointInterface
 {
-    /**
-     * @var SearchEntryPointInterface[]|iterable
-     */
-    private $searchEntryPoints;
-
-    /**
-     * @var SplObjectStorage
-     */
-    private $failedSearchEntryPoints;
+    private readonly SplObjectStorage $failedSearchEntryPoints;
 
     /**
      * @param SearchEntryPointInterface[]|iterable $searchEntryPoints
      */
-    public function __construct(iterable $searchEntryPoints)
+    public function __construct(private readonly iterable $searchEntryPoints)
     {
-        $this->searchEntryPoints = $searchEntryPoints;
         $this->failedSearchEntryPoints = new SplObjectStorage();
     }
 
@@ -44,7 +35,7 @@ final class FallbackSearchEntrypoint implements SearchEntryPointInterface
 
             try {
                 return $searchEntryPoint->search($index, $query, $options);
-            } catch (Throwable $throwable) {
+            } catch (Throwable) {
                 $this->failedSearchEntryPoints->attach($searchEntryPoint);
 
                 continue;

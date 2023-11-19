@@ -1,7 +1,7 @@
 # Data provider
 
 Data providers are the main entry point for every document that you may want to add in MeiliSearch.
-Data providers aims to allow you to submit data when you cannot use annotations.
+Data providers aims to allow you to submit data when you cannot use attributes.
 
 The main role of a data provider is to return an array that contain the data stored as a document in MeiliSearch.
 

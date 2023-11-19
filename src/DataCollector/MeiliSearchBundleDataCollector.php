@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 use Throwable;
+
 use function count;
 
 /**
@@ -18,16 +19,11 @@ use function count;
 final class MeiliSearchBundleDataCollector extends DataCollector implements LateDataCollectorInterface
 {
     public const NAME = 'meilisearch';
+
     private const QUERIES = 'queries';
 
-    /**
-     * @var SearchEventListInterface
-     */
-    private $searchEventList;
-
-    public function __construct(SearchEventListInterface $searchEventList)
+    public function __construct(private readonly SearchEventListInterface $searchEventList)
     {
-        $this->searchEventList = $searchEventList;
     }
 
     /**

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Health;
 
-use MeiliSearch\Client;
+use Meilisearch\Client;
+
 use function count;
 
 /**
@@ -12,14 +13,8 @@ use function count;
  */
 final class HealthEntryPoint implements HealthEntryPointInterface
 {
-    /**
-     * @var Client
-     */
-    private $client;
-
-    public function __construct(Client $client)
+    public function __construct(private readonly Client $client)
     {
-        $this->client = $client;
     }
 
     public function isUp(): bool

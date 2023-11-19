@@ -6,6 +6,7 @@ namespace MeiliSearchBundle\Test\Constraint\Index;
 
 use MeiliSearchBundle\Event\Index\IndexEventListInterface;
 use PHPUnit\Framework\Constraint\Constraint;
+
 use function count;
 use function sprintf;
 
@@ -14,11 +15,9 @@ use function sprintf;
  */
 final class IndexCreated extends Constraint
 {
-    private $expectedCount;
-
-    public function __construct(int $expectedCount)
-    {
-        $this->expectedCount = $expectedCount;
+    public function __construct(
+        private int $expectedCount
+    ) {
     }
 
     /**
@@ -26,7 +25,12 @@ final class IndexCreated extends Constraint
      */
     public function toString(): string
     {
-        return sprintf('%s index%s %s been created', $this->expectedCount, $this->expectedCount > 1 ? 'es' : '', $this->expectedCount > 1 ? 'have' : 'has');
+        return sprintf(
+            '%s index%s %s been created',
+            $this->expectedCount,
+            $this->expectedCount > 1 ? 'es' : '',
+            $this->expectedCount > 1 ? 'have' : 'has'
+        );
     }
 
     /**

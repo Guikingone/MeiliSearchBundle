@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Index;
 
-use MeiliSearch\Client;
+use Meilisearch\Client;
 use MeiliSearchBundle\Event\Index\PostSettingsUpdateEvent;
 use MeiliSearchBundle\Event\Index\PreSettingsUpdateEvent;
 use MeiliSearchBundle\Exception\InvalidArgumentException;
@@ -13,6 +13,7 @@ use Psr\Log\NullLogger;
 use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
+
 use function in_array;
 use function sprintf;
 
@@ -22,8 +23,11 @@ use function sprintf;
 final class IndexSettingsOrchestrator implements IndexSettingsOrchestratorInterface
 {
     private const INDEX_LOG_KEY = 'index';
+
     private const ERROR_LOG_KEY = 'error';
+
     private const UPDATE_KEY = 'updateId';
+
     private const ALLOWED_SETTINGS_KEY = [
         'rankingRules',
         'stopWords',
@@ -34,29 +38,14 @@ final class IndexSettingsOrchestrator implements IndexSettingsOrchestratorInterf
         'displayedAttributes',
     ];
 
-    /**
-     * @var Client
-     */
-    private $client;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var EventDispatcherInterface|null
-     */
-    private $eventDispatcher;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        Client $client,
+        private readonly Client $client,
         ?LoggerInterface $logger = null,
-        ?EventDispatcherInterface $eventDispatcher = null
+        private readonly ?EventDispatcherInterface $eventDispatcher = null
     ) {
-        $this->client = $client;
         $this->logger = $logger ?: new NullLogger();
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -87,7 +76,7 @@ final class IndexSettingsOrchestrator implements IndexSettingsOrchestratorInterf
         }
 
         try {
-            foreach ($updatePayload as $key => $value) {
+            foreach (array_keys($updatePayload) as $key) {
                 if (!in_array($key, self::ALLOWED_SETTINGS_KEY)) {
                     throw new InvalidArgumentException(sprintf('The following key "%s" is not allowed', $key));
                 }

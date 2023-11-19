@@ -27,7 +27,10 @@ final class UpdateIndexesCommandTest extends TestCase
         static::assertTrue($command->getDefinition()->hasOption('force'));
         static::assertSame('f', $command->getDefinition()->getOption('force')->getShortcut());
         static::assertFalse($command->getDefinition()->getOption('force')->isValueRequired());
-        static::assertSame('Force the action without asking for confirmation', $command->getDefinition()->getOption('force')->getDescription());
+        static::assertSame(
+            'Force the action without asking for confirmation',
+            $command->getDefinition()->getOption('force')->getDescription()
+        );
     }
 
     public function testCommandCannotUpdateEmptyIndexes(): void
@@ -41,24 +44,29 @@ final class UpdateIndexesCommandTest extends TestCase
         ]);
 
         static::assertSame(1, $tester->getStatusCode());
-        static::assertStringContainsString('[WARNING] No indexes found, please define at least a single index', $tester->getDisplay());
+        static::assertStringContainsString(
+            '[WARNING] No indexes found, please define at least a single index',
+            $tester->getDisplay()
+        );
     }
 
     public function testCommandCannotWarmIndexesWithException(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('updateIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]))->willThrowException(new RuntimeException('Random error message'));
+        $synchronizer->expects(self::once())->method('updateIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ])
+        )->willThrowException(new RuntimeException('Random error message'));
 
         $command = new UpdateIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer);
         $tester = new CommandTester($command);
         $tester->execute([
@@ -79,7 +87,7 @@ final class UpdateIndexesCommandTest extends TestCase
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer, '_foo_');
         $tester = new CommandTester($command);
         $tester->execute([]);
@@ -91,18 +99,21 @@ final class UpdateIndexesCommandTest extends TestCase
     public function testCommandCanWarmIndexesWithPrefixAndForceOption(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('updateIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]), self::equalTo('_foo_'));
+        $synchronizer->expects(self::once())->method('updateIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ]),
+            self::equalTo('_foo_')
+        );
 
         $command = new UpdateIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer, '_foo_');
         $tester = new CommandTester($command);
         $tester->execute([
@@ -110,31 +121,40 @@ final class UpdateIndexesCommandTest extends TestCase
         ]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString('[OK] The indexes has been updated, feel free to query them!', $tester->getDisplay());
+        static::assertStringContainsString(
+            '[OK] The indexes has been updated, feel free to query them!',
+            $tester->getDisplay()
+        );
     }
 
     public function testCommandCanWarmIndexesWithPrefix(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('updateIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]), self::equalTo('_foo_'));
+        $synchronizer->expects(self::once())->method('updateIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ]),
+            self::equalTo('_foo_')
+        );
 
         $command = new UpdateIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer, '_foo_');
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
         $tester->execute([]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString('[OK] The indexes has been updated, feel free to query them!', $tester->getDisplay());
+        static::assertStringContainsString(
+            '[OK] The indexes has been updated, feel free to query them!',
+            $tester->getDisplay()
+        );
     }
 
     public function testCommandCannotWarmIndexesButWithoutForceOptionOrConfirmation(): void
@@ -146,7 +166,7 @@ final class UpdateIndexesCommandTest extends TestCase
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer);
         $tester = new CommandTester($command);
         $tester->execute([]);
@@ -158,18 +178,20 @@ final class UpdateIndexesCommandTest extends TestCase
     public function testCommandCanWarmIndexesAndForceOption(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('updateIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]));
+        $synchronizer->expects(self::once())->method('updateIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ])
+        );
 
         $command = new UpdateIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer);
         $tester = new CommandTester($command);
         $tester->execute([
@@ -177,30 +199,38 @@ final class UpdateIndexesCommandTest extends TestCase
         ]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString('[OK] The indexes has been updated, feel free to query them!', $tester->getDisplay());
+        static::assertStringContainsString(
+            '[OK] The indexes has been updated, feel free to query them!',
+            $tester->getDisplay()
+        );
     }
 
     public function testCommandCanWarmIndexes(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('updateIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]));
+        $synchronizer->expects(self::once())->method('updateIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ])
+        );
 
         $command = new UpdateIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer);
         $tester = new CommandTester($command);
         $tester->setInputs(['yes']);
         $tester->execute([]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString('[OK] The indexes has been updated, feel free to query them!', $tester->getDisplay());
+        static::assertStringContainsString(
+            '[OK] The indexes has been updated, feel free to query them!',
+            $tester->getDisplay()
+        );
     }
 }

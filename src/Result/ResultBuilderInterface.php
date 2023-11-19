@@ -13,10 +13,8 @@ interface ResultBuilderInterface
 
     /**
      * @param array<string,mixed> $data
-     *
-     * @return bool
      */
     public function support(array $data): bool;
 
-    public function build(array $data, array $buildContext = []);
+    public function build(array $data, array $buildContext = []): mixed;
 }

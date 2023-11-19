@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MeiliSearchBundle\Event\Index;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -13,25 +13,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class PreSettingsUpdateEvent extends Event implements IndexEventInterface
 {
     /**
-     * @var Indexes
-     */
-    private $index;
-
-    /**
-     * @var array<string,array|null>
-     */
-    private $updatePayload;
-
-    /**
-     * @param Indexes                  $index
      * @param array<string,array|null> $updatePayload
      */
-    public function __construct(
-        Indexes $index,
-        array $updatePayload
-    ) {
-        $this->index = $index;
-        $this->updatePayload = $updatePayload;
+    public function __construct(private readonly Indexes $index, private readonly array $updatePayload)
+    {
     }
 
     public function getIndex(): Indexes

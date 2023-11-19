@@ -10,6 +10,7 @@ use MeiliSearchBundle\Command\DeleteIndexCommand;
 use MeiliSearchBundle\Index\IndexSynchronizerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+
 use function sprintf;
 
 /**
@@ -37,8 +38,7 @@ final class DeleteIndexCommandTest extends TestCase
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
         $synchronizer->expects(self::once())->method('dropIndex')
             ->with(self::equalTo($index))
-            ->willThrowException(new Exception('An error occurred'))
-        ;
+            ->willThrowException(new Exception('An error occurred'));
 
         $command = new DeleteIndexCommand($synchronizer);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\MeiliSearchBundle\EventSubscriber;
 
-use MeiliSearch\Endpoints\Indexes;
+use Meilisearch\Endpoints\Indexes;
 use MeiliSearchBundle\Event\Synonyms\PostResetSynonymsEvent;
 use MeiliSearchBundle\Event\Synonyms\PostUpdateSynonymsEvent;
 use MeiliSearchBundle\Event\Synonyms\PreResetSynonymsEvent;
@@ -44,10 +44,13 @@ final class SynonymsEventSubscriberTest extends TestCase
         $index = $this->createMock(Indexes::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms have been reset'), [
-            'index' => $index,
-            'update' => 1,
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] The synonyms have been reset'),
+            [
+                'index' => $index,
+                'update' => 1,
+            ]
+        );
 
         $event = new PostResetSynonymsEvent($index, 1);
 
@@ -73,10 +76,13 @@ final class SynonymsEventSubscriberTest extends TestCase
         $index = $this->createMock(Indexes::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms have been updated'), [
-            'index' => $index,
-            'update' => 1,
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] The synonyms have been updated'),
+            [
+                'index' => $index,
+                'update' => 1,
+            ]
+        );
 
         $event = new PostUpdateSynonymsEvent($index, 1);
 
@@ -102,9 +108,12 @@ final class SynonymsEventSubscriberTest extends TestCase
         $index = $this->createMock(Indexes::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms are about to been reset'), [
-            'index' => $index,
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] The synonyms are about to been reset'),
+            [
+                'index' => $index,
+            ]
+        );
 
         $event = new PreResetSynonymsEvent($index);
 
@@ -130,10 +139,13 @@ final class SynonymsEventSubscriberTest extends TestCase
         $index = $this->createMock(Indexes::class);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('info')->with(self::equalTo('[MeiliSearch] The synonyms are about to been updated'), [
-            'index' => $index,
-            'synonyms' => [],
-        ]);
+        $logger->expects(self::once())->method('info')->with(
+            self::equalTo('[MeiliSearch] The synonyms are about to been updated'),
+            [
+                'index' => $index,
+                'synonyms' => [],
+            ]
+        );
 
         $event = new PreUpdateSynonymsEvent($index, []);
 

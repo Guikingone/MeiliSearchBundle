@@ -11,14 +11,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class PostDocumentDeletionEvent extends Event implements DocumentEventInterface
 {
-    /**
-     * @var int
-     */
-    private $update;
-
-    public function __construct(int $update)
+    public function __construct(private readonly int $update)
     {
-        $this->update = $update;
     }
 
     public function getUpdate(): int

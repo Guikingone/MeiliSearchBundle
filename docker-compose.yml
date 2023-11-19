@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 services:
   php:
@@ -9,8 +9,10 @@ services:
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
 
   meilisearch:
-    image: getmeili/meilisearch
+    image: getmeili/meilisearch:v1.4
     environment:
-      MEILI_NO_ANALYTICS: 'true'
+      MEILI_ENV: ${MEILI_ENV:-development}
+      MEILI_LOG_LEVEL: ${MEILI_LOG_LEVEL:-INFO}
+      MEILI_NO_ANALYTICS: true
     volumes:
       - './docker/meili/data.ms:/data.ms'

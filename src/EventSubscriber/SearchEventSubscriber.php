@@ -10,6 +10,7 @@ use MeiliSearchBundle\Event\SearchEventListInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
 use function sprintf;
 
 /**
@@ -17,21 +18,12 @@ use function sprintf;
  */
 final class SearchEventSubscriber implements EventSubscriberInterface, MeiliSearchEventSubscriberInterface
 {
-    /**
-     * @var SearchEventListInterface
-     */
-    private $searchEventList;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        SearchEventListInterface $searchEventList,
+        private readonly SearchEventListInterface $searchEventList,
         ?LoggerInterface $logger = null
     ) {
-        $this->searchEventList = $searchEventList;
         $this->logger = $logger ?: new NullLogger();
     }
 

@@ -12,23 +12,10 @@ use MeiliSearchBundle\Messenger\MessageInterface;
 final class UpdateSynonymsMessage implements MessageInterface
 {
     /**
-     * @var string
-     */
-    private $index;
-
-    /**
-     * @var array<string,array>
-     */
-    private $synonyms;
-
-    /**
-     * @param string              $index
      * @param array<string,array> $synonyms
      */
-    public function __construct(string $index, array $synonyms)
+    public function __construct(private readonly string $index, private readonly array $synonyms)
     {
-        $this->index = $index;
-        $this->synonyms = $synonyms;
     }
 
     public function getIndex(): string

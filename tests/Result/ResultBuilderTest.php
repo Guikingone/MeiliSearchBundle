@@ -34,7 +34,9 @@ final class ResultBuilderTest extends TestCase
     public function testDataCannotBeBuiltWithExceptionAndLogger(): void
     {
         $serializer = $this->createMock(Serializer::class);
-        $serializer->expects(self::once())->method('denormalize')->willThrowException(new Exception('An error occurred'));
+        $serializer->expects(self::once())->method('denormalize')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('error');
@@ -52,7 +54,9 @@ final class ResultBuilderTest extends TestCase
     public function testDataCannotBeBuiltWithExceptionAndWithoutLogger(): void
     {
         $serializer = $this->createMock(Serializer::class);
-        $serializer->expects(self::once())->method('denormalize')->willThrowException(new Exception('An error occurred'));
+        $serializer->expects(self::once())->method('denormalize')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $builder = new ResultBuilder($serializer);
 
@@ -83,6 +87,7 @@ final class ResultBuilderTest extends TestCase
 
 final class Foo
 {
-    public $id;
-    public $key;
+    public int $id;
+
+    public string $key;
 }

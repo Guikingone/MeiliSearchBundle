@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace MeiliSearchBundle\Serializer;
 
 use MeiliSearchBundle\Metadata\IndexMetadata;
-use MeiliSearchBundle\Metadata\IndexMetadataInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+
 use function is_array;
 
 /**
@@ -16,14 +16,8 @@ use function is_array;
  */
 final class IndexMetadataDenormalizer implements DenormalizerInterface
 {
-    /**
-     * @var ObjectNormalizer
-     */
-    private $objectNormalizer;
-
-    public function __construct(ObjectNormalizer $objectNormalizer)
+    public function __construct(private readonly ObjectNormalizer $objectNormalizer)
     {
-        $this->objectNormalizer = $objectNormalizer;
     }
 
     /**

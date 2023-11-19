@@ -11,6 +11,7 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
 use function array_map;
 use function array_merge;
 use function is_array;
@@ -21,18 +22,15 @@ use function is_array;
 final class MeiliSearchChoiceType extends AbstractType
 {
     private const INDEX = 'index';
+
     private const QUERY = 'query';
+
     private const ATTRIBUTES_TO_RETRIEVE = 'attributes_to_retrieve';
+
     private const ATTRIBUTE_TO_DISPLAY = 'attribute_to_display';
 
-    /**
-     * @var SearchEntryPointInterface
-     */
-    private $searchEntryPoint;
-
-    public function __construct(SearchEntryPointInterface $searchEntryPoint)
+    public function __construct(private readonly SearchEntryPointInterface $searchEntryPoint)
     {
-        $this->searchEntryPoint = $searchEntryPoint;
     }
 
     /**
@@ -54,17 +52,24 @@ final class MeiliSearchChoiceType extends AbstractType
         ]);
 
         $resolver->setDefaults([
-            'choice_loader' => function (Options $options): ChoiceLoaderInterface {
-                return new CallbackChoiceLoader(function () use ($options): array {
+            'choice_loader' => fn (Options $options): ChoiceLoaderInterface => new CallbackChoiceLoader(
+                function () use ($options): array {
                     $result = $this->searchEntryPoint->search($options[self::INDEX], $options[self::QUERY], [
-                        'attributesToRetrieve' => is_array($options[self::ATTRIBUTES_TO_RETRIEVE]) ? $options[self::ATTRIBUTES_TO_RETRIEVE] : [$options[self::ATTRIBUTES_TO_RETRIEVE]],
+                        'attributesToRetrieve' => is_array(
+                            $options[self::ATTRIBUTES_TO_RETRIEVE]
+                        ) ? $options[self::ATTRIBUTES_TO_RETRIEVE] : [$options[self::ATTRIBUTES_TO_RETRIEVE]],
                     ]);
 
-                    return array_merge(...array_map(function (array $hit) use ($options): array {
-                        return [$hit[$options[self::ATTRIBUTE_TO_DISPLAY]] => $hit[$options[self::ATTRIBUTE_TO_DISPLAY]]];
-                    }, $result->getHits()));
-                });
-            },
+                    return array_merge(
+                        ...array_map(
+                            static fn (
+                                array $hit
+                            ): array => [$hit[$options[self::ATTRIBUTE_TO_DISPLAY]] => $hit[$options[self::ATTRIBUTE_TO_DISPLAY]]],
+                            $result->getHits()
+                        )
+                    );
+                }
+            ),
             self::ATTRIBUTES_TO_RETRIEVE => '*',
         ]);
 

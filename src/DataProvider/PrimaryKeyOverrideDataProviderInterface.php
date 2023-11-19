@@ -11,8 +11,6 @@ interface PrimaryKeyOverrideDataProviderInterface
 {
     /**
      * Define the primary key used by the current document.
-     *
-     * @return string
      */
     public function getPrimaryKey(): string;
 }

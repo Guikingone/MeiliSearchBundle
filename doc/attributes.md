@@ -1,21 +1,19 @@
-# Annotations
+# Attributes
 
-This bundle allows you to define annotations to ease the configuration:
+This bundle allows you to define attributes to ease the configuration:
 
-- [Document](../src/Bridge/Doctrine/Annotation/Document.php) define a document related to an `index`
+- [Document](../src/Bridge/Doctrine/Attribute/Document.php) define a document related to an `index`
 
 ## Defining a document
 
-Defining a document is as simple as it sounds: 
+Defining a document is as simple as it sounds:
 
 ```php
 <?php
 
-use MeiliSearchBundle\Bridge\Doctrine\Annotation as MeiliSearch;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute as MeiliSearch;
 
-/**
- * @MeiliSearch\Document(index="bar", primaryKey="id")
- */
+#[MeiliSearch\Document(index: 'bar', primaryKey: 'id')]
 final class Foo
 {
     // ...
@@ -30,19 +28,17 @@ a subscriber will handle the related operations.
 When submitting a document into MeiliSearch, you may need to retrieve an object
 when searching, if you're not using an "entity", the way-to-do is defined [here](dto.md).
 
-When using an entity, the `Document` annotation define a third argument `model`
+When using an entity, the `Document` attribute define a third argument `model`
 that allows you to specify that this class must be used to building an object
 after a successful search, let's see how to use it:
 
 ```php
 <?php
 
-use MeiliSearchBundle\Bridge\Doctrine\Annotation as MeiliSearch;
+use MeiliSearchBundle\Bridge\Doctrine\Attribute as MeiliSearch;
 // ...
 
-/**
- * @MeiliSearch\Document(index="bar", primaryKey="id", model=true)
- */
+#[MeiliSearch\Document(index: 'bar', primaryKey: 'id', model: true)]
 final class Foo
 {
     // ...

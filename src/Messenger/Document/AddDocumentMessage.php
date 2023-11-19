@@ -12,41 +12,16 @@ use MeiliSearchBundle\Messenger\MessageInterface;
 final class AddDocumentMessage implements MessageInterface
 {
     /**
-     * @var string
-     */
-    private $index;
-
-    /**
-     * @var array<string,mixed>
-     */
-    private $document;
-
-    /**
-     * @var string|null
-     */
-    private $primaryKey;
-
-    /**
-     * @var string|null
-     */
-    private $model;
-
-    /**
-     * @param string              $index
      * @param array<string,mixed> $document
-     * @param string|null         $primaryKey
-     * @param string|null         $model
+     * @param string|null $primaryKey
+     * @param string|null $model
      */
     public function __construct(
-        string $index,
-        array $document,
-        ?string $primaryKey = null,
-        string $model = null
+        private readonly string $index,
+        private readonly array $document,
+        private readonly ?string $primaryKey = null,
+        private readonly ?string $model = null
     ) {
-        $this->index = $index;
-        $this->document = $document;
-        $this->primaryKey = $primaryKey;
-        $this->model = $model;
     }
 
     public function getIndex(): string

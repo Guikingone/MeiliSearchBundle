@@ -34,19 +34,24 @@ final class WarmIndexesCommandTest extends TestCase
         $tester->execute([]);
 
         static::assertSame(1, $tester->getStatusCode());
-        static::assertStringContainsString('[WARNING] No indexes found, please define at least a single index', $tester->getDisplay());
+        static::assertStringContainsString(
+            '[WARNING] No indexes found, please define at least a single index',
+            $tester->getDisplay()
+        );
     }
 
     public function testCommandCannotWarmIndexesWithException(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('createIndexes')->willThrowException(new Exception('An error occurred'));
+        $synchronizer->expects(self::once())->method('createIndexes')->willThrowException(
+            new Exception('An error occurred')
+        );
 
         $command = new WarmIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer);
         $tester = new CommandTester($command);
         $tester->execute([]);
@@ -59,46 +64,57 @@ final class WarmIndexesCommandTest extends TestCase
     public function testCommandCanWarmIndexesWithPrefix(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('createIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]), self::equalTo('foo'));
+        $synchronizer->expects(self::once())->method('createIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ]),
+            self::equalTo('foo')
+        );
 
         $command = new WarmIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer, 'foo');
         $tester = new CommandTester($command);
         $tester->execute([]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString('The indexes has been warmed, feel free to query them!', $tester->getDisplay());
+        static::assertStringContainsString(
+            'The indexes has been warmed, feel free to query them!',
+            $tester->getDisplay()
+        );
     }
 
     public function testCommandCanWarmIndexes(): void
     {
         $synchronizer = $this->createMock(IndexSynchronizerInterface::class);
-        $synchronizer->expects(self::once())->method('createIndexes')->with(self::equalTo([
-            'foo' => [
-                'primaryKey' => 'id',
-                'synonyms' => [],
-            ]
-        ]));
+        $synchronizer->expects(self::once())->method('createIndexes')->with(
+            self::equalTo([
+                'foo' => [
+                    'primaryKey' => 'id',
+                    'synonyms' => [],
+                ],
+            ])
+        );
 
         $command = new WarmIndexesCommand([
             'foo' => [
                 'primaryKey' => 'id',
                 'synonyms' => [],
-            ]
+            ],
         ], $synchronizer);
         $tester = new CommandTester($command);
         $tester->execute([]);
 
         static::assertSame(0, $tester->getStatusCode());
-        static::assertStringContainsString('The indexes has been warmed, feel free to query them!', $tester->getDisplay());
+        static::assertStringContainsString(
+            'The indexes has been warmed, feel free to query them!',
+            $tester->getDisplay()
+        );
     }
 }

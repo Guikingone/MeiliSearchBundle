@@ -14,21 +14,12 @@ use Throwable;
  */
 final class SettingsEntryPoint implements SettingsEntryPointInterface
 {
-    /**
-     * @var IndexOrchestratorInterface
-     */
-    private $indexOrchestrator;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        IndexOrchestratorInterface $indexOrchestrator,
+        private readonly IndexOrchestratorInterface $indexOrchestrator,
         ?LoggerInterface $logger = null
     ) {
-        $this->indexOrchestrator = $indexOrchestrator;
         $this->logger = $logger ?: new NullLogger();
     }
 

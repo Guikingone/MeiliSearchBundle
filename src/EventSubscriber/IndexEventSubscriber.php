@@ -11,6 +11,7 @@ use MeiliSearchBundle\Event\Index\IndexRetrievedEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
 use function sprintf;
 
 /**
@@ -18,21 +19,12 @@ use function sprintf;
  */
 final class IndexEventSubscriber implements EventSubscriberInterface, MeiliSearchEventSubscriberInterface
 {
-    /**
-     * @var IndexEventListInterface
-     */
-    private $eventList;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        IndexEventListInterface $eventList,
+        private readonly IndexEventListInterface $eventList,
         ?LoggerInterface $logger = null
     ) {
-        $this->eventList = $eventList;
         $this->logger = $logger ?: new NullLogger();
     }
 
